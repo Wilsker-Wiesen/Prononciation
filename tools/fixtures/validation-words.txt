@@ -1,0 +1,61 @@
+# Validierungswörter: Grundwortschatz mit den kritischen Lautklassen
+bonjour
+merci
+salut
+au revoir
+madame
+monsieur
+la maison
+le garçon
+la fille
+le chat
+le chien
+un ami
+les amis
+une amie
+le livre
+le cahier
+la table
+la fenêtre
+la porte
+le vin
+le pain
+le matin
+bien
+rien
+bon
+bonne
+un
+une
+brun
+enfant
+maman
+grand
+grande
+petit
+petite
+tu
+tout
+rue
+roue
+sur
+sous
+le jardin
+je mange
+nous mangeons
+ils chantent
+la rouge
+le fromage
+le football
+huit
+la nuit
+lui
+chanter
+manger
+aller
+venir
+il est
+elle est
+les enfants
+beaucoup
+aujourd'hui

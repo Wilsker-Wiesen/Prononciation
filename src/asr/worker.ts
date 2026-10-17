@@ -13,7 +13,7 @@ export type WorkerRequest =
 
 export type WorkerResponse =
   | { type: 'progress'; file: string; loaded: number; total: number }
-  | { type: 'loaded'; seq: number; vocabSize: number; ms: number }
+  | { type: 'loaded'; seq: number; vocabSize: number; vocab: string[]; ms: number }
   | { type: 'result'; seq: number; phones: RecognizedPhone[]; frames: number; ms: number }
   | { type: 'error'; seq: number; message: string };
 
@@ -34,7 +34,7 @@ async function load(req: Extract<WorkerRequest, { type: 'load' }>): Promise<void
     executionProviders: ['wasm'],
     graphOptimizationLevel: 'all',
   });
-  post({ type: 'loaded', seq: req.seq, vocabSize: vocab.length, ms: Math.round(performance.now() - t0) });
+  post({ type: 'loaded', seq: req.seq, vocabSize: vocab.length, vocab, ms: Math.round(performance.now() - t0) });
 }
 
 /** Wav2Vec2-Vorverarbeitung: Mittelwert 0, Varianz 1 (feature_extractor do_normalize). */
@@ -85,7 +85,7 @@ self.onmessage = async (ev: MessageEvent<WorkerRequest>) => {
     else if (req.type === 'unload') {
       await session?.release();
       session = null;
-      post({ type: 'loaded', seq: req.seq, vocabSize: 0, ms: 0 });
+      post({ type: 'loaded', seq: req.seq, vocabSize: 0, vocab: [], ms: 0 });
     }
   } catch (e) {
     post({ type: 'error', seq: req.seq, message: e instanceof Error ? e.message : String(e) });

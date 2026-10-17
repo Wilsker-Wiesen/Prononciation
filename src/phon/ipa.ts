@@ -89,21 +89,28 @@ export const PHONES: Record<string, PhoneInfo> = {
 };
 
 /**
- * Zeichen, die das Modell nicht kennt, auf eSpeak-Konventionen abbilden.
+ * Zeichen, die das Modell nicht kennt, auf dessen Konventionen abbilden.
+ * Ohne Vokabular gelten die eSpeak-Konventionen von wav2vec2-lv-60-espeak-cv-ft
+ * (kein ɥ, ɲ vor Vokal als n+j, kein ɑ). Mit Vokabular wird nur ersetzt, was fehlt.
  * Arbeitet auf Phon-Objekten, damit Markierungen (fakultativ, Liaison) erhalten bleiben.
  */
-export function toModelSpace<T extends { ipa: string; optional?: boolean }>(phones: T[]): T[] {
+export function toModelSpace<T extends { ipa: string; optional?: boolean }>(phones: T[], vocab?: Set<string>): T[] {
+  const has = (p: string) => (vocab ? vocab.has(p) : false);
   const out: T[] = [];
   for (let i = 0; i < phones.length; i++) {
     const p = phones[i]!;
-    if (p.ipa === 'ɥ') out.push({ ...p, ipa: 'y' });
-    else if (p.ipa === 'ɑ') out.push({ ...p, ipa: 'a' });
-    else if (p.ipa === 'ɲ') {
+    if (p.ipa === 'ɥ' && !has('ɥ')) out.push({ ...p, ipa: has('y') || !vocab ? 'y' : 'w' });
+    else if (p.ipa === 'ɑ' && !has('ɑ')) out.push({ ...p, ipa: 'a' });
+    else if (p.ipa === 'ɲ' && (!vocab || !has('ɲ') || !vocab)) {
       // eSpeak schreibt „gn“ vor Vokal als n+j, am Wortende als ɲ.
       const next = phones[i + 1];
-      if (next && !next.optional && isVowelLike(next.ipa)) out.push({ ...p, ipa: 'n' }, { ...p, ipa: 'j' });
+      if (!vocab && next && !next.optional && isVowelLike(next.ipa)) out.push({ ...p, ipa: 'n' }, { ...p, ipa: 'j' });
+      else if (vocab && !has('ɲ')) out.push({ ...p, ipa: 'n' }, { ...p, ipa: 'j' });
       else out.push(p);
-    } else out.push(p);
+    } else if (p.ipa === 'ŋ' && vocab && !has('ŋ')) out.push({ ...p, ipa: 'n' }, { ...p, ipa: 'ɡ' });
+    else if (p.ipa === 'ɡ' && vocab && !has('ɡ') && has('g')) out.push({ ...p, ipa: 'g' });
+    else if (p.ipa === 'ʁ' && vocab && !has('ʁ') && has('r')) out.push({ ...p, ipa: 'r' });
+    else out.push(p);
   }
   return out;
 }

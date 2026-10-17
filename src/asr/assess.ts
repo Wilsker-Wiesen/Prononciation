@@ -15,9 +15,9 @@ export interface Assessment extends ScoreResult {
   findings: Finding[];
 }
 
-export function assess(text: string, recognized: RecognizedPhone[], transcription?: Transcription): Assessment {
+export function assess(text: string, recognized: RecognizedPhone[], transcription?: Transcription, vocab?: Set<string>): Assessment {
   const t = transcription ?? transcribe(text);
-  const { targets, flat } = buildAlignTargets(t);
+  const { targets, flat } = buildAlignTargets(t, vocab);
   const ops = align(targets, recognized);
   const score = scoreAlignment(t, targets, flat, recognized, ops);
   const findings = diagnose(t, score);

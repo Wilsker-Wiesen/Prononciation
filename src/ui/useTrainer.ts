@@ -176,7 +176,7 @@ export function useTrainer(item: TrainItem, settings: Settings) {
           const { phones, ms } = await recognizer.recognize(trimmed);
           recognitionMs = ms;
           const text = item.ipaOverride ? item.text : item.text;
-          assessment = assess(text, phones, item.ipaOverride ? transcribeWithOverride(item.text, item.ipaOverride) : transcription);
+          assessment = assess(text, phones, item.ipaOverride ? transcribeWithOverride(item.text, item.ipaOverride) : transcription, recognizer.vocab.size ? recognizer.vocab : undefined);
         } catch (e) {
           setError(`Bewertung fehlgeschlagen: ${e instanceof Error ? e.message : String(e)}`);
         }

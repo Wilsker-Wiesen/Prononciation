@@ -58,10 +58,10 @@ export function band(score: number): 'good' | 'mid' | 'bad' {
 }
 
 /** Zielphone für das Alignment aufbereiten (Modellraum, mit Rückverweis). */
-export function buildAlignTargets(t: Transcription): { targets: AlignTarget[]; flat: (Phone & { wordIndex: number })[] } {
+export function buildAlignTargets(t: Transcription, vocab?: Set<string>): { targets: AlignTarget[]; flat: (Phone & { wordIndex: number })[] } {
   const flat: (Phone & { wordIndex: number })[] = [];
   t.words.forEach((w, wi) => w.phones.forEach((p) => flat.push({ ...p, wordIndex: wi })));
-  const mapped = toModelSpace(flat.map((p, i) => ({ ...p, origIndex: i })));
+  const mapped = toModelSpace(flat.map((p, i) => ({ ...p, origIndex: i })), vocab);
   const targets: AlignTarget[] = mapped.map((p) => ({
     ipa: p.ipa,
     optional: p.optional,

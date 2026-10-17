@@ -1,0 +1,130 @@
+# Beschafft, prüft und veröffentlicht die Phonem-Erkennungsmodelle als GitHub-Release.
+# Start: Actions → "Modelle beschaffen und prüfen" → "Run workflow".
+name: Modelle beschaffen und prüfen
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Release-Tag für die Modelldateien
+        default: models-v1
+      publish:
+        description: Modelle als Release veröffentlichen (true/false)
+        default: 'true'
+
+permissions:
+  contents: write
+
+jobs:
+  multilingual:
+    name: wav2vec2-lv-60-espeak-cv-ft (ONNX, mehrsprachig)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: onnxruntime-node installieren
+        run: npm install --no-save onnxruntime-node
+      - name: Dateiliste des Hugging-Face-Repositories
+        run: |
+          curl -fsSL "https://huggingface.co/api/models/onnx-community/wav2vec2-lv-60-espeak-cv-ft-ONNX/tree/main/onnx" -o tree.json
+          python3 -c "import json; [print(f['path'], f.get('size')) for f in json.load(open('tree.json'))]"
+      - name: Modell und Vokabular herunterladen
+        run: |
+          set -e
+          mkdir -p out/multilingual
+          pick=$(python3 - <<'PY'
+          import json
+          files = {f['path'].split('/')[-1]: f for f in json.load(open('tree.json'))}
+          for name in ['model_quantized.onnx', 'model_q8.onnx', 'model_int8.onnx', 'model_uint8.onnx', 'model.onnx']:
+              if name in files:
+                  print(name); break
+          PY
+          )
+          echo "Gewählte Datei: $pick"
+          test -n "$pick"
+          curl -fL "https://huggingface.co/onnx-community/wav2vec2-lv-60-espeak-cv-ft-ONNX/resolve/main/onnx/$pick" -o out/multilingual/wav2vec2-lv-60-espeak-cv-ft.onnx
+          # Externe Daten (nur bei >2 GB-Modellen) – sicherheitshalber prüfen
+          if python3 -c "import json,sys; sys.exit(0 if '$pick'+'_data' in [f['path'].split('/')[-1] for f in json.load(open('tree.json'))] else 1)"; then
+            curl -fL "https://huggingface.co/onnx-community/wav2vec2-lv-60-espeak-cv-ft-ONNX/resolve/main/onnx/${pick}_data" -o "out/multilingual/wav2vec2-lv-60-espeak-cv-ft.onnx_data"
+          fi
+          curl -fL "https://huggingface.co/facebook/wav2vec2-lv-60-espeak-cv-ft/resolve/main/vocab.json" -o out/multilingual/wav2vec2-lv-60-espeak-cv-ft.vocab.json
+          ls -la out/multilingual
+          sha256sum out/multilingual/* > out/multilingual/SHA256SUMS
+      - name: Prüfstand (eSpeak-Synthese)
+        run: npx tsx tools/validate-model.mjs --model out/multilingual/wav2vec2-lv-60-espeak-cv-ft.onnx --vocab out/multilingual/wav2vec2-lv-60-espeak-cv-ft.vocab.json --report out/multilingual/report.json --min-mean 30 2>&1 | grep -v '^var ' | tee out/multilingual/report.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: multilingual
+          path: out/multilingual
+
+  french:
+    name: wav2vec2-french-phonemizer (ONNX-Export, nur Französisch)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: npm ci
+      - run: npm install --no-save onnxruntime-node
+      - name: Export mit Optimum
+        run: |
+          pip install --quiet "torch==2.5.1" --index-url https://download.pytorch.org/whl/cpu
+          pip install --quiet "transformers<5" "optimum[onnxruntime]" onnx onnxruntime
+          mkdir -p out/french export
+          optimum-cli export onnx --model Cnam-LMSSC/wav2vec2-french-phonemizer --task automatic-speech-recognition export/
+          python3 - <<'PY'
+          from optimum.onnxruntime import ORTQuantizer
+          from optimum.onnxruntime.configuration import AutoQuantizationConfig
+          q = ORTQuantizer.from_pretrained('export', file_name='model.onnx')
+          cfg = AutoQuantizationConfig.avx512_vnni(is_static=False, per_channel=False)
+          q.quantize(save_dir='export/q8', quantization_config=cfg)
+          PY
+          ls -la export export/q8
+          cp export/q8/model_quantized.onnx out/french/wav2vec2-french-phonemizer.onnx
+          cp export/vocab.json out/french/wav2vec2-french-phonemizer.vocab.json
+          python3 -c "import json; v=json.load(open('out/french/wav2vec2-french-phonemizer.vocab.json')); print(len(v), sorted(v, key=v.get))"
+          sha256sum out/french/* > out/french/SHA256SUMS
+      - name: Prüfstand (eSpeak-Synthese)
+        run: npx tsx tools/validate-model.mjs --model out/french/wav2vec2-french-phonemizer.onnx --vocab out/french/wav2vec2-french-phonemizer.vocab.json --report out/french/report.json --min-mean 30 2>&1 | grep -v '^var ' | tee out/french/report.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: french
+          path: out/french
+
+  release:
+    name: Als Release veröffentlichen
+    needs: [multilingual, french]
+    if: ${{ always() && needs.multilingual.result == 'success' && inputs.publish == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: assets
+      - name: Release anlegen oder aktualisieren
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.release_tag }}
+        run: |
+          set -e
+          files=$(find assets -type f \( -name '*.onnx' -o -name '*.onnx_data' -o -name '*.vocab.json' -o -name 'report.txt' -o -name 'SHA256SUMS' \))
+          echo "$files"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" $files --clobber
+          else
+            gh release create "$TAG" $files --title "Modelldateien $TAG" --notes "Phonem-Erkennungsmodelle für Prononciation (automatisch beschafft und geprüft). Siehe report.txt je Modell."
+          fi
+      - name: CORS der Release-Dateien prüfen
+        run: |
+          url="https://github.com/${{ github.repository }}/releases/download/${{ inputs.release_tag }}/wav2vec2-lv-60-espeak-cv-ft.vocab.json"
+          curl -sIL -H "Origin: https://example.github.io" "$url" | grep -i -E "^(HTTP|access-control|location)" || true

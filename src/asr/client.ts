@@ -23,6 +23,8 @@ export class PhonemeRecognizer {
   state: ModelState = 'idle';
   lastError: string | null = null;
   vocabSize = 0;
+  /** Tokens des geladenen Modells (für die Abbildung der Zielphone) */
+  vocab: Set<string> = new Set();
 
   onProgress(cb: (p: LoadProgress) => void): () => void {
     this.progressCbs.add(cb);
@@ -69,7 +71,7 @@ export class PhonemeRecognizer {
     const threads = typeof crossOriginIsolated !== 'undefined' && crossOriginIsolated ? Math.min(4, navigator.hardwareConcurrency || 1) : 1;
     try {
       const res = await this.send({ type: 'load', seq: ++this.seq, source, vocabUrl, numThreads: threads });
-      if (res.type === 'loaded') this.vocabSize = res.vocabSize;
+      if (res.type === 'loaded') { this.vocabSize = res.vocabSize; this.vocab = new Set(res.vocab.map((v) => v.replace(/[ːˈˌ]/g, ''))); }
       this.state = 'ready';
     } catch (e) {
       this.state = 'error';
