@@ -1,0 +1,1151 @@
+# Testkorpus für das G2P-Modul: typischer Wortschatz der Sekundarstufe I (eigene Zusammenstellung, kein Verlagsmaterial)
+bonjour
+salut
+au revoir
+merci
+s'il te plaît
+s'il vous plaît
+oui
+non
+pardon
+excusez-moi
+ça va
+comment ça va ?
+je m'appelle
+tu t'appelles
+il s'appelle
+elle s'appelle
+c'est
+ce n'est pas
+voici
+voilà
+qui est-ce ?
+qu'est-ce que c'est ?
+où
+quand
+pourquoi
+parce que
+comment
+combien
+un
+une
+des
+le
+la
+les
+l'ami
+l'amie
+l'école
+l'élève
+un ami
+une amie
+mon ami
+mon amie
+ton ami
+son ami
+nos amis
+vos amis
+leurs amis
+les amis
+les élèves
+les enfants
+les hommes
+les femmes
+le garçon
+la fille
+les filles
+la famille
+le père
+la mère
+les parents
+le frère
+la sœur
+le grand-père
+la grand-mère
+les grands-parents
+l'oncle
+la tante
+le cousin
+la cousine
+le chien
+le chat
+les chats
+le cheval
+les chevaux
+l'oiseau
+les oiseaux
+le poisson
+la maison
+l'appartement
+la chambre
+la cuisine
+la salle de bains
+le salon
+le jardin
+la rue
+la ville
+le village
+le quartier
+la gare
+la poste
+la boulangerie
+le marché
+le supermarché
+le magasin
+le collège
+le lycée
+la classe
+la salle de classe
+le cours
+le prof
+le professeur
+la professeure
+le cahier
+le livre
+le stylo
+le crayon
+la trousse
+le sac
+le sac à dos
+la table
+la chaise
+le tableau
+l'ordinateur
+le portable
+le téléphone
+la musique
+le sport
+le football
+le basket
+le tennis
+la natation
+le vélo
+la danse
+le cinéma
+le film
+la télé
+la télévision
+le jeu
+les jeux vidéo
+le week-end
+les vacances
+la fête
+l'anniversaire
+le cadeau
+le gâteau
+le pain
+le fromage
+le lait
+l'eau
+le jus d'orange
+le café
+le thé
+le chocolat
+le croissant
+la pomme
+la banane
+les fruits
+les légumes
+la viande
+le poulet
+les frites
+la pizza
+la salade
+le petit déjeuner
+le déjeuner
+le dîner
+le repas
+manger
+boire
+aimer
+adorer
+détester
+préférer
+jouer
+regarder
+écouter
+parler
+chanter
+danser
+travailler
+habiter
+acheter
+chercher
+trouver
+donner
+porter
+arriver
+entrer
+rester
+rentrer
+penser
+commencer
+nager
+voyager
+aller
+venir
+faire
+dire
+lire
+écrire
+voir
+savoir
+pouvoir
+vouloir
+devoir
+prendre
+apprendre
+comprendre
+attendre
+répondre
+partir
+sortir
+dormir
+finir
+choisir
+être
+avoir
+je suis
+tu es
+il est
+elle est
+nous sommes
+vous êtes
+ils sont
+elles sont
+j'ai
+tu as
+il a
+nous avons
+vous avez
+ils ont
+elles ont
+je vais
+tu vas
+il va
+nous allons
+vous allez
+ils vont
+je fais
+nous faisons
+vous faites
+ils font
+je peux
+tu peux
+il peut
+nous pouvons
+vous pouvez
+ils peuvent
+je veux
+il veut
+nous voulons
+ils veulent
+je sais
+nous savons
+je prends
+il prend
+nous prenons
+ils prennent
+je viens
+tu viens
+il vient
+nous venons
+ils viennent
+il y a
+il n'y a pas
+il faut
+j'habite à Münster
+nous habitons en Allemagne
+elle parle français
+ils parlent anglais
+elles étudient
+ils oublient
+tu aimes
+il aime
+nous aimons
+vous aimez
+ils aiment
+j'aime bien
+je n'aime pas
+petit
+petite
+grand
+grande
+gros
+grosse
+beau
+belle
+joli
+jolie
+nouveau
+nouvelle
+vieux
+vieille
+jeune
+bon
+bonne
+mauvais
+mauvaise
+gentil
+gentille
+sympa
+sympathique
+intelligent
+intelligente
+intéressant
+intéressante
+content
+contente
+heureux
+heureuse
+triste
+fatigué
+malade
+blanc
+blanche
+noir
+noire
+rouge
+bleu
+bleue
+vert
+verte
+jaune
+gris
+grise
+rose
+orange
+marron
+violet
+violette
+grand ami
+petit ami
+bon ami
+un bon élève
+une bonne élève
+un grand homme
+un petit enfant
+deux amis
+trois amis
+six amis
+dix amis
+vingt ans
+cent euros
+zéro
+deux
+trois
+quatre
+cinq
+six
+sept
+huit
+neuf
+dix
+onze
+douze
+treize
+quatorze
+quinze
+seize
+dix-sept
+dix-huit
+dix-neuf
+vingt
+vingt et un
+vingt-deux
+trente
+quarante
+cinquante
+soixante
+soixante-dix
+quatre-vingts
+quatre-vingt-dix
+cent
+mille
+premier
+première
+deuxième
+dernier
+dernière
+lundi
+mardi
+mercredi
+jeudi
+vendredi
+samedi
+dimanche
+janvier
+février
+mars
+avril
+mai
+juin
+juillet
+août
+septembre
+octobre
+novembre
+décembre
+le matin
+l'après-midi
+le soir
+la nuit
+aujourd'hui
+demain
+hier
+maintenant
+toujours
+souvent
+jamais
+quelquefois
+parfois
+déjà
+encore
+bientôt
+tôt
+tard
+ici
+là
+là-bas
+à gauche
+à droite
+tout droit
+devant
+derrière
+sous
+sur
+dans
+avec
+sans
+pour
+chez
+entre
+après
+avant
+pendant
+très
+trop
+assez
+beaucoup
+un peu
+peu
+plus
+moins
+aussi
+alors
+mais
+et
+ou
+donc
+puis
+ensuite
+enfin
+d'abord
+en été
+en hiver
+au printemps
+en automne
+il fait beau
+il fait chaud
+il fait froid
+il pleut
+il neige
+le temps
+l'heure
+quelle heure est-il ?
+il est huit heures
+il est midi
+il est minuit
+une heure et demie
+un quart d'heure
+la semaine
+le mois
+l'année
+le jour
+le monde
+le pays
+la France
+l'Allemagne
+l'Espagne
+l'Italie
+l'Angleterre
+Paris
+Lyon
+Marseille
+Strasbourg
+Toulouse
+Bordeaux
+français
+française
+allemand
+allemande
+anglais
+anglaise
+espagnol
+espagnole
+italien
+italienne
+européen
+européenne
+la langue
+le mot
+la phrase
+la question
+la réponse
+l'exercice
+le devoir
+les devoirs
+l'examen
+la note
+le résultat
+le problème
+l'idée
+l'histoire
+la géographie
+les maths
+les mathématiques
+la biologie
+la physique
+la chimie
+l'art
+le dessin
+la récréation
+la cantine
+la bibliothèque
+le gymnase
+la piscine
+le stade
+le parc
+le jardin public
+la plage
+la mer
+la montagne
+la forêt
+la campagne
+le fleuve
+la rivière
+le pont
+la place
+le centre-ville
+le bus
+le métro
+le train
+la voiture
+l'avion
+le bateau
+le billet
+le ticket
+la carte
+l'argent
+le prix
+cher
+chère
+pas cher
+gratuit
+ouvert
+fermé
+le corps
+la tête
+les yeux
+l'œil
+le nez
+la bouche
+les oreilles
+la main
+les mains
+le bras
+la jambe
+le pied
+les pieds
+les cheveux
+le cœur
+l'œuf
+les œufs
+le bœuf
+l'oignon
+monsieur
+madame
+mademoiselle
+la femme
+l'homme
+les gens
+la personne
+le fils
+le chef
+le roi
+la reine
+le prince
+la princesse
+le héros
+les héros
+le haricot
+les haricots
+la honte
+le hasard
+en haut
+en bas
+le hall
+le hamburger
+le hockey
+la ville
+mille
+tranquille
+Lille
+la fille
+la famille
+la feuille
+le soleil
+le travail
+le réveil
+l'œil
+le fauteuil
+gentil
+le fusil
+l'outil
+le sourcil
+le persil
+payer
+le pays
+le paysage
+le voyage
+le crayon
+la poésie
+le moyen
+le citoyen
+le royaume
+le yaourt
+le kayak
+examiner
+exister
+exact
+l'exemple
+l'excursion
+expliquer
+excellent
+le taxi
+le texte
+dix
+six
+le bus
+le tennis
+l'ours
+le fils
+le sens
+un os
+des os
+tous
+tous les jours
+nous sommes tous là
+plus
+en plus
+plus ou moins
+je ne veux plus
+l'est
+l'ouest
+le sud
+le nord
+août
+le but
+le fait
+en fait
+le gaz
+le riz
+le nez
+assez
+chez
+le respect
+l'aspect
+le tabac
+l'estomac
+le porc
+le banc
+blanc
+franc
+le second
+la seconde
+la femme
+solennel
+évidemment
+le club
+le web
+la question
+le questionnaire
+la nation
+la station
+l'attention
+la patience
+le patient
+patient
+l'initiale
+essentiel
+la démocratie
+la partie
+la sortie
+l'amitié
+la pitié
+entier
+le quartier
+le métier
+le papier
+le cahier
+hier
+fier
+la mer
+cher
+l'hiver
+le fer
+amer
+le ver
+parler
+chanter
+le boulanger
+le boucher
+le premier
+l'étranger
+léger
+l'orchestre
+l'écho
+le chœur
+la technique
+la technologie
+chrétien
+le psychologue
+la chorale
+le chaos
+l'archéologie
+Michel
+Michelle
+le chemin
+chercher
+le chocolat
+la chemise
+le photographe
+la philosophie
+le théâtre
+la bibliothèque
+le thé
+le rythme
+la gymnastique
+le gymnase
+le signe
+la montagne
+la campagne
+gagner
+l'agneau
+l'espagnol
+le diagnostic
+le week-end
+le football
+le jogging
+le shopping
+le sandwich
+le parking
+le camping
+le planning
+le marketing
+le hamburger
+le sweat
+le tee-shirt
+le jean
+le short
+le wagon
+le kiwi
+le web
+le wifi
+le whisky
+quatre
+quand
+quel
+quelle
+quelqu'un
+quelque chose
+la question
+la queue
+le coq
+cinq
+cinq amis
+le guide
+la guitare
+la guerre
+la langue
+la baguette
+le gui
+aiguille
+l'eau
+beau
+le château
+le gâteau
+le bateau
+le cadeau
+nouveau
+le bureau
+le tableau
+jaune
+aussi
+autre
+pauvre
+chaud
+haut
+gauche
+faux
+le journal
+jour
+toujours
+bonjour
+la bouche
+la boulangerie
+rouge
+douze
+la route
+le cours
+nous
+vous
+tout
+tous
+la tour
+le tour
+pour
+le four
+la cour
+le court
+au-dessus
+au-dessous
+dessous
+dessus
+le vœu
+le feu
+les cheveux
+le jeu
+deux
+peu
+mieux
+vieux
+heureux
+nombreux
+le neveu
+le pneu
+le monsieur
+le milieu
+le lieu
+la peur
+la sœur
+le cœur
+le beurre
+l'heure
+le professeur
+la fleur
+la couleur
+l'ordinateur
+l'acteur
+le docteur
+la peur
+seul
+seule
+jeune
+le déjeuner
+le petit déjeuner
+l'Europe
+l'euro
+européen
+le pneu
+l'œuf
+les œufs
+le bœuf
+les bœufs
+l'œuvre
+le chef-d'œuvre
+l'œil
+les yeux
+le coin
+loin
+le point
+le soin
+moins
+le besoin
+le témoin
+le roi
+la loi
+le mois
+trois
+le bois
+la voix
+le choix
+froid
+le droit
+la toilette
+les toilettes
+le poisson
+la boisson
+la poire
+noir
+le soir
+le miroir
+l'histoire
+la mémoire
+le devoir
+voir
+le savoir
+l'espoir
+boire
+croire
+pouvoir
+vouloir
+la boîte
+l'étoile
+l'oiseau
+la voiture
+le voyage
+la main
+demain
+le pain
+le train
+le bain
+le copain
+la copine
+américain
+américaine
+certain
+certaine
+prochain
+prochaine
+le jardin
+le matin
+le magasin
+le voisin
+la voisine
+le cousin
+la cousine
+le vin
+le lapin
+le dessin
+fin
+enfin
+le chemin
+le médecin
+cinq
+quinze
+vingt
+le prince
+l'important
+simple
+le timbre
+impossible
+le pain
+plein
+pleine
+la peinture
+le frein
+la ceinture
+le sein
+le teint
+éteindre
+peindre
+la faim
+le daim
+le parfum
+brun
+brune
+lundi
+un
+chacun
+quelqu'un
+aucun
+commun
+l'un
+l'humain
+le parfum
+le shampoing
+le poing
+le coing
+le lointain
+le bien
+bien
+le chien
+rien
+le mien
+le tien
+le sien
+le lien
+ancien
+ancienne
+le musicien
+la musicienne
+le moyen
+la moyenne
+le citoyen
+européen
+le lycéen
+le doyen
+la viande
+le client
+le patient
+le science
+la science
+l'ambiance
+la chance
+la danse
+la France
+la vacance
+la séance
+blanc
+le banc
+grand
+quand
+le camp
+le champ
+la chambre
+le jambon
+la lampe
+le temps
+le printemps
+longtemps
+l'enfant
+les enfants
+la dent
+le vent
+l'argent
+le parent
+le moment
+souvent
+lentement
+vraiment
+seulement
+doucement
+comment
+le comment
+rapidement
+l'appartement
+le gouvernement
+le département
+le médicament
+ils chantent
+elles parlent
+ils aiment
+ils arrivent
+elles entrent
+ils mangent
+nous mangeons
+vous mangez
+j'habite
+tu habites
+il habite
+nous habitons
+vous habitez
+ils habitent
+le bon
+bon
+le pont
+le mont
+le nom
+le prénom
+la maison
+la raison
+la saison
+le garçon
+la chanson
+la leçon
+le poisson
+le crayon
+le pantalon
+le ballon
+le salon
+le balcon
+le bonbon
+le dindon
+le pigeon
+le plafond
+le son
+le ton
+mon
+ton
+son
+non
+long
+longue
+rond
+ronde
+le monde
+le nombre
+l'ombre
+tomber
+la bombe
+compter
+le compte
+la compétition
+le compliment
+le nom
+la pompe
+la trompette
+le plomb
+monter
+montrer
+le monstre
+le moment
+nous montons
+onze
+l'ongle
+l'oncle
+la fonction
+le pont
+ils sont
+ils vont
+ils font
+ils ont
+elles ont
+nous sommes
+ils sont arrivés
+ils ont acheté
+elles ont mangé
+nous avons un chien
+vous avez des amis
+vous êtes ici
+on est là
+on a faim
+on y va
+c'est un ami
+c'est une amie
+il est ici
+elle est à Paris
+très important
+plus ou moins
+bien aimé
+tout à fait
+pas encore
+pas du tout
+dans un mois
+dans une heure
+chez elle
+chez eux
+en Allemagne
+en Italie
+en avril
+en août
+quand il
+quand elle
+quand on
+sous un arbre
+depuis un an
+un petit ami
+un grand ami
+le premier étage
+le dernier étage
+les autres élèves
+mes amis
+tes amis
+ses amis
+ces amis
+ces hommes
+quelques amis
+plusieurs amis
+de nouveaux amis
+de bons amis
+de grands arbres
+les Anglais
+les Allemands
+les Italiens
+les Espagnols
+les Français
+un Français
+une Française
+les États-Unis
+aux États-Unis

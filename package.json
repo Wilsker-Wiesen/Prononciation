@@ -1,0 +1,43 @@
+{
+  "name": "prononciation",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Aussprachetrainer Französisch für die Sekundarstufe I",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc -b --noEmit",
+    "lint": "eslint .",
+    "predev": "node scripts/copy-ort.mjs",
+    "prebuild": "node scripts/copy-ort.mjs"
+  },
+  "devDependencies": {
+    "@echogarden/espeak-ng-emscripten": "^0.3.5",
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^26.6.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "eslint": "^10.13.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^17.13.0",
+    "jsdom": "^29.1.1",
+    "tsx": "^4.23.15",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.71.2",
+    "vite": "^8.3.4",
+    "vite-plugin-pwa": "^2.0.0",
+    "vitest": "^5.0.5"
+  },
+  "dependencies": {
+    "idb": "^8.0.4",
+    "jszip": "^3.10.2",
+    "onnxruntime-web": "^1.30.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  }
+}
