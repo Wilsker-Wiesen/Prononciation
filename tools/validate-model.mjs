@@ -3,7 +3,7 @@
  * Prüfstand für Phonem-Erkennungsmodelle (läuft unter Node, z. B. in GitHub Actions).
  *
  *   npx tsx tools/validate-model.mjs --model pfad/model.onnx --vocab pfad/vocab.json
- *          [--words tools/fixtures/validation-words.txt] [--audio-dir ordner] [--report out.json]
+ *          [--words tools/fixtures/validation-words.txt] [--audio-dir ordner [--manifest texts.json]] [--report out.json]
  *
  * Ohne --audio-dir wird Testsprache mit eSpeak NG synthetisiert (robotisch, aber
  * phonetisch sauber). Mit --audio-dir werden WAV-Dateien (16-bit PCM) verwendet,
@@ -77,11 +77,15 @@ async function recognize(pcm16k) {
 
 // ---- Testsignale ----
 const samples = []; // { text, pcm16k, source }
+// --manifest texts.json ([{ key, text }]): Dateien heißen <key>.wav (z. B. Ausgabe der Sprachsynthese)
+const manifest = args.manifest ? new Map(JSON.parse(readFileSync(args.manifest, 'utf8')).map((r) => [r.key, r.text])) : null;
 if (args['audio-dir']) {
   for (const f of readdirSync(args['audio-dir']).filter((f) => extname(f).toLowerCase() === '.wav' && !/\.src\.wav$/.test(f)).sort()) {
     try {
       const { pcm, sampleRate } = decodeWav(readFileSync(join(args['audio-dir'], f)).buffer);
-      const text = basename(f, extname(f)).replace(/[_-]+/g, ' ');
+      const key = basename(f, extname(f));
+      const text = manifest ? manifest.get(key) : key.replace(/[_-]+/g, ' ');
+      if (!text) continue;
       samples.push({ text, pcm16k: sampleRate === 16000 ? pcm : resampleTo(pcm, sampleRate, 16000), source: f });
     } catch (e) {
       console.log(`! ${f}: ${e instanceof Error ? e.message : e}`);
@@ -112,7 +116,7 @@ for (const s of samples) {
   const { phones, ms } = await recognize(s.pcm16k);
   const a = assess(s.text, phones, undefined, vocabSet);
   const target = ipaString(transcribe(s.text));
-  rows.push({ text: s.text, target, heard: a.recognizedIpa, overall: a.overall, phoneme: a.overall, ms, findings: a.findings.map((f) => f.id), source: s.source });
+  rows.push({ key: s.source.replace(/\.wav$/i, ''), text: s.text, target, heard: a.recognizedIpa, overall: a.overall, phoneme: a.overall, ms, findings: a.findings.map((f) => f.id), source: s.source });
   console.log(`${a.overall.toString().padStart(3)}  ${s.text.padEnd(28)} ziel [${target}]  gehört [${a.recognizedIpa}]  ${ms} ms${a.findings.length ? '  ' + a.findings.map((f) => f.id).join(',') : ''}`);
 }
 const mean = rows.reduce((x, r) => x + r.overall, 0) / rows.length;

@@ -1,1 +1,1 @@
-{"root":["./vite.config.ts","./vitest.config.ts","./tools/g2p-compare.ts"],"version":"6.0.3"}
+{"root":["./vite.config.ts","./vitest.config.ts","./tools/g2p-compare.ts","./tools/tts-texts.ts"],"version":"6.0.3"}

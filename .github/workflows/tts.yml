@@ -1,0 +1,149 @@
+# Erzeugt Vorbild-Aufnahmen für die eigenen Inhalte der App mit neuronaler Sprachsynthese
+# und prüft jede Aufnahme mit dem französischen Phonem-Erkenner.
+# Start: Actions → "Vorbildstimme erzeugen" → "Run workflow".
+#   mode = sample: kurze Hörproben aller Kandidatenstimmen (Release tts-samples)
+#   mode = full:   alle Texte mit einer Stimme (Release tts-v1, danach nach public/tts übernehmen)
+name: Vorbildstimme erzeugen
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: sample oder full
+        default: sample
+      voice:
+        description: Nur bei full – Stimmen-ID aus der Matrix (z. B. piper-siwis-medium)
+        default: piper-siwis-medium
+
+permissions:
+  contents: write
+
+jobs:
+  synth:
+    name: ${{ matrix.id }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { id: piper-siwis-medium, engine: piper, path: siwis/medium/fr_FR-siwis-medium }
+          - { id: piper-tom-medium, engine: piper, path: tom/medium/fr_FR-tom-medium }
+          - { id: piper-upmc-jessica, engine: piper, path: upmc/medium/fr_FR-upmc-medium, speaker: 0 }
+          - { id: piper-upmc-pierre, engine: piper, path: upmc/medium/fr_FR-upmc-medium, speaker: 1 }
+          - { id: piper-gilles-low, engine: piper, path: gilles/low/fr_FR-gilles-low }
+          - { id: kokoro-ff-siwis, engine: kokoro, kvoice: ff_siwis }
+    steps:
+      - name: Stimme überspringen (full nur für die gewählte)
+        id: gate
+        run: |
+          if [ "${{ inputs.mode }}" = "full" ] && [ "${{ inputs.voice }}" != "${{ matrix.id }}" ]; then echo "skip=1" >> "$GITHUB_OUTPUT"; fi
+      - uses: actions/checkout@v4
+        if: ${{ !steps.gate.outputs.skip }}
+      - uses: actions/setup-node@v4
+        if: ${{ !steps.gate.outputs.skip }}
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-python@v5
+        if: ${{ !steps.gate.outputs.skip }}
+        with:
+          python-version: '3.11'
+      - name: Abhängigkeiten
+        if: ${{ !steps.gate.outputs.skip }}
+        run: |
+          npm ci
+          npm install --no-save onnxruntime-node
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg espeak-ng >/dev/null
+          if [ "${{ matrix.engine }}" = "piper" ]; then
+            pip install --quiet piper-tts
+          else
+            pip install --quiet "torch==2.5.1" --index-url https://download.pytorch.org/whl/cpu
+            pip install --quiet kokoro soundfile numpy
+          fi
+      - name: Textliste
+        if: ${{ !steps.gate.outputs.skip }}
+        run: |
+          mkdir -p out
+          npx tsx tools/tts-texts.ts out/texts.json ${{ inputs.mode == 'sample' && '--sample' || '' }}
+      - name: Piper-Stimme laden (mit Modellkarte)
+        if: ${{ !steps.gate.outputs.skip && matrix.engine == 'piper' }}
+        run: |
+          set -e
+          base="https://huggingface.co/rhasspy/piper-voices/resolve/main/fr/fr_FR/${{ matrix.path }}"
+          dir=$(dirname "${{ matrix.path }}")
+          curl -fsSL "$base.onnx" -o voice.onnx
+          curl -fsSL "$base.onnx.json" -o voice.onnx.json
+          curl -fsSL "https://huggingface.co/rhasspy/piper-voices/resolve/main/fr/fr_FR/$dir/MODEL_CARD" -o out/MODEL_CARD.txt || echo "keine Modellkarte" > out/MODEL_CARD.txt
+          cat out/MODEL_CARD.txt
+          python3 -c "import json; c=json.load(open('voice.onnx.json')); print('Sprecher:', c.get('speaker_id_map')); print('Rate:', c['audio']['sample_rate'])"
+      - name: Kokoro-Hinweis
+        if: ${{ !steps.gate.outputs.skip && matrix.engine == 'kokoro' }}
+        run: |
+          curl -fsSL "https://huggingface.co/hexgrad/Kokoro-82M/resolve/main/VOICES.md" -o out/MODEL_CARD.txt || true
+          grep -i -A3 -B3 "ff_siwis\|french" out/MODEL_CARD.txt || true
+      - name: Synthese
+        if: ${{ !steps.gate.outputs.skip }}
+        run: |
+          if [ "${{ matrix.engine }}" = "piper" ]; then
+            python3 tools/tts-synth.py --texts out/texts.json --out out/wav --engine piper --model voice.onnx ${{ matrix.speaker != '' && format('--speaker {0}', matrix.speaker) || '' }}
+          else
+            python3 tools/tts-synth.py --texts out/texts.json --out out/wav --engine kokoro --voice ${{ matrix.kvoice }}
+          fi
+          ls out/wav | wc -l
+      - name: Prüfung mit dem Phonem-Erkenner
+        if: ${{ !steps.gate.outputs.skip }}
+        run: |
+          rel="https://github.com/${{ github.repository }}/releases/download/models-v1"
+          curl -fsSL "$rel/wav2vec2-french-phonemizer.onnx" -o fr.onnx
+          curl -fsSL "$rel/wav2vec2-french-phonemizer.vocab.json" -o fr.vocab.json
+          npx tsx tools/validate-model.mjs --model fr.onnx --vocab fr.vocab.json --audio-dir out/wav --manifest out/texts.json --report out/report.json --min-mean 0 2>&1 | grep -v '^var ' | tee out/report.txt
+      - name: MP3 kodieren und packen
+        if: ${{ !steps.gate.outputs.skip }}
+        run: |
+          set -e
+          mkdir -p out/mp3
+          for f in out/wav/*.wav; do
+            ffmpeg -loglevel error -y -i "$f" -af "silenceremove=start_periods=1:start_threshold=-50dB,areverse,silenceremove=start_periods=1:start_threshold=-50dB,areverse,adelay=80" -ac 1 -ar 24000 -b:a 48k "out/mp3/$(basename "$f" .wav).mp3"
+          done
+          # Hörproben mit lesbaren Namen
+          if [ "${{ inputs.mode }}" = "sample" ]; then
+            python3 - <<'PY'
+          import json, os, re, shutil
+          rows = json.load(open('out/texts.json', encoding='utf-8'))
+          os.makedirs('out/hoerproben', exist_ok=True)
+          for i, r in enumerate(rows):
+              name = re.sub(r"[^\w' -]", '', r['text'], flags=re.U).strip()[:40]
+              shutil.copy(f"out/mp3/{r['key']}.mp3", f"out/hoerproben/{i+1:02d} {name}.mp3")
+          PY
+          fi
+          extra=""; [ -d out/hoerproben ] && extra="hoerproben"
+          (cd out && zip -qr "../${{ matrix.id }}.zip" mp3 report.txt report.json texts.json MODEL_CARD.txt $extra)
+          ls -la *.zip
+      - uses: actions/upload-artifact@v4
+        if: ${{ !steps.gate.outputs.skip }}
+        with:
+          name: ${{ matrix.id }}
+          path: ${{ matrix.id }}.zip
+
+  release:
+    needs: synth
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: assets
+      - name: Release anlegen
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          TAG=${{ inputs.mode == 'full' && 'tts-v1' || 'tts-samples' }}
+          files=$(find assets -name '*.zip')
+          echo "$files"
+          test -n "$files"
+          if gh release view "$TAG" >/dev/null 2>&1; then gh release delete "$TAG" --yes --cleanup-tag || true; sleep 5; fi
+          gh release create "$TAG" $files --title "Vorbildstimme $TAG" --notes "Synthetische Vorbild-Aufnahmen für die eigenen Inhalte der App, geprüft mit dem Phonem-Erkenner (report.txt je Stimme)." --prerelease
+          gh release view "$TAG" --json assets --jq '.assets[] | "\(.name) \(.size)"'
