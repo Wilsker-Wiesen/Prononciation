@@ -7,7 +7,6 @@ import { InfoView } from './ui/InfoView';
 import { LessonView } from './ui/LessonView';
 import { MissionsView } from './ui/MissionsView';
 import { BlitzView } from './ui/BlitzView';
-import { ShopView } from './ui/ShopView';
 import { PacksView } from './ui/PacksView';
 import { ProgressView } from './ui/ProgressView';
 import { SettingsView } from './ui/SettingsView';
@@ -22,7 +21,7 @@ function Shell() {
   useEffect(() => { void loadGame(); }, []);
 
   const nav = (name: 'home' | 'mission' | 'progress' | 'packs' | 'settings' | 'teacher' | 'info', label: string) => (
-    <button className={route.name === name || (name === 'home' && (route.name === 'lesson' || route.name === 'train' || route.name === 'blitz' || route.name === 'shop')) ? 'active' : ''} onClick={() => navigate({ name })}>{label}</button>
+    <button className={route.name === name || (name === 'home' && (route.name === 'lesson' || route.name === 'train' || route.name === 'blitz')) ? 'active' : ''} onClick={() => navigate({ name })}>{label}</button>
   );
 
   let view: React.ReactNode;
@@ -34,7 +33,6 @@ function Shell() {
     else view = <TrainerView key={location.hash} pack={pack} lessonId={route.lessonId} kind={route.kind} itemId={route.itemId} index={route.index} focus={route.focus} />;
   } else if (route.name === 'mission') view = <MissionsView key={route.phenomenonId ?? 'list'} phenomenonId={route.phenomenonId} />;
   else if (route.name === 'blitz') view = <BlitzView />;
-  else if (route.name === 'shop') view = <ShopView />;
   else if (route.name === 'progress') view = <ProgressView />;
   else if (route.name === 'settings') view = <SettingsView />;
   else if (route.name === 'packs') view = <PacksView />;

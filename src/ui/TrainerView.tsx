@@ -6,7 +6,7 @@ import { PHENOMENON_BY_ID, detectPhenomena, type PhenomenonId } from '../phon/ph
 import type { Pack } from '../types/content';
 import { FindingsList, HighlightedText, Icon, PhoneRow, ScoreRing, Waveform, formatBytes } from './components';
 import { useTrainer, type TrainItem } from './useTrainer';
-import { gameSnapshot, recordAttemptReward, type RewardResult } from '../game/store';
+import { recordAttemptReward, type RewardResult } from '../game/store';
 import { BADGES } from '../game/rewards';
 import { MascotSays, lineForScore, pickLine } from './Mascot';
 import { confetti, sfx, vibrate } from './fx';
@@ -80,13 +80,11 @@ export function TrainerCard({ item, onResult }: { item: TrainItem; onResult?: (o
     if (!result) return;
     onResult?.(result.overall);
     let cancelled = false;
-    const phenomena = [...detectPhenomena(state.transcription)];
-    recordAttemptReward(result.overall, phenomena, result.previousScore).then((r) => {
+    recordAttemptReward(result.overall, result.previousScore).then((r) => {
       if (cancelled) return;
       setReward({ ...r, for: result });
-      const special = r.goalReachedNow || r.questsCompleted.length > 0 || r.newBadges.length > 0;
+      const special = r.goalReachedNow || r.newBadges.length > 0;
       if (special) { sfx.fanfare(); confetti(); vibrate([40, 60, 40]); }
-      else if (r.combo >= 3) { sfx.combo(); vibrate(30); }
       else if (result.overall >= 85) { sfx.success(); if (result.overall >= 95) confetti(30); }
       else if (result.overall >= 0) sfx.soft();
     });
@@ -169,19 +167,15 @@ export function TrainerCard({ item, onResult }: { item: TrainItem; onResult?: (o
       {shownReward && result && (
         <div className="stack" style={{ marginTop: 12 }}>
           {(() => {
-            const outfit = gameSnapshot().outfit;
-            if (shownReward.goalReachedNow) { const l = pickLine('goal'); return <MascotSays mood="cheer" outfit={outfit} fr={l.fr} de={l.de} />; }
-            if (shownReward.combo >= 3) { const l = pickLine('combo'); return <MascotSays mood="cheer" outfit={outfit} fr={l.fr} de={l.de} />; }
+            if (shownReward.goalReachedNow) { const l = pickLine('goal'); return <MascotSays mood="cheer" fr={l.fr} de={l.de} />; }
             if (result.overall < 0) return null;
             const { mood, line } = lineForScore(result.overall);
-            return <MascotSays mood={mood} outfit={outfit} fr={line.fr} de={line.de} />;
+            return <MascotSays mood={mood} fr={line.fr} de={line.de} />;
           })()}
           <div className="row">
             <span className="badge good reward-pop">+{shownReward.xp} XP</span>
             {!!shownReward.improvement && <span className="badge good reward-pop">📈 Besser als letztes Mal! +{shownReward.improvement} XP</span>}
-            {shownReward.combo >= 2 && <span className="badge combo-badge reward-pop">⚡ Kombo ×{shownReward.combo}</span>}
-            {shownReward.goalReachedNow && <span className="badge good reward-pop">🎯 Tagesziel geschafft! +10 🥐</span>}
-            {shownReward.questsCompleted.map((q) => <span key={q.id} className="badge reward-pop">✅ {q.title} +{q.reward} 🥐</span>)}
+            {shownReward.goalReachedNow && <span className="badge good reward-pop">🎯 Tagesziel geschafft!</span>}
             {shownReward.newBadges.map((b) => { const d = BADGES.find((x) => x.id === b); return d ? <span key={b} className="badge reward-pop">{d.emoji} {d.title}</span> : null; })}
           </div>
         </div>

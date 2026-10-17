@@ -36,7 +36,6 @@ export function MissionsView({ phenomenonId }: { phenomenonId?: PhenomenonId }) 
           <span className="chip">⭐ Lv. {level.level} · {level.title}</span>
           <span className="chip">⚡ {game.points} XP</span>
           <span className="chip flame">🔥 {game.streakDays}</span>
-          <span className="chip">🥐 {game.croissants}</span>
           <span className="chip">🏅 {game.badges.length}/{BADGES.length}</span>
         </div>
         <div className="progress" style={{ marginTop: 8 }}><div style={{ width: `${Math.round(level.progress * 100)}%` }} /></div>
@@ -211,11 +210,11 @@ function MissionRun({ id }: { id: PhenomenonId }) {
     <div>
       <div className="card" style={{ textAlign: 'center' }}>
         <div style={{ display: 'flex', justifyContent: 'center' }}>
-          <MascotSays mood={(last?.stars ?? 0) >= 2 ? 'cheer' : (last?.stars ?? 0) >= 1 ? 'happy' : 'encourage'} outfit={gameSnapshot().outfit} fr={(last?.stars ?? 0) >= 3 ? 'Incroyable !' : (last?.stars ?? 0) >= 1 ? 'Mission accomplie !' : 'On recommence ensemble ?'} de={(last?.stars ?? 0) >= 1 ? 'Mission geschafft!' : 'Nochmal zusammen?'} />
+          <MascotSays mood={(last?.stars ?? 0) >= 2 ? 'cheer' : (last?.stars ?? 0) >= 1 ? 'happy' : 'encourage'} fr={(last?.stars ?? 0) >= 3 ? 'Incroyable !' : (last?.stars ?? 0) >= 1 ? 'Mission accomplie !' : 'On recommence ensemble ?'} de={(last?.stars ?? 0) >= 1 ? 'Mission geschafft!' : 'Nochmal zusammen?'} />
         </div>
         <div style={{ fontSize: '3rem', color: '#e8b84a' }}>{'★'.repeat(last?.stars ?? 0)}{'☆'.repeat(3 - (last?.stars ?? 0))}</div>
         <h1>{(last?.stars ?? 0) >= 3 ? 'Bravo !' : (last?.stars ?? 0) >= 1 ? 'Bien joué !' : 'Encore une fois ?'}</h1>
-        <p>Hörquiz: {Math.round((last?.listening ?? 0) * 100)} % richtig · Sprechen: {last && last.speaking >= 0 ? `${Math.round(last.speaking)} Punkte` : 'nicht bewertet'} · +{last?.points ?? 0} XP · +{(last?.stars ?? 0) * 2} 🥐</p>
+        <p>Hörquiz: {Math.round((last?.listening ?? 0) * 100)} % richtig · Sprechen: {last && last.speaking >= 0 ? `${Math.round(last.speaking)} Punkte` : 'nicht bewertet'} · +{last?.points ?? 0} XP</p>
         {newBadges.length > 0 && (
           <div className="banner" style={{ marginTop: 8 }}>
             Neues Abzeichen: {newBadges.map((b) => { const d = BADGES.find((x) => x.id === b); return d ? `${d.emoji} ${d.title}` : b; }).join(', ')}

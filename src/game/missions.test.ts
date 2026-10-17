@@ -64,7 +64,7 @@ describe('Belohnungen', () => {
     expect(levelFor(160).level).toBe(3);
   });
   it('zählt Serien tageweise (lokale Zeit)', () => {
-    const g0 = { ...EMPTY_GAME, freezes: 0 };
+    const g0 = { ...EMPTY_GAME };
     // Di 13.10.2026
     const g1 = touchStreak(g0, new Date(2026, 9, 13, 10));
     expect(g1.streakDays).toBe(1);

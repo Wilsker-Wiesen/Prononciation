@@ -101,7 +101,7 @@ export function BlitzView() {
       <div className="card" style={{ textAlign: 'center' }}>
         <h1>⚡ Ohren-Blitz</h1>
         <div style={{ display: 'flex', justifyContent: 'center' }}>
-          <MascotSays mood="happy" outfit={game.outfit} fr="60 secondes. Prêt·e ?" de="60 Sekunden. Bereit?" />
+          <MascotSays mood="happy" fr="60 secondes. Prêt·e ?" de="60 Sekunden. Bereit?" />
         </div>
         <p>Du hörst ein Wort und tippst, welches es war. So viele wie möglich in 60 Sekunden.</p>
         <p className="muted small">Dein Rekord: {game.bestBlitz} richtige Antworten</p>
@@ -115,7 +115,7 @@ export function BlitzView() {
       <div className="card" style={{ textAlign: 'center' }}>
         <h1>{result?.newBest ? 'Nouveau record !' : 'Temps écoulé !'}</h1>
         <div style={{ display: 'flex', justifyContent: 'center' }}>
-          <MascotSays mood={result?.newBest ? 'cheer' : 'happy'} outfit={game.outfit} fr={result?.newBest ? 'Record battu !' : 'Bien joué !'} de={`${correct} richtige Antworten`} />
+          <MascotSays mood={result?.newBest ? 'cheer' : 'happy'} fr={result?.newBest ? 'Record battu !' : 'Bien joué !'} de={`${correct} richtige Antworten`} />
         </div>
         {result && (
           <div className="row" style={{ justifyContent: 'center' }}>

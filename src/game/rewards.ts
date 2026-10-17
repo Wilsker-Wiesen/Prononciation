@@ -46,7 +46,7 @@ export function pointsForAttempt(overall: number): number {
   return Math.max(2, Math.round(overall / 10));
 }
 
-/** Serie fortschreiben (lokale Kalendertage, mit Serienschutz). */
+/** Serie fortschreiben (lokale Kalendertage, Wochenenden zählen nicht). */
 export function touchStreak(g: GameState, now = new Date()): GameState {
   return advanceStreak(g, localDay(now));
 }
@@ -73,8 +73,6 @@ export const BADGES: BadgeDef[] = [
   { id: 'plural-pro', title: 'ils/elles-Profi', emoji: '👥', description: 'Mission 3. Person Plural mit drei Sternen.', test: (g) => (g.missionStars['plural-3'] ?? 0) >= 3 },
   { id: 'voicing-pro', title: 'Stimmhaft bis zum Schluss', emoji: '🔊', description: 'Mission Auslaut mit drei Sternen.', test: (g) => (g.missionStars['final-voicing'] ?? 0) >= 3 },
   { id: 'goal-7', title: 'Objectif atteint', emoji: '🎯', description: 'An 7 Tagen das Tagesziel erreicht.', test: (g) => g.goalDays >= 7 },
-  { id: 'combo-5', title: 'Combo !', emoji: '⚡', description: 'Fünfmal hintereinander 85 Punkte oder mehr.', test: (g) => g.bestCombo >= 5 },
-  { id: 'chic', title: 'Très chic', emoji: '🎩', description: 'Coco ein Outfit gekauft.', test: (g) => g.outfits.length >= 1 },
   { id: 'all-missions', title: 'Tour complet', emoji: '🗺️', description: 'Jede Mission mindestens einmal bestanden.', test: (g) => Object.values(g.missionStars).filter((s) => (s ?? 0) >= 1).length >= 14 },
 ];
 

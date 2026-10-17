@@ -199,10 +199,6 @@ table.tbl input { width: 100%; background: var(--surface); border: 1px solid var
 .ring svg { transform: rotate(-90deg); }
 .ring .ring-label { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; font-weight: 800; font-size: 0.95rem; line-height: 1.1; }
 .ring .ring-label small { font-weight: 600; color: var(--muted); font-size: 0.7rem; }
-.quest { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); }
-.quest:last-child { border-bottom: 0; }
-.quest .qbar { flex: 1; }
-.quest.done .qtitle { text-decoration: line-through; color: var(--muted); }
 .qbar .progress { height: 12px; border-radius: 6px; }
 .qbar .progress > div { background: var(--good); border-radius: 6px; }
 .reward-pop { animation: pop 0.45s cubic-bezier(0.2, 1.6, 0.4, 1); display: inline-block; }
@@ -228,9 +224,6 @@ table.tbl input { width: 100%; background: var(--surface); border: 1px solid var
 @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
 .path-node .label { font-size: 0.8rem; font-weight: 700; text-align: center; }
 .path-node .stars { color: #e8b84a; font-size: 0.9rem; letter-spacing: 1px; }
-.shop { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
-.shop-item { border: 1px solid var(--border); border-radius: 12px; padding: 10px; text-align: center; background: var(--surface); }
-.shop-item.owned { border-color: var(--good); }
 .blitz-timer { font-size: 2rem; font-weight: 800; font-variant-numeric: tabular-nums; }
 .blitz-timer.low { color: var(--bad); }
 @media (prefers-reduced-motion: reduce) {
