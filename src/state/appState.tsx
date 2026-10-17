@@ -127,6 +127,7 @@ export type Route =
   | { name: 'settings' }
   | { name: 'packs' }
   | { name: 'teacher'; packId?: string; lessonId?: string }
+  | { name: 'mission'; phenomenonId?: import('../phon/phenomena').PhenomenonId }
   | { name: 'info' };
 
 export function parseRoute(hash: string): Route {
@@ -142,6 +143,7 @@ export function parseRoute(hash: string): Route {
     case 'settings': return { name: 'settings' };
     case 'packs': return { name: 'packs' };
     case 'teacher': return { name: 'teacher', packId: parts[1], lessonId: parts[2] };
+    case 'mission': return { name: 'mission', phenomenonId: parts[1] as import('../phon/phenomena').PhenomenonId | undefined };
     case 'info': return { name: 'info' };
     default: return { name: 'home' };
   }
@@ -154,6 +156,7 @@ export function routeToHash(r: Route): string {
     case 'lesson': return `#/lesson/${e(r.packId)}/${e(r.lessonId)}${r.tab ? `/${e(r.tab)}` : ''}`;
     case 'train': return `#/train/${e(r.packId)}/${e(r.lessonId)}/${r.kind}${r.itemId ? `/${e(r.itemId)}` : ''}${r.index !== undefined ? `/${r.index}` : ''}`;
     case 'teacher': return `#/teacher${r.packId ? `/${e(r.packId)}` : ''}${r.lessonId ? `/${e(r.lessonId)}` : ''}`;
+    case 'mission': return `#/mission${r.phenomenonId ? `/${e(r.phenomenonId)}` : ''}`;
     default: return `#/${r.name}`;
   }
 }

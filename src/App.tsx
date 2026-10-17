@@ -3,6 +3,7 @@ import { AppProvider, navigate, useApp, useRoute } from './state/appState';
 import { HomeView } from './ui/HomeView';
 import { InfoView } from './ui/InfoView';
 import { LessonView } from './ui/LessonView';
+import { MissionsView } from './ui/MissionsView';
 import { PacksView } from './ui/PacksView';
 import { ProgressView } from './ui/ProgressView';
 import { SettingsView } from './ui/SettingsView';
@@ -14,7 +15,7 @@ function Shell() {
   const { packs, settings, ready } = useApp();
   useEffect(() => { window.scrollTo(0, 0); }, [route]);
 
-  const nav = (name: 'home' | 'progress' | 'packs' | 'settings' | 'teacher' | 'info', label: string) => (
+  const nav = (name: 'home' | 'mission' | 'progress' | 'packs' | 'settings' | 'teacher' | 'info', label: string) => (
     <button className={route.name === name || (name === 'home' && (route.name === 'lesson' || route.name === 'train')) ? 'active' : ''} onClick={() => navigate({ name })}>{label}</button>
   );
 
@@ -25,7 +26,8 @@ function Shell() {
     if (!pack) view = <div className="card">Paket nicht gefunden. <button className="btn" onClick={() => navigate({ name: 'home' })}>Zur Startseite</button></div>;
     else if (route.name === 'lesson') view = <LessonView pack={pack} lessonId={route.lessonId} tab={route.tab} />;
     else view = <TrainerView key={location.hash} pack={pack} lessonId={route.lessonId} kind={route.kind} itemId={route.itemId} index={route.index} />;
-  } else if (route.name === 'progress') view = <ProgressView />;
+  } else if (route.name === 'mission') view = <MissionsView key={route.phenomenonId ?? 'list'} phenomenonId={route.phenomenonId} />;
+  else if (route.name === 'progress') view = <ProgressView />;
   else if (route.name === 'settings') view = <SettingsView />;
   else if (route.name === 'packs') view = <PacksView />;
   else if (route.name === 'teacher') view = <TeacherView packId={route.packId} lessonId={route.lessonId} />;
@@ -41,6 +43,7 @@ function Shell() {
         </a>
         <nav aria-label="Hauptnavigation">
           {nav('home', 'Lernen')}
+          {nav('mission', 'Missionen')}
           {nav('progress', 'Lernstand')}
           {nav('packs', 'Pakete')}
           {settings.teacherMode && nav('teacher', 'Editor')}

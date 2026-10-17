@@ -43,7 +43,12 @@ for (const word of words) {
     const raw = join(outDir, `${word}.src.wav`);
     const res = await fetch(url, { headers: { 'User-Agent': UA } });
     writeFileSync(raw, Buffer.from(await res.arrayBuffer()));
-    execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-i', raw, '-ac', '1', '-ar', '16000', '-sample_fmt', 's16', join(outDir, `${word}.wav`)]);
+    try {
+      execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-i', raw, '-ac', '1', '-ar', '16000', '-sample_fmt', 's16', join(outDir, `${word}.wav`)]);
+    } catch {
+      // ohne ffmpeg: WAV unverändert übernehmen (der Prüfstand resampelt selbst)
+      writeFileSync(join(outDir, `${word}.wav`), readFileSync(raw));
+    }
     credits.push(`${word}: ${title} (${page.imageinfo?.[0]?.user ?? '?'}, CC BY-SA 4.0, ${url})`);
     found++;
     console.log(`✓ ${word}: ${title}`);

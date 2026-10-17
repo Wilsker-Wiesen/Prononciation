@@ -5,6 +5,8 @@ import { ipaString } from '../phon/g2p';
 import type { Pack } from '../types/content';
 import { FindingsList, HighlightedText, Icon, PhoneRow, ScoreRing, Waveform, formatBytes } from './components';
 import { useTrainer, type TrainItem } from './useTrainer';
+import { recordAttemptReward } from '../game/store';
+import { BADGES } from '../game/rewards';
 
 export function trainItemsForLesson(pack: Pack, lessonId: string, kind: 'vocab' | 'text'): TrainItem[] {
   const lesson = pack.lessons.find((l) => l.id === lessonId);
@@ -59,11 +61,21 @@ export function TrainerView({ pack, lessonId, kind, itemId, index }: { pack: Pac
   );
 }
 
-export function TrainerCard({ item }: { item: TrainItem }) {
+export function TrainerCard({ item, onResult }: { item: TrainItem; onResult?: (overall: number) => void }) {
   const { settings } = useApp();
   const model = useModelStatus();
   const { state, playModel, playOwn, startRecording, stopRecording, reset } = useTrainer(item, settings);
   const { phase, result } = state;
+  const [reward, setReward] = useState<{ points: number; newBadges: string[]; for: unknown } | null>(null);
+  useEffect(() => {
+    if (!result) return;
+    onResult?.(result.overall);
+    let cancelled = false;
+    recordAttemptReward(result.overall).then((r) => { if (!cancelled) setReward({ ...r, for: result }); });
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [result]);
+  const shownReward = reward && reward.for === result ? reward : null;
   const assessment = result?.assessment ?? null;
   const ipa = item.ipaOverride ?? ipaString(state.transcription);
   const canAssess = settings.assessmentEnabled;
@@ -136,6 +148,12 @@ export function TrainerCard({ item }: { item: TrainItem }) {
       )}
 
       {result && <ResultPanel result={result} />}
+      {shownReward && (
+        <div className="row" style={{ marginTop: 10 }}>
+          <span className="badge good">+{shownReward.points} Punkte</span>
+          {shownReward.newBadges.map((b) => { const d = BADGES.find((x) => x.id === b); return d ? <span key={b} className="badge">{d.emoji} {d.title}</span> : null; })}
+        </div>
+      )}
     </div>
   );
 }

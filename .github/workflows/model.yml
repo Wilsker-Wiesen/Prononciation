@@ -116,6 +116,8 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           path: assets
+      - name: ffmpeg installieren
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg >/dev/null
       - name: Aufnahmen laden (Wikimedia Commons, CC BY-SA)
         run: node tools/fetch-lingualibre.mjs tools/fixtures/validation-words.txt out/real-audio 80
       - name: Prüfstand mehrsprachig
@@ -149,11 +151,13 @@ jobs:
           set -e
           files=$(find assets -type f \( -name '*.onnx' -o -name '*.onnx_data' -o -name '*.vocab.json' -o -name 'report.txt' -o -name 'SHA256SUMS' \))
           echo "$files"
+          # Vorhandenes Release ersetzen (Asset-Überschreiben per --clobber ist unzuverlässig)
           if gh release view "$TAG" >/dev/null 2>&1; then
-            gh release upload "$TAG" $files --clobber
-          else
-            gh release create "$TAG" $files --title "Modelldateien $TAG" --notes "Phonem-Erkennungsmodelle für Prononciation (automatisch beschafft und geprüft). Siehe report.txt je Modell."
+            gh release delete "$TAG" --yes --cleanup-tag || true
+            sleep 5
           fi
+          gh release create "$TAG" $files --title "Modelldateien $TAG" --notes "Phonem-Erkennungsmodelle für Prononciation (automatisch beschafft und geprüft). Siehe report.txt je Modell."
+          gh release view "$TAG" --json assets --jq '.assets[] | "\(.name) \(.size)"'
       - name: CORS der Release-Dateien prüfen
         run: |
           url="https://github.com/${{ github.repository }}/releases/download/${{ inputs.release_tag }}/wav2vec2-lv-60-espeak-cv-ft.vocab.json"

@@ -15,6 +15,15 @@ export function HomeView() {
           <button className="btn primary" onClick={() => navigate({ name: 'packs' })}>Paket importieren</button>
         </div>
       )}
+      <div className="card" style={{ background: 'color-mix(in srgb, var(--accent) 14%, var(--surface))' }}>
+        <div className="row between">
+          <div>
+            <h2 style={{ margin: 0 }}>🎯 Missionen</h2>
+            <div className="muted small">Eine Regel, ein Hörquiz, fünf Wörter: sammle Sterne und Abzeichen.</div>
+          </div>
+          <button className="btn primary" onClick={() => navigate({ name: 'mission' })}>Zu den Missionen <Icon.next /></button>
+        </div>
+      </div>
       {packs.map((p) => (
         <div className="card" key={p.id}>
           <div className="row between">
