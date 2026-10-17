@@ -55,6 +55,14 @@ selben Repository gehen immer).
 Ein Paket kann jederzeit aktualisiert und erneut importiert werden; gleiche Paket-ID = Ersetzen, der Lernstand bleibt
 erhalten.
 
+### Ordner-Import (ganze Bände)
+
+Für große Bestände (z. B. die Vokabelaufnahmen eines ganzen Bandes) gibt es im Editor „Ordner importieren“: Ein Ordner
+mit allen Audiodateien und einer Wortliste (CSV/TSV/TXT; Spalten: französisch, deutsch, optional Lektion, optional
+Dateiname) wird in einem Schritt zu Lektionen mit zugeordnetem Audio. Die Zuordnung läuft über den Dateinamen
+(„le_college.mp3“ ↔ „le collège“) oder die vierte Spalte. Nicht zugeordnete Dateien landen in einer Sammel-Lektion
+zum Nachbearbeiten.
+
 ## 4. Das Bewertungsmodell
 
 Beim ersten Training lädt die App das Phonem-Erkennungsmodell (≈ 300 MB) von Hugging Face herunter und speichert es im

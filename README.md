@@ -18,7 +18,8 @@ ohne Übertragung von Sprachaufnahmen.
 | **Hinweise** | Didaktische Diagnose typischer Fehler deutschsprachiger Lernender (stumme Endkonsonanten, Verbendung -ent, Nasalvokale, u/ou, [ʒ], Liaison, Auslautverhärtung, h, ui …) mit Erklärung und Tipp. |
 | **Lesen** | Lektionstexte Satz für Satz üben, mit Zeitfenstern im Gesamt-Audio oder eigenen Satz-Audios. |
 | **Lernstand** | Versuche, Bestwerte, häufigste Fehlertypen; Export als CSV/JSON (freiwillig, lokal). |
-| **Lehrkraft-Editor** | Pakete mit Lektionen, Vokabeln (Listen einfügen), Texten (Fließtext → Sätze), Audio-Zuordnung (Drag & Drop, automatische Zuordnung über Dateinamen), Lautschrift-Korrektur, Export als ZIP. |
+| **Missionen** | Spielerische Fokus-Einheiten je Aussprache-Regel (stumme Enden, -ent, Nasale, u/ou, Liaison, [ʒ], ch, h, ui, eu, oi, r): Regel → Hörquiz mit Minimalpaaren → Sprechrunde mit Wörtern aus den eigenen Lektionen → Sterne. Punkte, Level, Übungsserien und Abzeichen. |
+| **Lehrkraft-Editor** | Pakete mit Lektionen, Vokabeln (Listen einfügen, Ordner-Import), Texten (Fließtext → Sätze), Audio-Zuordnung (Drag & Drop, automatische Zuordnung über Dateinamen, Zerteilen langer Tracks an Pausen), Lautschrift-Korrektur, Export als ZIP. |
 
 ## Schnellstart
 
@@ -30,8 +31,18 @@ npm run build      # Produktions-Build nach dist/
 ```
 
 Veröffentlichung auf GitHub Pages: Der Workflow `.github/workflows/deploy.yml` baut bei jedem Push auf `main`
-und veröffentlicht `dist/`. Einmalig im Repository unter *Settings → Pages → Source* „GitHub Actions“ wählen.
-Die App ist dann unter `https://<konto>.github.io/Prononciation/` erreichbar.
+und veröffentlicht `dist/`. Voraussetzungen: Das Repository muss **öffentlich** sein (bei privaten Repositories
+sind weder Pages noch Release-Downloads ohne Anmeldung erreichbar), und einmalig wird unter
+*Settings → Pages → Source* „GitHub Actions“ gewählt. Die App ist dann unter
+`https://<konto>.github.io/Prononciation/` erreichbar.
+
+## Erkennungsmodelle
+
+Der Workflow `.github/workflows/model.yml` („Modelle beschaffen und prüfen“, manuell startbar) lädt das mehrsprachige
+Phonem-Modell von Hugging Face, exportiert zusätzlich ein rein französisches wav2vec2-Modell nach ONNX, prüft beide
+mit synthetischer Sprache und mit echten Wortaufnahmen (Lingua Libre, CC BY-SA) und veröffentlicht die Dateien als
+GitHub-Release `models-v1`. Die App lädt zuerst von dort, ersatzweise von Hugging Face. Prüfberichte liegen dem Release
+bei (`report.txt`).
 
 Die App funktioniert nur über HTTPS (oder `localhost`), weil Mikrofonzugriff und Service Worker das verlangen.
 
@@ -40,6 +51,7 @@ Die App funktioniert nur über HTTPS (oder `localhost`), weil Mikrofonzugriff un
 - [docs/Konzept.md](docs/Konzept.md) – Didaktisches und technisches Konzept, Bewertungsverfahren, Grenzen
 - [docs/Lehrkraefte.md](docs/Lehrkraefte.md) – Anleitung für Lehrkräfte: Pakete erstellen, Audio zuordnen, verteilen, Modell selbst hosten
 - [docs/Datenschutz.md](docs/Datenschutz.md) – Datenschutz und Urheberrecht (DSGVO, Schulkontext NRW, Verlagsmaterial)
+- [docs/Aussprachefehler.md](docs/Aussprachefehler.md) – Forschungsmemo: typische Fehler deutschsprachiger Lernender, Minimalpaare, Didaktik, Grenzen automatischer Bewertung
 - [docs/Entwicklung.md](docs/Entwicklung.md) – Architektur, Module, Tests, Roadmap
 
 ## Inhalte und Rechte

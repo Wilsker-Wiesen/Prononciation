@@ -33,6 +33,23 @@ Hören → Nachsprechen → (Vergleich hören) → Rückmeldung → gezielt wied
   werden nach artikulatorischer Nähe abgestuft bewertet ([e]/[ɛ] kostet wenig, [y]/[u] viel).
 - **Keine Notenfunktion.** Der Lernstand bleibt bei den Lernenden; ein Export ist freiwillig.
 
+### Missionen (spielerischer Kern)
+
+Die Forschung (siehe *Aussprachefehler.md*) zeigt, dass die dominante Fehlerquelle in der Sekundarstufe I die
+„Leseaussprache“ ist: Lernende sprechen, was dasteht. Dagegen hilft Kognitivierung, also explizite Schrift-Laut-Regeln,
+gekoppelt mit Hören und Sprechen. Genau so sind die Missionen gebaut:
+
+1. **Regel verstehen** – eine Regel in Lernendensprache, ein Artikulationstipp, der typische Fehler, drei Hörbeispiele
+   (bevorzugt aus dem eigenen Lehrwerk-Audio).
+2. **Hören** – sechs Aufgaben „Welches Wort hörst du?“ mit Minimalpaaren des Phänomens (tu/tout, bon/bonne,
+   petit/petite, vin/vent …) oder Wörtern der eigenen Lektionen.
+3. **Sprechen** – fünf Wörter des Phänomens aus den geladenen Lektionen, bewertet wie im Training, mit dem Fokus-Tipp.
+4. **Sterne** (1–3 nach Hör- und Sprechleistung), Punkte, Level, Serien (Tage in Folge) und Abzeichen („Nasal-Profi“,
+   „tu ≠ tout“ …). Keine Ranglisten, kein Vergleich zwischen Lernenden.
+
+Die Zuordnung von Wörtern zu Phänomenen erfolgt automatisch über das G2P-Modul (z. B. „enthält Nasalvokal“, „stummer
+Endkonsonant“, „obligatorische Liaison“), so dass jede importierte Découvertes-Unité sofort Missionen speist.
+
 ### Lehrwerkbezug
 
 Inhalte werden als *Pakete* organisiert (Lehrwerk → Band → Unité/Lektion → Abschnitt), so dass die App die Struktur
@@ -71,9 +88,15 @@ Fehler von eSpeak. 113 Unit-Tests sichern Standardfälle ab.
 
 ### Phonemerkennung (src/asr)
 
-- Modell: `facebook/wav2vec2-lv-60-espeak-cv-ft` (300 M Parameter, auf 60 Sprachen mit eSpeak-Phonemtranskriptionen
-  feinjustiert), ONNX-Export `onnx-community/…-ONNX`, quantisiert (int8, ≈ 300 MB). Läuft mit onnxruntime-web
-  (WebAssembly, SIMD) in einem Web Worker; der Download wird in der Cache-API abgelegt.
+- Modelle (wählbar): `facebook/wav2vec2-lv-60-espeak-cv-ft` (300 M Parameter, 60 Sprachen, eSpeak-Phonemsatz, ONNX
+  int8 ≈ 190 MB) und `Cnam-LMSSC/wav2vec2-french-phonemizer` (95 M Parameter, nur Französisch, Common Voice 13,
+  MIT; vom Workflow nach ONNX exportiert und in den MatMul-Operatoren int8-quantisiert, ≈ 86 MB, rund dreimal schneller).
+  Beide laufen mit onnxruntime-web (WebAssembly, SIMD) in einem Web Worker; der Download wird in der Cache-API abgelegt.
+  Die Abbildung der Zielphone auf den Zeichensatz des jeweiligen Modells ist vokabularabhängig (ipa.ts).
+- Prüfstand: `tools/validate-model.mjs` bewertet ein Modell unter Node mit demselben Code wie die App, wahlweise mit
+  eSpeak-synthetisierten Testwörtern oder mit echten Aufnahmen (WAV-Ordner). Erste Ergebnisse (eSpeak-Synthese,
+  robotisch): mehrsprachig 44,8 Punkte Mittel, 178 ms/Wort; französisch 50,5 Punkte, 53 ms/Wort. Mit echten Aufnahmen
+  (Lingua Libre) liefert der Workflow eigene Berichte.
 - Vorverarbeitung: 16 kHz Mono, Mittelwert/Varianz-Normierung, Stille-Beschneidung.
 - Dekodierung: CTC-Greedy mit Konfidenz je Phon (mittlere Softmax-Wahrscheinlichkeit).
 - Alignment: globales Alignment der Zielphone (in den eSpeak-Zeichensatz abgebildet: ɥ→y, ɲ+V→nj) mit den erkannten

@@ -10,6 +10,7 @@ import { deleteAudio, getAudio, listAudioForPack, putAudio, savePack } from '../
 import { PACK_FORMAT_VERSION, newId, type AudioAsset, type Lesson, type Pack, type Sentence, type TextItem, type VocabEntry } from '../types/content';
 import { Icon } from './components';
 import { SplitAudio } from './SplitAudio';
+import { materialize, planBulkImport, type BulkPlan } from '../content/bulkImport';
 import { download } from './ProgressView';
 
 export function TeacherView({ packId, lessonId }: { packId?: string; lessonId?: string }) {
@@ -112,6 +113,7 @@ function PackEditor({ initial, lessonId, onSaved }: { initial: Pack; lessonId?: 
         )}
       </div>
 
+      <BulkImport pack={pack} onDone={async (lessons, newAssets) => { for (const a of newAssets) await putAudio(a); update((p) => ({ ...p, lessons: [...p.lessons, ...lessons] })); await reloadAssets(); }} />
       <AudioLibrary packId={pack.id} assets={assets} reload={reloadAssets} lesson={lesson} updateLesson={updateLesson} />
     </div>
   );
@@ -337,6 +339,60 @@ function AudioLibrary({ packId, assets, reload, lesson, updateLesson }: { packId
         </ul>
       )}
       {splitting && lesson && <SplitAudio key={splitting.id} asset={splitting} lesson={lesson} updateLesson={updateLesson} onClose={() => setSplitting(null)} />}
+    </div>
+  );
+}
+
+// ---------- Ordner-Import ----------
+
+function BulkImport({ pack, onDone }: { pack: Pack; onDone: (lessons: Lesson[], assets: AudioAsset[]) => Promise<void> }) {
+  const dirRef = useRef<HTMLInputElement>(null);
+  const [plan, setPlan] = useState<BulkPlan | null>(null);
+  const [title, setTitle] = useState('Import');
+  const [busy, setBusy] = useState(false);
+  const [includeUnmatched, setIncludeUnmatched] = useState(true);
+  useEffect(() => { if (dirRef.current) dirRef.current.setAttribute('webkitdirectory', ''); }, []);
+  const analyze = async (files: FileList | null) => {
+    if (!files?.length) return;
+    setBusy(true);
+    try { setPlan(await planBulkImport(Array.from(files), { defaultLessonTitle: title })); } finally { setBusy(false); }
+  };
+  const run = async () => {
+    if (!plan) return;
+    setBusy(true);
+    try {
+      const { lessons, assets } = materialize(plan, pack.id, { includeUnmatchedAudio: includeUnmatched });
+      await onDone(lessons, assets);
+      setPlan(null);
+    } finally { setBusy(false); }
+  };
+  return (
+    <div className="card">
+      <h2>Ordner importieren</h2>
+      <p className="muted small">
+        Ein Ordner mit Audiodateien und einer Wortliste (CSV/TSV/TXT: „französisch ⇥ deutsch [⇥ Lektion] [⇥ Dateiname]“) wird zu Lektionen mit zugeordnetem Audio.
+        Ohne Liste werden die Dateinamen als Vokabeln übernommen.
+      </p>
+      <div className="row">
+        <label className="field">Lektionstitel (falls die Liste keinen nennt)<input value={title} onChange={(e) => setTitle(e.target.value)} /></label>
+        <input ref={dirRef} type="file" multiple style={{ display: 'none' }} onChange={(e) => void analyze(e.target.files)} />
+        <button className="btn" disabled={busy} onClick={() => dirRef.current?.click()}>Ordner wählen …</button>
+      </div>
+      {plan && (
+        <div style={{ marginTop: 10 }}>
+          <p className="small">
+            {plan.audioFiles.length} Audiodateien · {plan.lessons.reduce((a, l) => a + l.entries.length, 0)} Listeneinträge in {plan.lessons.length} Lektion(en) ·
+            {' '}{plan.lessons.reduce((a, l) => a + l.entries.filter((e) => e.file).length, 0)} zugeordnet · {plan.unmatchedRows.length} Einträge ohne Audio · {plan.unmatchedAudio.length} Audiodateien ohne Eintrag
+          </p>
+          {plan.unmatchedRows.length > 0 && <p className="muted small">Ohne Audio: {plan.unmatchedRows.slice(0, 15).map((r) => r.fr).join(', ')}{plan.unmatchedRows.length > 15 ? ' …' : ''}</p>}
+          {plan.unmatchedAudio.length > 0 && <p className="muted small">Ohne Eintrag: {plan.unmatchedAudio.slice(0, 15).map((f) => f.name).join(', ')}{plan.unmatchedAudio.length > 15 ? ' …' : ''}</p>}
+          <label className="check"><input type="checkbox" checked={includeUnmatched} onChange={(e) => setIncludeUnmatched(e.target.checked)} /> Nicht zugeordnete Audiodateien als eigene Lektion „Nicht zugeordnete Aufnahmen“ anlegen</label>
+          <div className="row" style={{ marginTop: 8 }}>
+            <button className="btn primary" disabled={busy} onClick={() => void run()}>Importieren</button>
+            <button className="btn ghost" onClick={() => setPlan(null)}>Abbrechen</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
