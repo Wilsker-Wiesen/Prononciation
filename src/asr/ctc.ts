@@ -20,13 +20,24 @@ export interface CtcOptions {
   ignore?: Set<string>;
 }
 
-const DEFAULT_IGNORE = new Set(['<pad>', '<s>', '</s>', '<unk>', '|']);
+const DEFAULT_IGNORE = new Set(['<pad>', '[PAD]', '<s>', '</s>', '<unk>', '[UNK]', '|', '<blank>']);
+const BLANK_TOKENS = ['<pad>', '[PAD]', '<blank>'];
+const COMBINING = /^[\u0300-\u036f]+$/;
+
+/** Index des CTC-Blanks im Vokabular (pad-Token), sonst 0. */
+export function blankIdFor(vocab: string[]): number {
+  for (const t of BLANK_TOKENS) {
+    const i = vocab.indexOf(t);
+    if (i >= 0) return i;
+  }
+  return 0;
+}
 
 /**
  * @param logits  [frames × vocab] zeilenweise (row-major)
  */
 export function ctcGreedyDecode(logits: Float32Array, frames: number, vocabSize: number, vocab: string[], opts: CtcOptions = {}): RecognizedPhone[] {
-  const blank = opts.blankId ?? 0;
+  const blank = opts.blankId ?? blankIdFor(vocab);
   const ignore = opts.ignore ?? DEFAULT_IGNORE;
   const out: RecognizedPhone[] = [];
   let prevId = -1;
@@ -62,7 +73,20 @@ export function ctcGreedyDecode(logits: Float32Array, frames: number, vocabSize:
     prevId = argmax;
   }
   if (current) { current.conf = confN ? confSum / confN : 0; out.push(current); }
-  return out.filter((p) => !ignore.has(p.token) && p.ipa !== '');
+  const filtered = out.filter((p) => !ignore.has(p.token) && p.ipa !== '');
+  // Manche Vokabulare führen die Nasal-Tilde als eigenes Token: an das vorige Phon anhängen
+  const merged: RecognizedPhone[] = [];
+  for (const p of filtered) {
+    const prev = merged[merged.length - 1];
+    if (COMBINING.test(p.token) && prev) {
+      prev.ipa = prev.ipa + p.token;
+      prev.endFrame = p.endFrame;
+      prev.conf = (prev.conf + p.conf) / 2;
+    } else if (!COMBINING.test(p.token)) {
+      merged.push(p);
+    }
+  }
+  return merged;
 }
 
 /** Zeitpunkt eines Frames in Sekunden (wav2vec2: 20 ms pro Frame bei 16 kHz). */

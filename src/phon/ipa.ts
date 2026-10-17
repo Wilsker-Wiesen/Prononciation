@@ -138,8 +138,12 @@ export function isVowelOrGlide(p: string): boolean {
  * Artikulatorische Distanz zweier Phone in [0, 1].
  * 0 = identisch, 1 = maximal verschieden. Unbekannte Phone: 0.9.
  */
+const RHOTICS = new Set(['ʁ', 'r', 'ɹ', 'ɾ', 'ʀ', 'ɻ', 'ɽ']);
+
 export function phoneDistance(a: string, b: string): number {
   if (a === b) return 0;
+  // r-Varianten gelten als nah: Die Literatur rät, die r-Qualität nicht zu bestrafen (Verständlichkeit kaum betroffen).
+  if (RHOTICS.has(a) && RHOTICS.has(b)) return 0.15;
   const A = PHONES[a];
   const B = PHONES[b];
   if (!A || !B) return 0.9;

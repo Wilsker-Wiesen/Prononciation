@@ -4,6 +4,9 @@ import { clearAttempts, listAllAttempts } from '../storage/db';
 import { useApp } from '../state/appState';
 import type { Attempt } from '../types/content';
 import { Badge } from './components';
+import { useGame } from './MissionsView';
+import { BADGES, levelFor } from '../game/rewards';
+import { navigate } from '../state/appState';
 
 const ISSUE_LABEL: Record<string, string> = {
   'silent-final': 'Stummer Endkonsonant',
@@ -26,6 +29,8 @@ const ISSUE_LABEL: Record<string, string> = {
 
 export function ProgressView() {
   const { packs, settings, updateSettings } = useApp();
+  const game = useGame();
+  const level = levelFor(game.points);
   const [attempts, setAttempts] = useState<Attempt[]>([]);
   const [now] = useState(() => Date.now());
   useEffect(() => { listAllAttempts().then(setAttempts); }, []);
@@ -64,6 +69,18 @@ export function ProgressView() {
   return (
     <div>
       <h1>Mein Lernstand</h1>
+      <div className="card">
+        <div className="row between">
+          <div className="row" style={{ gap: 20 }}>
+            <div className="stat"><b>{game.points}</b><span className="muted small">Punkte</span></div>
+            <div className="stat"><b>Lv. {level.level}</b><span className="muted small">{level.title}</span></div>
+            <div className="stat"><b>{game.streakDays} 🔥</b><span className="muted small">Tage in Folge</span></div>
+            <div className="stat"><b>{game.badges.length} / {BADGES.length}</b><span className="muted small">Abzeichen</span></div>
+          </div>
+          <button className="btn" onClick={() => navigate({ name: 'mission' })}>Missionen</button>
+        </div>
+        <div className="progress" style={{ marginTop: 8 }}><div style={{ width: `${Math.round(level.progress * 100)}%` }} /></div>
+      </div>
       <div className="card">
         <div className="row" style={{ gap: 28 }}>
           <div className="stat"><b>{attempts.length}</b><span className="muted small">Versuche</span></div>

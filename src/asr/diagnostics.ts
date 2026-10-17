@@ -201,7 +201,7 @@ export function diagnose(t: Transcription, result: ScoreResult): Finding[] {
         return;
       }
       if (p.ipa === 'ʁ' && ['r', 'ɹ', 'ɾ', 'ɐ', 'l'].includes(heard)) {
-        add(mk('r', 1, wi, w.orth, `In „${w.orth}“ klang das r wie [${heard}].`, p.ipa, heard));
+        add(mk('r', 0, wi, w.orth, `In „${w.orth}“ klang das r wie [${heard}].`, p.ipa, heard));
         return;
       }
       if (pi === lastIdx && VOICED_TO_VOICELESS[p.ipa] === heard) {

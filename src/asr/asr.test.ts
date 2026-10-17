@@ -32,6 +32,12 @@ describe('CTC-Dekodierung', () => {
     expect(r[1]!.endFrame).toBe(6);
     expect(r[0]!.conf).toBeGreaterThan(0.9);
   });
+  it('erkennt Blank-Token [PAD] und fügt Nasal-Tilde an', () => {
+    const vocab = ['a', '[PAD]', 'ɛ', '\u0303', 'n'];
+    const rows = [[0, 5, 0, 0, 0], [0, 0, 5, 0, 0], [0, 5, 0, 0, 0], [0, 0, 0, 5, 0], [0, 5, 0, 0, 0], [0, 0, 0, 0, 5]];
+    const r = ctcGreedyDecode(new Float32Array(rows.flat()), rows.length, 5, vocab);
+    expect(r.map((p) => p.ipa)).toEqual(['ɛ̃', 'n']);
+  });
   it('normalisiert Längenzeichen und g', () => {
     const vocab = ['<pad>', 'iː', 'g'];
     const logits = new Float32Array([0, 5, 0, 0, 0, 5]);
@@ -109,7 +115,7 @@ describe('Bewertung und Diagnose', () => {
   });
   it('bewertet grob falsche Aussprache deutlich schlechter', () => {
     const good = assess('bonjour', rec('bɔ̃ʒuʁ')).overall;
-    const bad = assess('bonjour', rec('bonjur')).overall;
+    const bad = assess('bonjour', rec('bonjus')).overall;
     expect(bad).toBeLessThan(good - 25);
   });
   it('liefert Graphemspannen zur Markierung', () => {
