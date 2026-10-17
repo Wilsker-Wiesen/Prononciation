@@ -2,12 +2,12 @@
  * Web Worker: lädt das Phonem-Modell mit onnxruntime-web und berechnet Logits
  * für 16-kHz-Audio. Die Dekodierung (CTC) findet ebenfalls hier statt.
  */
-import * as ort from 'onnxruntime-web';
+import * as ort from 'onnxruntime-web/wasm';
 import { ctcGreedyDecode, type RecognizedPhone } from './ctc';
 import { fetchCached, parseVocab, type ModelSource } from './modelLoader';
 
 export type WorkerRequest =
-  | { type: 'load'; seq: number; source: ModelSource; vocabUrl: string; wasmPaths: string; numThreads: number }
+  | { type: 'load'; seq: number; source: ModelSource; vocabUrl: string; numThreads: number }
   | { type: 'recognize'; seq: number; pcm: Float32Array }
   | { type: 'unload'; seq: number };
 
@@ -24,7 +24,6 @@ const post = (m: WorkerResponse) => (self as unknown as Worker).postMessage(m);
 
 async function load(req: Extract<WorkerRequest, { type: 'load' }>): Promise<void> {
   const t0 = performance.now();
-  ort.env.wasm.wasmPaths = req.wasmPaths;
   ort.env.wasm.numThreads = req.numThreads;
   ort.env.wasm.proxy = false;
   const vocabBuf = await fetchCached(req.vocabUrl, undefined, 'Vokabular');

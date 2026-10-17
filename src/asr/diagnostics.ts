@@ -3,6 +3,7 @@
  * Französischlernender aus dem Alignment. Liefert deutschsprachige Hinweise.
  */
 import type { Transcription } from '../phon/g2p';
+import { isVowelLike } from '../phon/ipa';
 import type { Insertion, ScoreResult, WordResult } from './score';
 
 export type FindingId =
@@ -139,7 +140,7 @@ export function diagnose(t: Transcription, result: ScoreResult): Finding[] {
       }
     }
     // Verbendung -ent
-    if (/ent$/i.test(pw.lower) && !/[ɑ̃]$/.test(pw.phones.map((p) => p.ipa).join(''))) {
+    if (/ent$/i.test(pw.lower) && pw.phones[pw.phones.length - 1]?.ipa !== 'ɑ̃') {
       for (const ins of insAfterWord) {
         if (['ɑ̃', 'ɛ̃', 'n', 't', 'ɛ', 'ə'].includes(ins.ipa) || ins.ipa === 'ɑ̃') {
           add(mk('ent-ending', 2, wi, w.orth, `Die Endung -ent in „${w.orth}“ ist stumm; gehört wurde [${ins.ipa}].`, '', ins.ipa));
@@ -255,5 +256,5 @@ function nextWordStartsWithVowel(t: Transcription, wi: number): boolean {
   const next = t.words[wi + 1];
   if (!next || t.words[wi]!.boundaryAfter) return false;
   const first = next.phones[0];
-  return !!first && /^[aeiouyøœəɛɔɑɛ̃ɑ̃ɔ̃œ̃]/.test(first.ipa);
+  return !!first && isVowelLike(first.ipa);
 }

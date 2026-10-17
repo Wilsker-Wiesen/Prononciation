@@ -139,10 +139,11 @@ describe('G2P – Liaison und Kontext', () => {
     const t = transcribe('il est ici');
     const liaison = t.words[1]!.phones.find((p) => p.liaison);
     expect(liaison?.ipa).toBe('t');
-    expect(liaison?.liaison).toBe('obligatory');
+    expect(liaison?.liaison).toBe('optional');
     const t2 = transcribe('elles ont acheté');
     const l2 = t2.words[1]!.phones.find((p) => p.liaison);
-    expect(l2?.liaison).toBe('obligatory');
+    expect(l2?.liaison).toBe('optional');
+    expect(ipa('nous sommes en classe')).toBe('nu sɔm(z) ɑ̃ klas');
   });
   it('bindet nicht über Satzzeichen', () => {
     expect(ipa('Ils sont là. Elles aussi.')).toBe('il sɔ̃ la ɛlz‿osi');

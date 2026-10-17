@@ -11,9 +11,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc -b --noEmit",
-    "lint": "eslint .",
-    "predev": "node scripts/copy-ort.mjs",
-    "prebuild": "node scripts/copy-ort.mjs"
+    "lint": "eslint ."
   },
   "devDependencies": {
     "@echogarden/espeak-ng-emscripten": "^0.3.5",

@@ -4,6 +4,7 @@ dist-ssr
 *.local
 .DS_Store
 coverage
-public/ort/
 public/models/**/*.onnx
 tools/out/
+public/models/test/
+*.tsbuildinfo

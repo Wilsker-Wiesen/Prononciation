@@ -66,10 +66,9 @@ export class PhonemeRecognizer {
     if (this.state === 'ready') return;
     this.state = 'loading';
     this.lastError = null;
-    const base = import.meta.env.BASE_URL;
     const threads = typeof crossOriginIsolated !== 'undefined' && crossOriginIsolated ? Math.min(4, navigator.hardwareConcurrency || 1) : 1;
     try {
-      const res = await this.send({ type: 'load', seq: ++this.seq, source, vocabUrl, wasmPaths: `${location.origin}${base}ort/`, numThreads: threads });
+      const res = await this.send({ type: 'load', seq: ++this.seq, source, vocabUrl, numThreads: threads });
       if (res.type === 'loaded') this.vocabSize = res.vocabSize;
       this.state = 'ready';
     } catch (e) {

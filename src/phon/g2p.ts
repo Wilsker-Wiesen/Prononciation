@@ -540,11 +540,11 @@ const PRENOMINAL = new Set(['petit', 'petits', 'grand', 'grands', 'gros', 'bon',
 const OBLIGATORY_BEFORE_VOWEL = new Set([
   'les', 'des', 'un', 'mes', 'tes', 'ses', 'ces', 'nos', 'vos', 'leurs', 'aux', 'mon', 'ton', 'son', 'en', 'on',
   'ils', 'elles', 'nous', 'vous', 'deux', 'trois', 'six', 'dix', 'vingt', 'cent', 'quelques', 'plusieurs',
-  'dans', 'chez', 'sans', 'sous', 'très', 'bien', 'rien', 'tout', 'plus', 'moins', 'quand', 'dont', 'est',
+  'dans', 'chez', 'sans', 'sous', 'très', 'bien', 'rien', 'tout', 'plus', 'moins', 'quand', 'dont',
   'petit', 'petits', 'grand', 'grands', 'gros', 'bon', 'bons', 'mauvais', 'premier', 'dernier', 'autres',
-  'certains', 'nouveaux', 'vieux', 'beaux', 'tous', 'ont', 'sont', 'font', 'vont', 'avons', 'avez', 'allons',
-  'allez', 'êtes', 'sommes', 'pas', 'jamais', 'devant', 'pendant', 'avant', 'depuis', 'après', 'comment', 'combien',
+  'certains', 'nouveaux', 'vieux', 'beaux', 'tous', 'pas', 'devant', 'pendant', 'avant', 'depuis', 'après',
 ]);
+// Verbformen, Adverbien u. ä.: Liaison üblich, aber fakultativ (est, sont, ont, jamais, comment …) → Lexikon-Latent
 
 const DENASALIZE: Record<string, string> = { 'ɔ̃': 'ɔ', 'ɛ̃': 'ɛ', 'œ̃': 'œ', 'ɑ̃': 'a' };
 const DENASALIZE_WORDS = new Set(['bon', 'certain', 'plein', 'ancien', 'prochain', 'moyen', 'vilain', 'divin', 'vain', 'soudain', 'lointain', 'hautain', 'aucun_']);
@@ -563,7 +563,7 @@ function applyLiaison(words: PhonWord[]): void {
     let cls: 'obligatory' | 'optional' | 'none';
     if (w1.tight) cls = 'obligatory';
     else if (OBLIGATORY_BEFORE_VOWEL.has(w1.lower)) cls = 'obligatory';
-    else if (w1.lower === 'c' || w1.lower === "c'") cls = 'obligatory';
+    else if (w1.lower === 'est' && i > 0 && /^c['’]?$/.test(words[i - 1]!.lower)) cls = 'obligatory'; // c'est un …
     else if (LEXICON[w1.lower] !== undefined && w1.latent) cls = 'optional'; // Verbformen etc. aus dem Lexikon
     else if (/[sx]$/.test(w1.lower)) cls = 'optional'; // Plural + Adjektiv
     else cls = 'none';

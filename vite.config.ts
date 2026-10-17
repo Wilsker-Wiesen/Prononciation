@@ -12,7 +12,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icons/*.svg', 'ort/*'],
+      includeAssets: ['icons/*.svg'],
       manifest: {
         name: 'Prononciation – Aussprachetrainer Französisch',
         short_name: 'Prononciation',
@@ -44,15 +44,12 @@ export default defineConfig({
     sourcemap: false,
     rollupOptions: {
       output: {
-        manualChunks: {
-          ort: ['onnxruntime-web'],
-          vendor: ['react', 'react-dom', 'idb', 'jszip'],
+        manualChunks(id: string) {
+          if (id.includes('onnxruntime-web')) return 'ort';
+          if (/node_modules\/(react|react-dom|scheduler|idb|jszip)\//.test(id)) return 'vendor';
+          return undefined;
         },
       },
     },
-  },
-  test: {
-    environment: 'node',
-    include: ['src/**/*.test.ts'],
   },
 });
