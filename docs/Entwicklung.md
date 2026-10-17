@@ -86,6 +86,29 @@ npx tsx tools/validate-model.mjs --model modell.onnx --vocab vocab.json --audio-
 Der Bericht enthält je Wort Ziel- und erkannte Lautung, Punktwert und Diagnosen – damit lassen sich Bewertungsgewichte
 und Konfidenzschwellen an echten Schüleraufnahmen kalibrieren.
 
+## Vorbildstimme (eigene Inhalte)
+
+Konjugationspaket, Beispielpaket, Beispiele und Minimalpaare der Missionen haben keine Lehrwerk-Aufnahme.
+Dafür erzeugt der Workflow **Vorbildstimme erzeugen** (`.github/workflows/tts.yml`) Aufnahmen mit freien
+neuronalen Stimmen (Piper, Kokoro), je Text in drei Sprechtempi. Jede Fassung wird mit dem französischen
+Phonem-Erkenner geprüft (`tools/validate-model.mjs --manifest`), die beste je Text übernommen
+(`tools/tts-pick.py`). Texte unter 80 Punkten landen auf einer Prüfliste zum Nachhören.
+
+```bash
+# mode=sample: Hörproben aller Kandidaten (Release tts-samples); mode=full: alle Texte einer Stimme (Release tts-v1)
+# Übernahme in die App (Hauptstimme, Ersatzstimme nur für schwache Texte):
+python3 tools/tts-install.py --primary <entpacktes Zip A> --fallback <entpacktes Zip B> --out public/tts
+```
+
+Die App findet die Datei über einen Hash des normalisierten Textes (`src/audio/ttsKey.ts`). Rangfolge beim
+Abspielen: Paket-Aufnahme, dann Vorbildstimme, dann Gerätestimme (`src/audio/modelVoice.ts`). Nach Änderungen
+an eigenen Texten den Workflow erneut starten; fehlende Texte fallen automatisch auf die Gerätestimme zurück.
+
+## Native Apps
+
+Siehe [App.md](App.md). Kurz: `npm run native:ios` bzw. `npm run native:android` auf einem Rechner mit Xcode
+bzw. Android Studio; in CI baut der Workflow **Native Apps** beide Plattformen.
+
 ## Offene Punkte / bekannte Lücken
 
 - Beide Modelle wurden in GitHub Actions mit onnxruntime-node geladen und mit eSpeak-Synthese sowie echten

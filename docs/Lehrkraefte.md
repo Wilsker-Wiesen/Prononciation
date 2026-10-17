@@ -2,7 +2,9 @@
 
 ## 1. Die App bereitstellen
 
-Die App ist eine statische Web-App. Drei Wege:
+**iPhone/iPad und Android:** als native App über TestFlight/App Store bzw. APK, siehe [App.md](App.md).
+
+Zusätzlich läuft dieselbe App als Web-App in jedem Browser. Drei Wege:
 
 1. **GitHub Pages** (Standard): Nach dem ersten Push baut der Workflow die App automatisch. Einmalig unter
    *Settings → Pages → Source* „GitHub Actions“ wählen. Adresse: `https://<konto>.github.io/Prononciation/`.

@@ -1,0 +1,12 @@
+Vorbildstimme: Piper-Stimme fr_FR-siwis-medium, trainiert auf der SIWIS French Speech Synthesis Database (University of Edinburgh, CC BY 4.0)
+426 Aufnahmen, Mittelwert 97.9 Punkte, Ersatzstimme bei 0 Texten.
+
+Unter 80 Punkten (bitte nachhören):
+   45  A  pou
+   67  A  chou
+   70  A  blond
+   72  A  yeux
+   73  A  main
+   75  A  bon
+   78  A  tu
+   79  A  nous sortons
