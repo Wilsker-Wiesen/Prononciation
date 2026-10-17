@@ -94,9 +94,17 @@ Fehler von eSpeak. 113 Unit-Tests sichern Standardfälle ab.
   Beide laufen mit onnxruntime-web (WebAssembly, SIMD) in einem Web Worker; der Download wird in der Cache-API abgelegt.
   Die Abbildung der Zielphone auf den Zeichensatz des jeweiligen Modells ist vokabularabhängig (ipa.ts).
 - Prüfstand: `tools/validate-model.mjs` bewertet ein Modell unter Node mit demselben Code wie die App, wahlweise mit
-  eSpeak-synthetisierten Testwörtern oder mit echten Aufnahmen (WAV-Ordner). Erste Ergebnisse (eSpeak-Synthese,
-  robotisch): mehrsprachig 44,8 Punkte Mittel, 178 ms/Wort; französisch 50,5 Punkte, 53 ms/Wort. Mit echten Aufnahmen
-  (Lingua Libre) liefert der Workflow eigene Berichte.
+  eSpeak-synthetisierten Testwörtern oder mit echten Aufnahmen (WAV-Ordner). Ergebnisse (GitHub Actions, 17.10.2026):
+
+  | Modell | eSpeak-Synthese (60 Wörter) | echte Wortaufnahmen, Lingua Libre (10 Wörter) | Zeit je Wort (CPU) |
+  | --- | --- | --- | --- |
+  | wav2vec2-french-phonemizer (86 MB) | 50,5 Punkte | **81,8 Punkte**, 8/10 ≥ 65; Nasale korrekt (bonjour → [bɔ̃ʒo], garçon → [ɡaʁsɔ̃]) | ≈ 120 ms |
+  | wav2vec2-lv-60-espeak (190 MB) | 44,8 Punkte | 65,9 Punkte, 5/10 ≥ 65 | ≈ 350 ms |
+
+  Die Lingua-Libre-Aufnahmen enthalten nur das nackte Wort (ohne Artikel), die Zielwörter des Prüfstands teils mit
+  Artikel; die Werte unterschätzen die Modelle daher etwas. Das französische Modell ist deshalb Standard; das
+  mehrsprachige bleibt als Vergleich wählbar. Eine Validierung mit echten Schüleraufnahmen und Lehrkraft-Ratings
+  steht aus (siehe Aussprachefehler.md, Abschnitt 5).
 - Vorverarbeitung: 16 kHz Mono, Mittelwert/Varianz-Normierung, Stille-Beschneidung.
 - Dekodierung: CTC-Greedy mit Konfidenz je Phon (mittlere Softmax-Wahrscheinlichkeit).
 - Alignment: globales Alignment der Zielphone (in den eSpeak-Zeichensatz abgebildet: ɥ→y, ɲ+V→nj) mit den erkannten
