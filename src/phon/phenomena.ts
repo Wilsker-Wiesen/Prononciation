@@ -305,7 +305,7 @@ export function detectPhenomena(t: Transcription): Set<PhenomenonId> {
     const lower = w.lower;
     if (w.silentFinal && !/e$/.test(lower)) out.add('silent-final');
     if (/[^aeiouy]e$/.test(lower) && lower.length > 2 && !/^(le|de|je|me|te|se|ne|ce|que)$/.test(lower)) out.add('silent-e');
-    if (/ent$/.test(lower) && !ipa.includes('ɑ̃') && lower.length > 4) out.add('ent-ending');
+    if (/ent$/.test(lower) && ipa[ipa.length - 1] !== 'ɑ̃' && lower.length > 4) out.add('ent-ending');
     if (ipa.some((p) => /̃/.test(p))) out.add('nasal');
     if (ipa.includes('y') || ipa.includes('u')) out.add('u-ou');
     if (ipa.includes('ʁ')) out.add('r');
