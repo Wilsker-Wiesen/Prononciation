@@ -1,18 +1,27 @@
 # Prononciation als App: iPhone, iPad, Android und Browser
 
-Eine Codebasis, drei Wege auf die Geräte. Inhalt, Bewertung und Datenschutz sind überall gleich:
-Aufnahmen und Lernstand bleiben auf dem Gerät, es gibt keine Konten und keinen Server.
+## Standardweg (wie Parteigesicht und Qui est-ce)
 
-| Weg | Geräte | Voraussetzung | Für wen |
-| --- | --- | --- | --- |
-| **Native App** (App Store / TestFlight) | iPhone, iPad (iOS/iPadOS 15+) | Apple-Entwicklerkonto | Schulgeräte, eigene iPhones |
-| **Android-App** (APK, später Play Store) | Android 7+ | keine (APK) bzw. Google-Play-Konto | Android-Telefone und -Tablets |
-| **Web-App** (PWA) | alle: iPad, iPhone, Android, Chromebook, Windows, Mac | nur ein Link | sofort, ohne Installation |
+**Adresse:** https://wilsker-wiesen.github.io/Prononciation/
 
-Die Web-App bleibt der niedrigschwellige Zugang: Link öffnen, fertig. Auf iPhone/iPad in Safari
-„Teilen → Zum Home-Bildschirm“ wählen; sie startet dann wie eine App im Vollbild und funktioniert offline.
+GitHub Pages veröffentlicht die App bei jedem Push automatisch. Auf iPhone/iPad in Safari
+„Teilen → Zum Home-Bildschirm“ wählen (die App zeigt dazu einen Hinweis); danach startet sie mit
+eigenem Symbol im Vollbild und funktioniert offline. Auf Android, Chromebook und Windows bietet der
+Browser „App installieren“ an. Kein Konto, kein App Store, keine Kosten.
 
-## Was die native App zusätzlich bringt
+## Optionen ohne Apple-Entwicklerkonto
+
+| Option | Geht für Schülergeräte? | Bemerkung |
+| --- | --- | --- |
+| Web-App über „Zum Home-Bildschirm“ | ja, alle Geräte | Standardweg, oben |
+| Android-App (APK aus dem Release `app-latest`) | ja, Android | Installation „aus unbekannter Quelle“ nötig |
+| Xcode mit kostenloser Apple-ID auf dem eigenen iPhone/iPad | nein | nur eigene Geräte, App läuft nach 7 Tagen ab und muss neu aufgespielt werden |
+| App Store, TestFlight, Verteilung über Schul-MDM | – | braucht ein Apple-Entwicklerkonto (Abschnitt weiter unten) |
+
+Die native Hülle (`ios/`, `android/`) bleibt im Repository und wird bei jedem Push mitgebaut. Wird später
+doch ein Apple-Konto eingerichtet, ist kein Umbau nötig.
+
+## Was eine native App zusätzlich brächte
 
 - echtes App-Symbol und Startbildschirm, Installation über App Store, TestFlight oder Schul-MDM
 - Ausspracheerkennung ist **im App-Paket enthalten** (kein Download von 122 MB beim ersten Start)

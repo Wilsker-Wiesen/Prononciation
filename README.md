@@ -5,8 +5,9 @@ Modellaussprache von Vokabeln und Lektionstexten, sprechen nach, hören ihre eig
 und erhalten eine Rückmeldung zu einzelnen Lauten – vollständig auf dem Gerät, ohne Server, ohne Konten,
 ohne Übertragung von Sprachaufnahmen.
 
-Läuft als **native App auf iPhone und iPad** (TestFlight/App Store), als **Android-App** und als
-**Web-App** in jedem aktuellen Browser (Chromebook, Windows, Mac). Siehe [docs/App.md](docs/App.md).
+**Starten:** https://wilsker-wiesen.github.io/Prononciation/ (im Browser; auf iPhone/iPad über
+„Teilen → Zum Home-Bildschirm“ wie eine App, danach auch ohne Internet). Android-App und vorbereitete
+iOS-Hülle: siehe [docs/App.md](docs/App.md).
 
 > Arbeitstitel „Prononciation“. Stand: Oktober 2026, Version 0.1 (Prototyp).
 

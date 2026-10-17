@@ -1,6 +1,7 @@
 /** Startseite: Pakete und Lektionen. */
 import { navigate, useApp } from '../state/appState';
 import { Icon } from './components';
+import { InstallHint } from './InstallHint';
 import { TodayPanel } from './TodayPanel';
 
 export function HomeView() {
@@ -8,6 +9,7 @@ export function HomeView() {
   if (!ready) return <div className="card muted">Wird geladen …</div>;
   return (
     <div>
+      <InstallHint />
       <TodayPanel />
       {packs.length === 0 && (
         <div className="card">
