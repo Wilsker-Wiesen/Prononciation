@@ -1,8 +1,6 @@
 /** Missionen: Übersicht und Durchlauf (Einführung → Hörquiz → Sprechrunde → Ergebnis). */
 import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
-import { player } from '../audio/player';
-import { speakFrench, ttsAvailable } from '../audio/tts';
-import { audioBlob } from '../content/pack';
+import { playText as playModelText } from '../audio/modelVoice';
 import { missionAvailability, planMission, type ListeningTask, type MissionPlan } from '../game/missions';
 import { BADGES, levelFor, starsFromScore } from '../game/rewards';
 import { gameSnapshot, loadGame, recordListen, recordMission, subscribeGame } from '../game/store';
@@ -102,9 +100,7 @@ function MissionRun({ id }: { id: PhenomenonId }) {
   const ph = plan.phenomenon;
 
   const playText = async (text: string, audioId?: string, start?: number, end?: number) => {
-    const blob = await audioBlob(audioId);
-    if (blob) await player.play(blob, { start, end });
-    else if (settings.ttsFallback && ttsAvailable()) await speakFrench(text, { rate: 0.85 }).catch(() => undefined);
+    await playModelText(text, { audioId, start, end, ttsFallback: settings.ttsFallback, voiceName: settings.ttsVoice || undefined }).catch(() => undefined);
   };
 
   const finish = async (scores: number[]) => {

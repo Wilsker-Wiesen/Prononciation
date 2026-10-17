@@ -8,6 +8,7 @@ import { formatBytes } from './components';
 import { GOAL_OPTIONS } from '../game/daily';
 import { setDailyGoal } from '../game/store';
 import { useGame } from './MissionsView';
+import { loadVoices, rankedFrenchVoices, speakFrench } from '../audio/tts';
 
 export function SettingsView() {
   const { settings, updateSettings } = useApp();
@@ -16,6 +17,8 @@ export function SettingsView() {
   const [storage, setStorage] = useState<{ usage: number; quota: number } | null>(null);
   const [advanced, setAdvanced] = useState(false);
   const game = useGame();
+  const [voices, setVoices] = useState<{ name: string; lang: string }[]>([]);
+  useEffect(() => { void loadVoices().then(() => setVoices(rankedFrenchVoices().map((v) => ({ name: v.name, lang: v.lang })))); }, []);
 
   const refresh = () => {
     Promise.all(modelSources(settings).map((src) => isModelCached(src))).then((r) => setCached(r.some(Boolean)));
@@ -117,6 +120,16 @@ export function SettingsView() {
           <input type="checkbox" checked={settings.ttsFallback} onChange={(e) => void updateSettings({ ttsFallback: e.target.checked })} />
           Ersatzstimme des Geräts verwenden, wenn keine Aufnahme vorliegt
         </label>
+        {settings.ttsFallback && voices.length > 0 && (
+          <div className="row" style={{ marginTop: 4 }}>
+            <label className="small" htmlFor="tts-voice">Gerätestimme</label>
+            <select id="tts-voice" value={settings.ttsVoice} onChange={(e) => void updateSettings({ ttsVoice: e.target.value })}>
+              <option value="">Automatisch (beste verfügbare)</option>
+              {voices.map((v) => <option key={v.name} value={v.name}>{v.name} ({v.lang})</option>)}
+            </select>
+            <button className="btn ghost" onClick={() => void speakFrench('Bonjour ! Ils prennent le train à huit heures.', { voiceName: settings.ttsVoice || undefined }).catch(() => undefined)}>Probe hören</button>
+          </div>
+        )}
         <label className="check">
           <input type="checkbox" checked={settings.soundEnabled} onChange={(e) => void updateSettings({ soundEnabled: e.target.checked })} />
           Töne und Vibration bei Erfolgen

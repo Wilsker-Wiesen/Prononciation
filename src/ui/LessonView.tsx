@@ -1,8 +1,6 @@
 /** Lektionsansicht: Vokabeln und Texte mit Vorhören und Einstieg ins Training. */
 import { useEffect, useMemo, useState } from 'react';
-import { player } from '../audio/player';
-import { speakFrench, ttsAvailable } from '../audio/tts';
-import { audioBlob } from '../content/pack';
+import { playText as playModelText } from '../audio/modelVoice';
 import { ipaString, transcribe } from '../phon/g2p';
 import { navigate, useApp } from '../state/appState';
 import { listAttemptsForPack } from '../storage/db';
@@ -31,9 +29,7 @@ export function LessonView({ pack, lessonId, tab }: { pack: Pack; lessonId: stri
   if (!lesson) return <div className="card">Lektion nicht gefunden.</div>;
 
   const playItem = async (text: string, audioId?: string, start?: number, end?: number) => {
-    const blob = await audioBlob(audioId);
-    if (blob) await player.play(blob, { start, end });
-    else if (settings.ttsFallback && ttsAvailable()) await speakFrench(text).catch(() => undefined);
+    await playModelText(text, { audioId, start, end, ttsFallback: settings.ttsFallback, voiceName: settings.ttsVoice || undefined }).catch(() => undefined);
   };
 
   return (

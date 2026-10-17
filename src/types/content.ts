@@ -147,6 +147,8 @@ export interface Settings {
   conjugationVersion: number;
   /** Töne und Vibration bei Erfolgen */
   soundEnabled: boolean;
+  /** bevorzugte Gerätestimme (leer = automatisch die beste französische) */
+  ttsVoice: string;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -162,6 +164,7 @@ export const DEFAULT_SETTINGS: Settings = {
   learnerName: '',
   conjugationVersion: 0,
   soundEnabled: true,
+  ttsVoice: '',
 };
 
 export function newId(prefix = ''): string {

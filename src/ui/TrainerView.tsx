@@ -113,6 +113,7 @@ export function TrainerCard({ item, onResult }: { item: TrainItem; onResult?: (o
         <button className="btn" onClick={() => void playModel(0.7)} disabled={phase === 'recording'} aria-label="Langsam anhören">
           <Icon.slow /> Langsam
         </button>
+        {state.modelSource === 'builtin' && <span className="muted small">Vorbildstimme der App (synthetisch)</span>}
         {!state.hasModelAudio && (
           <span className="muted small">{settings.ttsFallback ? 'Ersatzstimme des Geräts (keine Lehrwerk-Aufnahme)' : 'Keine Aufnahme vorhanden'}</span>
         )}

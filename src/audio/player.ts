@@ -3,8 +3,10 @@
  * und Tempo), rohes PCM über einen AudioBufferSourceNode.
  * Neues Abspielen stoppt immer das laufende.
  *
- * iOS: play()/playPcm() aus einer Nutzergeste heraus aufrufen, sonst
- * verweigert Safari die Wiedergabe (NotAllowedError → Promise wird verworfen).
+ * iOS: Safari erlaubt Wiedergabe nur aus einer Nutzergeste heraus. Nach einem
+ * await (IndexedDB, fetch) ist die Geste verbraucht. Deshalb gibt es genau ein
+ * Audio-Element, das bei der ersten Berührung einmal mit Stille entsperrt wird
+ * (installAudioUnlock); danach darf es jederzeit abspielen.
  */
 import { getAudioContextCtor } from './audioContext';
 
@@ -58,6 +60,48 @@ function setPreservesPitch(el: HTMLAudioElement): void {
   if ('webkitPreservesPitch' in anyEl) anyEl.webkitPreservesPitch = true;
 }
 
+let sharedEl: HTMLAudioElement | null = null;
+
+function audioElement(): HTMLAudioElement {
+  sharedEl ??= new Audio();
+  return sharedEl;
+}
+
+/** 0,05 s Stille als WAV (8 kHz, 8 bit) zum Entsperren unter iOS. */
+function silentWavUrl(): string {
+  const n = 400;
+  const bytes = new Uint8Array(44 + n);
+  const v = new DataView(bytes.buffer);
+  const str = (o: number, t: string) => { for (let i = 0; i < t.length; i++) bytes[o + i] = t.charCodeAt(i); };
+  str(0, 'RIFF'); v.setUint32(4, 36 + n, true); str(8, 'WAVEfmt ');
+  v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+  v.setUint32(24, 8000, true); v.setUint32(28, 8000, true); v.setUint16(32, 1, true); v.setUint16(34, 8, true);
+  str(36, 'data'); v.setUint32(40, n, true); bytes.fill(128, 44);
+  let bin = '';
+  for (const b of bytes) bin += String.fromCharCode(b);
+  return `data:audio/wav;base64,${btoa(bin)}`;
+}
+
+/**
+ * Bei der ersten Berührung/Taste Audio-Element und AudioContext entsperren
+ * (iOS/iPadOS Safari und WKWebView). Einmal beim Start aufrufen.
+ */
+export function installAudioUnlock(): void {
+  if (typeof document === 'undefined' || typeof Audio === 'undefined') return;
+  const events = ['touchend', 'pointerdown', 'keydown'] as const;
+  const unlock = (): void => {
+    for (const e of events) document.removeEventListener(e, unlock, true);
+    const el = audioElement();
+    if (!current) {
+      el.src = silentWavUrl();
+      el.play().catch(() => undefined);
+    }
+    const c = getContext();
+    if (c && c.state === 'suspended') c.resume().catch(() => undefined);
+  };
+  for (const e of events) document.addEventListener(e, unlock, true);
+}
+
 function playBlob(blob: Blob, opts: PlayOptions): Promise<void> {
   return new Promise<void>((resolve, reject) => {
     if (typeof Audio === 'undefined' || typeof URL === 'undefined') {
@@ -68,7 +112,7 @@ function playBlob(blob: Blob, opts: PlayOptions): Promise<void> {
     const start = Math.max(0, opts.start ?? 0);
     const end = opts.end;
     const url = URL.createObjectURL(blob);
-    const el = new Audio();
+    const el = audioElement();
     el.preload = 'auto';
     setPreservesPitch(el);
     el.defaultPlaybackRate = rate;

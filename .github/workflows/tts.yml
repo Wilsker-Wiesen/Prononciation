@@ -27,12 +27,11 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { id: piper-siwis-medium, engine: piper, path: siwis/medium/fr_FR-siwis-medium }
-          - { id: piper-tom-medium, engine: piper, path: tom/medium/fr_FR-tom-medium }
-          - { id: piper-upmc-jessica, engine: piper, path: upmc/medium/fr_FR-upmc-medium, speaker: 0 }
-          - { id: piper-upmc-pierre, engine: piper, path: upmc/medium/fr_FR-upmc-medium, speaker: 1 }
-          - { id: piper-gilles-low, engine: piper, path: gilles/low/fr_FR-gilles-low }
-          - { id: kokoro-ff-siwis, engine: kokoro, kvoice: ff_siwis }
+          # Nicht aufgenommen: tom (Trainingsdaten AGPLv3), gilles (Prüfung 59,6 Punkte)
+          - { id: piper-siwis-medium, engine: piper, path: siwis/medium/fr_FR-siwis-medium, credit: 'Piper-Stimme fr_FR-siwis-medium, trainiert auf der SIWIS French Speech Synthesis Database (University of Edinburgh, CC BY 4.0)' }
+          - { id: piper-upmc-jessica, engine: piper, path: upmc/medium/fr_FR-upmc-medium, speaker: 0, credit: 'Piper-Stimme fr_FR-upmc-medium (jessica), Trainingsdaten UPMC/MaryTTS (CC BY-SA 4.0)' }
+          - { id: piper-upmc-pierre, engine: piper, path: upmc/medium/fr_FR-upmc-medium, speaker: 1, credit: 'Piper-Stimme fr_FR-upmc-medium (pierre), Trainingsdaten UPMC/MaryTTS (CC BY-SA 4.0)' }
+          - { id: kokoro-ff-siwis, engine: kokoro, kvoice: ff_siwis, credit: 'Kokoro-82M (Apache 2.0), Stimme ff_siwis, trainiert auf der SIWIS French Speech Synthesis Database (CC BY 4.0)' }
     steps:
       - name: Stimme überspringen (full nur für die gewählte)
         id: gate
@@ -58,8 +57,9 @@ jobs:
           if [ "${{ matrix.engine }}" = "piper" ]; then
             pip install --quiet piper-tts
           else
-            pip install --quiet "torch==2.5.1" --index-url https://download.pytorch.org/whl/cpu
-            pip install --quiet kokoro soundfile numpy
+            pip install torch --index-url https://download.pytorch.org/whl/cpu
+            pip install "kokoro>=0.9" soundfile numpy phonemizer-fork espeakng-loader
+            python3 -c "import torch, kokoro; print('torch', torch.__version__)"
           fi
       - name: Textliste
         if: ${{ !steps.gate.outputs.skip }}
@@ -82,43 +82,56 @@ jobs:
         run: |
           curl -fsSL "https://huggingface.co/hexgrad/Kokoro-82M/resolve/main/VOICES.md" -o out/MODEL_CARD.txt || true
           grep -i -A3 -B3 "ff_siwis\|french" out/MODEL_CARD.txt || true
-      - name: Synthese
-        if: ${{ !steps.gate.outputs.skip }}
-        run: |
-          if [ "${{ matrix.engine }}" = "piper" ]; then
-            python3 tools/tts-synth.py --texts out/texts.json --out out/wav --engine piper --model voice.onnx ${{ matrix.speaker != '' && format('--speaker {0}', matrix.speaker) || '' }}
-          else
-            python3 tools/tts-synth.py --texts out/texts.json --out out/wav --engine kokoro --voice ${{ matrix.kvoice }}
-          fi
-          ls out/wav | wc -l
-      - name: Prüfung mit dem Phonem-Erkenner
-        if: ${{ !steps.gate.outputs.skip }}
-        run: |
-          rel="https://github.com/${{ github.repository }}/releases/download/models-v1"
-          curl -fsSL "$rel/wav2vec2-french-phonemizer.onnx" -o fr.onnx
-          curl -fsSL "$rel/wav2vec2-french-phonemizer.vocab.json" -o fr.vocab.json
-          npx tsx tools/validate-model.mjs --model fr.onnx --vocab fr.vocab.json --audio-dir out/wav --manifest out/texts.json --report out/report.json --min-mean 0 2>&1 | grep -v '^var ' | tee out/report.txt
-      - name: MP3 kodieren und packen
+      - name: Synthese (drei Sprechtempi)
         if: ${{ !steps.gate.outputs.skip }}
         run: |
           set -e
-          mkdir -p out/mp3
-          for f in out/wav/*.wav; do
-            ffmpeg -loglevel error -y -i "$f" -af "silenceremove=start_periods=1:start_threshold=-50dB,areverse,silenceremove=start_periods=1:start_threshold=-50dB,areverse,adelay=80" -ac 1 -ar 24000 -b:a 48k "out/mp3/$(basename "$f" .wav).mp3"
+          for slow in 1.0 1.15 1.3; do
+            if [ "${{ matrix.engine }}" = "piper" ]; then
+              python3 tools/tts-synth.py --texts out/texts.json --out out/v$slow/wav --engine piper --model voice.onnx --slow $slow ${{ matrix.speaker != '' && format('--speaker {0}', matrix.speaker) || '' }} > /dev/null
+            else
+              python3 tools/tts-synth.py --texts out/texts.json --out out/v$slow/wav --engine kokoro --voice ${{ matrix.kvoice }} --slow $slow > /dev/null
+            fi
+            echo "Tempo $slow: $(ls out/v$slow/wav | wc -l) Dateien"
           done
-          # Hörproben mit lesbaren Namen
-          if [ "${{ inputs.mode }}" = "sample" ]; then
-            python3 - <<'PY'
+      - name: Prüfung mit dem Phonem-Erkenner und Auswahl der besten Fassung
+        if: ${{ !steps.gate.outputs.skip }}
+        run: |
+          set -e
+          rel="https://github.com/${{ github.repository }}/releases/download/models-v1"
+          curl -fsSL "$rel/wav2vec2-french-phonemizer.onnx" -o fr.onnx
+          curl -fsSL "$rel/wav2vec2-french-phonemizer.vocab.json" -o fr.vocab.json
+          for slow in 1.0 1.15 1.3; do
+            npx tsx tools/validate-model.mjs --model fr.onnx --vocab fr.vocab.json --audio-dir out/v$slow/wav --manifest out/texts.json --report out/v$slow/report.json --min-mean 0 2>&1 | grep -v '^var ' > out/v$slow/report.txt
+            echo "Tempo $slow: $(tail -1 out/v$slow/report.txt)"
+          done
+          python3 tools/tts-pick.py --texts out/texts.json --out out/final --min 80 out/v1.0 out/v1.15 out/v1.3 | tee out/auswahl.txt
+      - name: MP3 kodieren und packen
+        if: ${{ !steps.gate.outputs.skip }}
+        env:
+          CREDIT: ${{ matrix.credit }}
+        run: |
+          set -e
+          mkdir -p out/tts
+          for f in out/final/wav/*.wav; do
+            ffmpeg -loglevel error -y -i "$f" -af "silenceremove=start_periods=1:start_threshold=-50dB,areverse,silenceremove=start_periods=1:start_threshold=-50dB,areverse,adelay=80,apad=pad_dur=0.15" -ac 1 -ar 24000 -b:a 48k "out/tts/$(basename "$f" .wav).mp3"
+          done
+          python3 - <<'PY'
           import json, os, re, shutil
           rows = json.load(open('out/texts.json', encoding='utf-8'))
-          os.makedirs('out/hoerproben', exist_ok=True)
-          for i, r in enumerate(rows):
-              name = re.sub(r"[^\w' -]", '', r['text'], flags=re.U).strip()[:40]
-              shutil.copy(f"out/mp3/{r['key']}.mp3", f"out/hoerproben/{i+1:02d} {name}.mp3")
+          files = {r['key']: r['key'] + '.mp3' for r in rows if os.path.exists(f"out/tts/{r['key']}.mp3")}
+          json.dump({'voice': '${{ matrix.id }}', 'credit': os.environ['CREDIT'], 'format': 'mp3', 'files': files},
+                    open('out/tts/manifest.json', 'w', encoding='utf-8'), ensure_ascii=False, indent=0)
+          if '${{ inputs.mode }}' == 'sample':
+              os.makedirs('out/hoerproben', exist_ok=True)
+              for i, r in enumerate(rows):
+                  name = re.sub(r"[^\w' -]", '', r['text'], flags=re.U).strip()[:40]
+                  shutil.copy(f"out/tts/{r['key']}.mp3", f"out/hoerproben/{i+1:02d} {name}.mp3")
           PY
-          fi
+          cp out/final/auswahl.json out/final/pruefliste.txt out/
+          for slow in 1.0 1.15 1.3; do cp out/v$slow/report.txt "out/report-tempo-$slow.txt"; done
           extra=""; [ -d out/hoerproben ] && extra="hoerproben"
-          (cd out && zip -qr "../${{ matrix.id }}.zip" mp3 report.txt report.json texts.json MODEL_CARD.txt $extra)
+          (cd out && zip -qr "../${{ matrix.id }}.zip" tts report-tempo-*.txt auswahl.txt auswahl.json pruefliste.txt texts.json MODEL_CARD.txt $extra)
           ls -la *.zip
       - uses: actions/upload-artifact@v4
         if: ${{ !steps.gate.outputs.skip }}

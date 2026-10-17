@@ -9,7 +9,7 @@ import { decodeAudioFile, encodeWav, resampleTo } from '../audio';
 import { Recorder, RecorderError } from '../audio/recorder';
 import { player } from '../audio/player';
 import { speakFrench, ttsAvailable } from '../audio/tts';
-import { audioBlob } from '../content/pack';
+import { resolveModelAudio } from '../audio/modelVoice';
 import { compareRecordings, type SimilarityResult } from '../dsp/compare';
 import { trimSilence } from '../dsp/trim';
 import { transcribe, type Transcription } from '../phon/g2p';
@@ -53,6 +53,8 @@ export interface TrainerState {
   result: TrainResult | null;
   error: string | null;
   hasModelAudio: boolean;
+  /** Herkunft des Vorbilds: Paket-Aufnahme oder Vorbildstimme der App */
+  modelSource: 'pack' | 'builtin' | null;
   transcription: Transcription;
   playing: boolean;
   previousBlob: Blob | null;
@@ -67,6 +69,7 @@ export function useTrainer(item: TrainItem, settings: Settings) {
   const [result, setResult] = useState<TrainResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [modelBlob, setModelBlob] = useState<Blob | null>(null);
+  const [modelSource, setModelSource] = useState<'pack' | 'builtin' | null>(null);
   const [modelPcm, setModelPcm] = useState<Float32Array | null>(null);
   const [playing, setPlaying] = useState(false);
   const [previousBlob, setPreviousBlob] = useState<Blob | null>(null);
@@ -78,15 +81,17 @@ export function useTrainer(item: TrainItem, settings: Settings) {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const blob = await audioBlob(item.audioId);
+      const audio = await resolveModelAudio(item.text, item.audioId);
       if (cancelled) return;
+      const blob = audio?.blob;
       setModelBlob(blob ?? null);
+      setModelSource(audio?.source ?? null);
       if (blob) {
         try {
           const dec = await decodeAudioFile(blob);
           if (cancelled) return;
           let pcm = dec.pcm;
-          if (item.start !== undefined || item.end !== undefined) {
+          if (audio?.source === 'pack' && (item.start !== undefined || item.end !== undefined)) {
             const s = Math.floor((item.start ?? 0) * dec.sampleRate);
             const e = Math.floor((item.end ?? dec.pcm.length / dec.sampleRate) * dec.sampleRate);
             pcm = dec.pcm.slice(Math.max(0, s), Math.min(dec.pcm.length, e));
@@ -108,17 +113,17 @@ export function useTrainer(item: TrainItem, settings: Settings) {
   const playModel = useCallback(async (rate = 1) => {
     setError(null);
     if (modelBlob) {
-      await player.play(modelBlob, { start: item.start, end: item.end, rate });
+      await player.play(modelBlob, modelSource === 'pack' ? { start: item.start, end: item.end, rate } : { rate });
     } else if (settings.ttsFallback && ttsAvailable()) {
       try {
-        await speakFrench(item.text, { rate: rate < 1 ? 0.7 : 0.9 });
+        await speakFrench(item.text, { rate: rate < 1 ? 0.7 : 0.9, voiceName: settings.ttsVoice || undefined });
       } catch (e) {
         setError(e instanceof Error ? e.message : 'Keine französische Stimme verfügbar');
       }
     } else {
       setError('Keine Modellaufnahme vorhanden.');
     }
-  }, [modelBlob, settings.ttsFallback, item.text, item.start, item.end]);
+  }, [modelBlob, modelSource, settings.ttsFallback, settings.ttsVoice, item.text, item.start, item.end]);
 
   const playOwn = useCallback(async () => {
     const blob = result?.ownBlob ?? previousBlob;
@@ -232,6 +237,7 @@ export function useTrainer(item: TrainItem, settings: Settings) {
   const state: TrainerState = {
     phase, level, seconds, result, error,
     hasModelAudio: !!modelBlob,
+    modelSource,
     transcription,
     playing,
     previousBlob,

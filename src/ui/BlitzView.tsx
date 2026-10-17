@@ -1,6 +1,8 @@
 /** Ohren-Blitz: 60 Sekunden Hörquiz mit Minimalpaaren aller Phänomene. */
 import { useEffect, useRef, useState } from 'react';
-import { speakFrench, ttsAvailable } from '../audio/tts';
+import { loadBuiltinManifest } from '../audio/builtinAudio';
+import { playText } from '../audio/modelVoice';
+import { ttsAvailable } from '../audio/tts';
 import { recordBlitz } from '../game/store';
 import { BADGES } from '../game/rewards';
 import { PHENOMENA, type MinimalPair } from '../phon/phenomena';
@@ -40,9 +42,12 @@ export function BlitzView() {
   const timer = useRef<number | null>(null);
   const q = questions[idx % questions.length]!;
   const word = q.correct === 0 ? q.pair.a : q.pair.b;
-  const canSpeak = ttsAvailable() && settings.ttsFallback;
+  const [hasBuiltin, setHasBuiltin] = useState(false);
+  const canSpeak = hasBuiltin || (ttsAvailable() && settings.ttsFallback);
+  const say = (text: string, rate = 1) => void playText(text, { rate, ttsFallback: settings.ttsFallback, voiceName: settings.ttsVoice || undefined }).catch(() => undefined);
 
   useEffect(() => () => { if (timer.current) clearInterval(timer.current); }, []);
+  useEffect(() => { void loadBuiltinManifest().then((m) => setHasBuiltin(!!m)); }, []);
 
   const correctRef = useRef(0);
 
@@ -68,7 +73,7 @@ export function BlitzView() {
         finishRound();
       }
     }, 1000);
-    void speakFrench(word, { rate: 0.9 }).catch(() => undefined);
+    say(word);
   };
 
   const answer = (i: 0 | 1) => {
@@ -82,7 +87,7 @@ export function BlitzView() {
       const nextIdx = idx + 1;
       setIdx(nextIdx);
       const nq = questions[nextIdx % questions.length]!;
-      void speakFrench(nq.correct === 0 ? nq.pair.a : nq.pair.b, { rate: 0.9 }).catch(() => undefined);
+      say(nq.correct === 0 ? nq.pair.a : nq.pair.b);
     }, ok ? 450 : 1100);
   };
 
@@ -139,7 +144,7 @@ export function BlitzView() {
         <span className="hud"><span className="chip">✅ {correct}</span>{combo >= 2 && <span className="chip combo-badge">⚡ ×{combo}</span>}</span>
       </div>
       <div style={{ textAlign: 'center', margin: '14px 0' }}>
-        <button className="btn big" onClick={() => void speakFrench(word, { rate: 0.8 }).catch(() => undefined)}><Icon.play /> Nochmal hören</button>
+        <button className="btn big" onClick={() => say(word, 0.8)}><Icon.play /> Nochmal hören</button>
       </div>
       <div className="row" style={{ justifyContent: 'center', gap: 14 }}>
         {[q.pair.a, q.pair.b].map((text, i) => {
