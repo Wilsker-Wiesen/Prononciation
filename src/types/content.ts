@@ -145,7 +145,7 @@ export interface Settings {
 
 export const DEFAULT_SETTINGS: Settings = {
   assessmentEnabled: true,
-  modelId: 'multilingual',
+  modelId: 'french',
   modelBaseUrl: '',
   modelFile: 'model.onnx',
   modelVocabFile: 'vocab.json',

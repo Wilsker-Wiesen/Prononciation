@@ -35,13 +35,22 @@ function looksLikeAudio(buf) {
 /** Datei laden; bei Nicht-Audio die transkodierte MP3-Fassung versuchen. */
 async function downloadAudio(url) {
   const tryUrl = async (u) => {
-    const res = await fetch(u, { headers: HEADERS, redirect: 'follow' });
-    const buf = Buffer.from(await res.arrayBuffer());
-    if (!res.ok || !looksLikeAudio(buf)) {
-      console.log(`  ! ${res.status} ${res.headers.get('content-type')} ${u} → ${buf.subarray(0, 60).toString('utf8').replace(/\s+/g, ' ')}`);
-      return null;
+    for (let attempt = 0; attempt < 4; attempt++) {
+      const res = await fetch(u, { headers: HEADERS, redirect: 'follow' });
+      const buf = Buffer.from(await res.arrayBuffer());
+      if (res.status === 429) {
+        // Drosselung: warten und erneut versuchen
+        await new Promise((r) => setTimeout(r, 8000 * (attempt + 1)));
+        continue;
+      }
+      if (!res.ok || !looksLikeAudio(buf)) {
+        console.log(`  ! ${res.status} ${res.headers.get('content-type')} ${u} → ${buf.subarray(0, 60).toString('utf8').replace(/\s+/g, ' ')}`);
+        return null;
+      }
+      return buf;
     }
-    return buf;
+    console.log(`  ! wiederholt gedrosselt (429): ${u}`);
+    return null;
   };
   const direct = await tryUrl(url);
   if (direct) return { buf: direct, ext: url.split('.').pop() };
@@ -56,8 +65,10 @@ async function downloadAudio(url) {
 
 let found = 0;
 const credits = [];
+const pause = (ms) => new Promise((r) => setTimeout(r, ms));
 for (const word of words) {
   if (found >= max) break;
+  await pause(1500); // Wikimedia bittet um moderate Abfrageraten
   const bare = word.replace(/^(le|la|les|l'|un|une|des)\s+/i, '');
   if (/\s/.test(bare)) continue;
   try {
