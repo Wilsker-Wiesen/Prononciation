@@ -14,7 +14,7 @@ export function trainItemsForLesson(pack: Pack, lessonId: string, kind: 'vocab' 
   if (!lesson) return [];
   if (kind === 'vocab') {
     return lesson.vocab.filter((v) => v.fr.trim()).map((v) => ({
-      id: v.id, kind: 'vocab', text: v.fr, de: v.de, ipaOverride: v.ipa, audioId: v.audioId, start: v.start, end: v.end, packId: pack.id, lessonId,
+      id: v.id, kind: 'vocab', text: v.fr, de: v.de, ipaOverride: v.ipa, contrast: v.contrast, audioId: v.audioId, start: v.start, end: v.end, packId: pack.id, lessonId,
     }));
   }
   const items: TrainItem[] = [];
@@ -197,6 +197,7 @@ function ResultPanel({ result }: { result: NonNullable<ReturnType<typeof useTrai
         <div style={{ marginTop: 12 }}>
           <PhoneRow words={a.words} />
           <div className="muted small ipa" style={{ marginTop: 6 }}>Gehört: [{a.recognizedIpa || '–'}]</div>
+          {a.contrast && !a.contrast.closerToContrast && a.overall >= 85 && <div className="badge good" style={{ marginTop: 6 }}>Deutlich unterscheidbar von „{a.contrast.text}“ ✓</div>}
           <div style={{ marginTop: 12 }}><FindingsList findings={a.findings} /></div>
         </div>
       )}

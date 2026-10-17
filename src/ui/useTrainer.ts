@@ -22,6 +22,8 @@ export interface TrainItem {
   text: string;
   de?: string;
   ipaOverride?: string;
+  /** Kontrastform für den Verwechslungs-Check */
+  contrast?: string;
   audioId?: string;
   /** Zeitfenster innerhalb der Audio-Datei (Sekunden) */
   start?: number;
@@ -176,7 +178,7 @@ export function useTrainer(item: TrainItem, settings: Settings) {
           const { phones, ms } = await recognizer.recognize(trimmed);
           recognitionMs = ms;
           const text = item.ipaOverride ? item.text : item.text;
-          assessment = assess(text, phones, item.ipaOverride ? transcribeWithOverride(item.text, item.ipaOverride) : transcription, recognizer.vocab.size ? recognizer.vocab : undefined);
+          assessment = assess(text, phones, item.ipaOverride ? transcribeWithOverride(item.text, item.ipaOverride) : transcription, recognizer.vocab.size ? recognizer.vocab : undefined, { contrast: item.contrast });
         } catch (e) {
           setError(`Bewertung fehlgeschlagen: ${e instanceof Error ? e.message : String(e)}`);
         }

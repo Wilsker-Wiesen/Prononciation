@@ -85,3 +85,18 @@ export function align(target: AlignTarget[], rec: RecognizedPhone[], opts: Align
   ops.reverse();
   return ops;
 }
+
+/** Gesamtkosten eines Alignments (gleiche Kostenfunktion wie align()). */
+export function alignCost(target: AlignTarget[], rec: RecognizedPhone[], ops: AlignOp[], opts: AlignOptions = {}): number {
+  const insertCost = opts.insertCost ?? 0.6;
+  const deleteCost = opts.deleteCost ?? 1.0;
+  const optDel = opts.optionalDeleteCost ?? 0.05;
+  const schwaIns = opts.schwaInsertCost ?? 0.25;
+  let c = 0;
+  for (const op of ops) {
+    if (op.type === 'match' || op.type === 'sub') c += op.dist;
+    else if (op.type === 'del') c += target[op.t]!.optional ? optDel : deleteCost;
+    else c += rec[op.r]!.ipa === 'ə' ? schwaIns : insertCost;
+  }
+  return c;
+}

@@ -147,7 +147,8 @@ function MissionRun({ id }: { id: PhenomenonId }) {
       <div>
         <div className="row between"><span className="muted small">Hörquiz {li + 1} / {plan.listening.length}</span><span className="muted small">{listenHits} richtig</span></div>
         <div className="card">
-          <h2>Welches Wort hörst du?</h2>
+          <h2>{id === 'plural-3' ? 'Singular oder Plural – was hörst du?' : 'Welches Wort hörst du?'}</h2>
+          {id === 'plural-3' && <p className="muted small">Achtung: Manchmal klingen beide Formen gleich. Dann ist jede Antwort richtig – und genau das ist die Regel.</p>}
           <button className="btn big" onClick={() => void playText(task.play.text, task.play.audioId, task.play.start, task.play.end)}><Icon.play /> Abspielen</button>
           <div className="row" style={{ marginTop: 14, gap: 14 }}>
             {task.options.map((o, i) => {

@@ -6,6 +6,7 @@ import { recognizer, type LoadProgress, type ModelState } from '../asr/client';
 import { modelOption } from '../asr/models';
 import type { ModelSource } from '../asr/modelLoader';
 import { demoPack, DEMO_PACK_ID } from '../content/demo';
+import { conjugationPack, CONJUGATION_VERSION } from '../content/conjugation';
 import { getPack, listPacks, loadSettings, savePack, saveSettings } from '../storage/db';
 import { DEFAULT_SETTINGS, type Pack, type Settings } from '../types/content';
 
@@ -33,13 +34,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     (async () => {
       try {
-        const s = await loadSettings();
-        setSettings(s);
+        let s = await loadSettings();
         // Beispielpaket beim ersten Start anlegen
         if (!(await getPack(DEMO_PACK_ID))) {
           const all = await listPacks();
           if (all.length === 0) await savePack(demoPack());
         }
+        // Eingebautes Konjugationspaket installieren bzw. aktualisieren (gelöscht bleibt gelöscht bis zur nächsten Version)
+        if ((s.conjugationVersion ?? 0) < CONJUGATION_VERSION) {
+          await savePack(conjugationPack());
+          s = { ...s, conjugationVersion: CONJUGATION_VERSION };
+          await saveSettings(s);
+        }
+        setSettings(s);
         await refreshPacks();
       } finally {
         setReady(true);

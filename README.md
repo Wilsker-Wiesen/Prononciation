@@ -19,6 +19,7 @@ ohne Übertragung von Sprachaufnahmen.
 | **Lesen** | Lektionstexte Satz für Satz üben, mit Zeitfenstern im Gesamt-Audio oder eigenen Satz-Audios. |
 | **Lernstand** | Versuche, Bestwerte, häufigste Fehlertypen; Export als CSV/JSON (freiwillig, lokal). |
 | **Missionen** | Spielerische Fokus-Einheiten je Aussprache-Regel (stumme Enden, -ent, Nasale, u/ou, Liaison, [ʒ], ch, h, ui, eu, oi, r): Regel → Hörquiz mit Minimalpaaren → Sprechrunde mit Wörtern aus den eigenen Lektionen → Sterne. Punkte, Level, Übungsserien und Abzeichen. |
+| **Konjugation** | Eingebautes Paket mit 42 Verben im Präsens (252 Formen), gegliedert danach, ob die 3. Person Plural hörbar ist (ils parlent = il parle; ils‿aiment; ils prennent ≠ il prend). Prüfung, ob eine Pluralform wie der Singular klang. |
 | **Lehrkraft-Editor** | Pakete mit Lektionen, Vokabeln (Listen einfügen, Ordner-Import), Texten (Fließtext → Sätze), Audio-Zuordnung (Drag & Drop, automatische Zuordnung über Dateinamen, Zerteilen langer Tracks an Pausen), Lautschrift-Korrektur, Export als ZIP. |
 
 ## Schnellstart

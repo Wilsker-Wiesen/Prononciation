@@ -59,6 +59,8 @@ export interface VocabEntry {
   exampleAudioId?: string;
   /** Didaktische Markierungen, z. B. „liaison“, „nasal“, „h-aspiré“ */
   tags?: string[];
+  /** Form, mit der die Aussprache nicht verwechselt werden darf (z. B. Singular zu „ils prennent“) */
+  contrast?: string;
 }
 
 export interface TextItem {
@@ -141,6 +143,8 @@ export interface Settings {
   showIpa: boolean;
   /** Name der Lernenden/des Lernenden für Export (freiwillig) */
   learnerName: string;
+  /** zuletzt installierte Version des eingebauten Konjugationspakets */
+  conjugationVersion: number;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -154,6 +158,7 @@ export const DEFAULT_SETTINGS: Settings = {
   teacherMode: false,
   showIpa: true,
   learnerName: '',
+  conjugationVersion: 0,
 };
 
 export function newId(prefix = ''): string {

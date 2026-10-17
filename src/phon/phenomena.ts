@@ -18,7 +18,8 @@ export type PhenomenonId =
   | 'glide-ui'
   | 'eu'
   | 'oi'
-  | 'final-voicing';
+  | 'final-voicing'
+  | 'plural-3';
 
 export interface MinimalPair {
   a: string;
@@ -259,6 +260,38 @@ export const PHENOMENA: Phenomenon[] = [
     year: 1,
   },
   {
+    id: 'plural-3',
+    title: '3. Person Plural: hörbar oder nicht?',
+    short: 'ils/elles',
+    emoji: '👥',
+    rule: 'Bei Verben auf -er klingen „il parle“ und „ils parlent“ genau gleich: -ent ist stumm. Hörbar wird der Plural nur auf zwei Wegen: durch die Liaison (il aime [ilɛm] – ils‿aiment [ilzɛm]) oder durch einen eigenen Pluralstamm (il prend [pʁɑ̃] – ils prennent [pʁɛn], il peut – ils peuvent, il finit – ils finissent).',
+    tip: 'Frag dich: Hat das Verb einen zweiten Stamm (prenn-, peuv-, finiss-, doiv-, viennent)? Dann sprich den Konsonanten vor -ent deutlich. Sonst: -ent einfach weglassen. Vor Vokal das s von ils/elles als [z] anbinden.',
+    pitfall: '„ils parlent“ mit [ɑ̃] oder [ɛnt] am Ende – laut Wiener Studie (Pro²F) einer der hartnäckigsten Lesefehler, bis ins 6. Lernjahr.',
+    examples: [{ fr: 'ils parlent', ipa: 'il paʁl' }, { fr: 'ils aiment', ipa: 'ilz‿ɛm' }, { fr: 'ils prennent', ipa: 'il pʁɛn' }, { fr: 'ils finissent', ipa: 'il finis' }],
+    pairs: [
+      { a: 'il parle', b: 'ils parlent', ipaA: 'il paʁl', ipaB: 'il paʁl', deA: 'er spricht', deB: 'sie sprechen' },
+      { a: 'il joue', b: 'ils jouent', ipaA: 'il ʒu', ipaB: 'il ʒu', deA: 'er spielt', deB: 'sie spielen' },
+      { a: 'il aime', b: 'ils aiment', ipaA: 'il ɛm', ipaB: 'ilz‿ɛm', deA: 'er mag', deB: 'sie mögen' },
+      { a: 'il arrive', b: 'ils arrivent', ipaA: 'il aʁiv', ipaB: 'ilz‿aʁiv', deA: 'er kommt an', deB: 'sie kommen an' },
+      { a: 'il prend', b: 'ils prennent', ipaA: 'il pʁɑ̃', ipaB: 'il pʁɛn', deA: 'er nimmt', deB: 'sie nehmen' },
+      { a: 'il vient', b: 'ils viennent', ipaA: 'il vjɛ̃', ipaB: 'il vjɛn', deA: 'er kommt', deB: 'sie kommen' },
+      { a: 'il peut', b: 'ils peuvent', ipaA: 'il pø', ipaB: 'il pœv', deA: 'er kann', deB: 'sie können' },
+      { a: 'il veut', b: 'ils veulent', ipaA: 'il vø', ipaB: 'il vœl', deA: 'er will', deB: 'sie wollen' },
+      { a: 'il doit', b: 'ils doivent', ipaA: 'il dwa', ipaB: 'il dwav', deA: 'er muss', deB: 'sie müssen' },
+      { a: 'il finit', b: 'ils finissent', ipaA: 'il fini', ipaB: 'il finis', deA: 'er beendet', deB: 'sie beenden' },
+      { a: 'il part', b: 'ils partent', ipaA: 'il paʁ', ipaB: 'il paʁt', deA: 'er geht weg', deB: 'sie gehen weg' },
+      { a: 'il lit', b: 'ils lisent', ipaA: 'il li', ipaB: 'il liz', deA: 'er liest', deB: 'sie lesen' },
+      { a: 'il met', b: 'ils mettent', ipaA: 'il mɛ', ipaB: 'il mɛt', deA: 'er legt', deB: 'sie legen' },
+      { a: 'il attend', b: 'ils attendent', ipaA: 'il atɑ̃', ipaB: 'ilz‿atɑ̃d', deA: 'er wartet', deB: 'sie warten' },
+      { a: 'il a', b: 'ils ont', ipaA: 'il a', ipaB: 'ilz‿ɔ̃', deA: 'er hat', deB: 'sie haben' },
+      { a: 'il est', b: 'ils sont', ipaA: 'il ɛ', ipaB: 'il sɔ̃', deA: 'er ist', deB: 'sie sind' },
+      { a: 'il va', b: 'ils vont', ipaA: 'il va', ipaB: 'il vɔ̃', deA: 'er geht', deB: 'sie gehen' },
+      { a: 'il fait', b: 'ils font', ipaA: 'il fɛ', ipaB: 'il fɔ̃', deA: 'er macht', deB: 'sie machen' },
+      { a: 'il voit', b: 'ils voient', ipaA: 'il vwa', ipaB: 'il vwa', deA: 'er sieht', deB: 'sie sehen' },
+    ],
+    year: 1,
+  },
+  {
     id: 'final-voicing',
     title: 'Stimmhafte Konsonanten am Wortende',
     short: 'Auslaut',
@@ -316,6 +349,7 @@ export function detectPhenomena(t: Transcription): Set<PhenomenonId> {
     if (ipa.includes('ɥ')) out.add('glide-ui');
     if (ipa.includes('ø') || ipa.includes('œ')) out.add('eu');
     if (/oi/.test(lower) && ipa.includes('w')) out.add('oi');
+    if ((lower === 'ils' || lower === 'elles') && t.words.indexOf(w) < t.words.length - 1) out.add('plural-3');
     const last = ipa[ipa.length - 1];
     if (last && ['b', 'd', 'ɡ', 'v', 'z', 'ʒ'].includes(last)) out.add('final-voicing');
   }

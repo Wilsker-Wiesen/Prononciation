@@ -50,6 +50,28 @@ gekoppelt mit Hören und Sprechen. Genau so sind die Missionen gebaut:
 Die Zuordnung von Wörtern zu Phänomenen erfolgt automatisch über das G2P-Modul (z. B. „enthält Nasalvokal“, „stummer
 Endkonsonant“, „obligatorische Liaison“), so dass jede importierte Découvertes-Unité sofort Missionen speist.
 
+### Konjugation (eingebautes Paket)
+
+Das Lektionsvokabular enthält fast nur Infinitive; die am besten belegte Fehlerquelle der Sekundarstufe I liegt aber in
+den konjugierten Formen (Pro²F: *ils aiment* als \*[ɛmɑ̃] bis ins 6. Lernjahr). Die App bringt deshalb ein eigenes Paket
+„Konjugation – Präsens“ mit 42 häufigen Verben in vollständigen Paradigmen (252 Formen, alle G2P-geprüft), gegliedert
+nach dem Merkmal, das für die Aussprache entscheidet:
+
+| Gruppe | Beispiel | 3. Person Plural hörbar? |
+| --- | --- | --- |
+| -er-Verben | il parle – ils parlent | nein, identisch [il paʁl] |
+| -er-Verben mit Vokalanlaut | il aime – ils‿aiment | nur über die Liaison [ilzɛm] |
+| eigener Pluralstamm | il prend – ils prennent, il peut – ils peuvent, il finit – ils finissent | ja, am Stammkonsonanten |
+| Sonderfälle | il a – ils‿ont, il est – ils sont, il voit – ils voient | teils ja, teils nein |
+
+Bei Pluralformen mit hörbarem Unterschied prüft die Bewertung zusätzlich, ob die Aufnahme näher an der Singularform liegt
+(Vergleich der Alignmentkosten beider Kandidaten, analog zu einer Minimalpaar-Entscheidung). Ist das der Fall, erscheint
+der Hinweis „klang eher wie der Singular“, und die Punktzahl ist auf 60 begrenzt. Die Mission „3. Person Plural“ übt
+dasselbe als Hörquiz „Singular oder Plural?“, inklusive gleich klingender Paare als Kontrollaufgaben.
+
+Grenze: Für die Konjugationsformen gibt es keine Lehrwerk-Aufnahmen; zum Hören dient die Gerätestimme, ein
+Klangvergleich mit einer Modellaufnahme entfällt. Die Lautbewertung funktioniert unabhängig davon.
+
 ### Lehrwerkbezug
 
 Inhalte werden als *Pakete* organisiert (Lehrwerk → Band → Unité/Lektion → Abschnitt), so dass die App die Struktur

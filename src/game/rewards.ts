@@ -76,8 +76,9 @@ export const BADGES: BadgeDef[] = [
   { id: 'u-ou-pro', title: 'tu ≠ tout', emoji: '👄', description: 'Mission u/ou mit drei Sternen.', test: (g) => (g.missionStars['u-ou'] ?? 0) >= 3 },
   { id: 'silent-pro', title: 'Stumm-Meister', emoji: '🤫', description: 'Mission Stumme Enden mit drei Sternen.', test: (g) => (g.missionStars['silent-final'] ?? 0) >= 3 },
   { id: 'liaison-pro', title: 'Liaison-Künstler', emoji: '🔗', description: 'Mission Liaison mit drei Sternen.', test: (g) => (g.missionStars.liaison ?? 0) >= 3 },
+  { id: 'plural-pro', title: 'ils/elles-Profi', emoji: '👥', description: 'Mission 3. Person Plural mit drei Sternen.', test: (g) => (g.missionStars['plural-3'] ?? 0) >= 3 },
   { id: 'voicing-pro', title: 'Stimmhaft bis zum Schluss', emoji: '🔊', description: 'Mission Auslaut mit drei Sternen.', test: (g) => (g.missionStars['final-voicing'] ?? 0) >= 3 },
-  { id: 'all-missions', title: 'Tour complet', emoji: '🗺️', description: 'Jede Mission mindestens einmal bestanden.', test: (g) => Object.values(g.missionStars).filter((s) => (s ?? 0) >= 1).length >= 12 },
+  { id: 'all-missions', title: 'Tour complet', emoji: '🗺️', description: 'Jede Mission mindestens einmal bestanden.', test: (g) => Object.values(g.missionStars).filter((s) => (s ?? 0) >= 1).length >= 13 },
 ];
 
 export function evaluateBadges(g: GameState, attempts: Attempt[]): string[] {

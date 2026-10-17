@@ -2,6 +2,7 @@
 import { useRef, useState } from 'react';
 import { exportPackZip, importPackFromUrl, importPackZip } from '../content/pack';
 import { demoPack } from '../content/demo';
+import { conjugationPack } from '../content/conjugation';
 import { navigate, useApp } from '../state/appState';
 import { deletePack, savePack } from '../storage/db';
 import { download } from './ProgressView';
@@ -81,8 +82,11 @@ export function PacksView() {
 
       <div className="card flat">
         <div className="row between">
-          <span className="muted small">Beispielpaket wiederherstellen</span>
-          <button className="btn ghost" onClick={async () => { await savePack(demoPack()); await refreshPacks(); }}>Beispiel anlegen</button>
+          <span className="muted small">Eingebaute Pakete wiederherstellen</span>
+          <div className="row">
+            <button className="btn ghost" onClick={async () => { await savePack(demoPack()); await refreshPacks(); }}>Beispiel</button>
+            <button className="btn ghost" onClick={async () => { await savePack(conjugationPack()); await refreshPacks(); }}>Konjugation</button>
+          </div>
         </div>
       </div>
     </div>

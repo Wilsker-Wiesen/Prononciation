@@ -21,6 +21,7 @@ const ISSUE_LABEL: Record<string, string> = {
   'liaison-missing': 'Liaison fehlt',
   'liaison-false': 'Falsche Liaison',
   'glottal-stop': 'Knacklaut statt Bindung',
+  'plural-stem': 'Pluralstamm (ils prennent)',
   'glide-ui': 'ui [ɥi]',
   ch: 'ch [ʃ]',
   'e-ouvert-ferme': 'e / è',

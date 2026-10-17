@@ -113,6 +113,34 @@ describe('Bewertung und Diagnose', () => {
     const a = assess('il a', rec('ilʔa'));
     expect(a.findings.map((f) => f.id)).toContain('glottal-stop');
   });
+  it('erkennt fehlenden Pluralstamm (ils prennent wie Singular)', () => {
+    const a = assess('ils prennent', rec('ilpʁɑ̃'));
+    expect(a.findings.map((f) => f.id)).toContain('plural-stem');
+    const ok = assess('ils prennent', rec('ilpʁɛn'));
+    expect(ok.findings).toHaveLength(0);
+    expect(ok.overall).toBeGreaterThanOrEqual(95);
+  });
+  it('erkennt gesprochene Endung -ent bei ils parlent', () => {
+    const a = assess('ils parlent', rec('ilpaʁlɑ̃'));
+    expect(a.findings.map((f) => f.id)).toContain('ent-ending');
+    const ok = assess('ils parlent', rec('ilpaʁl'));
+    expect(ok.findings).toHaveLength(0);
+  });
+  it('erkennt fehlende Liaison bei ils aiment', () => {
+    const a = assess('ils aiment', rec('ilɛm'));
+    expect(a.findings.map((f) => f.id)).toContain('liaison-missing');
+  });
+  it('meldet, wenn die Aufnahme näher an der Kontrastform liegt', () => {
+    const wrong = assess('ils prennent', rec('ilpʁɑ̃'), undefined, undefined, { contrast: 'il prend' });
+    expect(wrong.contrast?.closerToContrast).toBe(true);
+    expect(wrong.findings[0]?.id).toBe('plural-stem');
+    expect(wrong.overall).toBeLessThanOrEqual(60);
+    const right = assess('ils prennent', rec('ilpʁɛn'), undefined, undefined, { contrast: 'il prend' });
+    expect(right.contrast?.closerToContrast).toBe(false);
+    expect(right.overall).toBeGreaterThanOrEqual(95);
+    const same = assess('ils parlent', rec('ilpaʁl'), undefined, undefined, { contrast: 'il parle' });
+    expect(same.contrast).toBeUndefined();
+  });
   it('erkennt gerolltes r', () => {
     const a = assess('rue', rec('ry'));
     expect(a.findings.map((f) => f.id)).toContain('r');

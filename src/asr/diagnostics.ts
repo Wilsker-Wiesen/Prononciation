@@ -19,6 +19,8 @@ export type FindingId =
   | 'liaison-missing'
   | 'liaison-false'
   | 'glottal-stop'
+  | 'plural-stem'
+  | 'contrast'
   | 'glide-ui'
   | 'ch'
   | 'e-ouvert-ferme'
@@ -82,6 +84,14 @@ const TEXT: Record<FindingId, { title: string; tip: string }> = {
   'liaison-false': {
     title: 'Keine Liaison an dieser Stelle',
     tip: 'Nach „et“, vor h aspiré und nach Nomen im Singular wird nicht gebunden.',
+  },
+  'plural-stem': {
+    title: 'Pluralstamm hörbar machen',
+    tip: 'Viele Verben haben im Plural einen eigenen Stamm: il prend – ils prennent [pʁɛn], il peut – ils peuvent [pœv], il finit – ils finissent [finis]. Der Konsonant vor -ent wird gesprochen, nur -ent selbst ist stumm.',
+  },
+  contrast: {
+    title: 'Verwechslungsgefahr',
+    tip: 'Hör dir beide Formen noch einmal an und achte auf den Unterschied.',
   },
   'glottal-stop': {
     title: 'Knacklaut statt Bindung',
@@ -161,6 +171,14 @@ export function diagnose(t: Transcription, result: ScoreResult): Finding[] {
     if (/e$/i.test(pw.lower) && lastIdx >= 0 && !pw.phones[lastIdx]!.optional && pw.lower.length > 2) {
       const ins = insAfterWord.find((x) => ['ə', 'e', 'ɛ', 'ɐ'].includes(x.ipa));
       if (ins) add(mk('silent-e', 1, wi, w.orth, `Das -e am Ende von „${w.orth}“ wird nicht gesprochen (gehört: [${ins.ipa}]).`, '', ins.ipa));
+    }
+    // 3. Person Plural mit eigenem Stamm: hörbarer Schlusskonsonant fehlt oder Singularform gesprochen
+    const prevWord = wi > 0 ? t.words[wi - 1] : undefined;
+    if (prevWord && (prevWord.lower === 'ils' || prevWord.lower === 'elles') && /ent$/.test(pw.lower)) {
+      const lastP = w.phones[w.phones.length - 1];
+      if (lastP && !isVowelLike(lastP.ipa) && !lastP.optional && (lastP.status === 'missing' || (lastP.status === 'sub' && lastP.heard && isVowelLike(lastP.heard)))) {
+        add(mk('plural-stem', 2, wi, w.orth, `In „${prevWord.orth} ${w.orth}“ fehlt der hörbare Pluralkonsonant [${lastP.ipa}] – es klang wie der Singular.`, lastP.ipa, lastP.heard));
+      }
     }
     // Knacklaut (Glottisverschluss) vor vokalisch anlautendem Wort innerhalb der Gruppe
     if (wi > 0 && !t.words[wi - 1]!.boundaryAfter && pw.phones[0] && isVowelLike(pw.phones[0].ipa)) {
@@ -273,4 +291,13 @@ function nextWordStartsWithVowel(t: Transcription, wi: number): boolean {
   if (!next || t.words[wi]!.boundaryAfter) return false;
   const first = next.phones[0];
   return !!first && isVowelLike(first.ipa);
+}
+
+/** Hinweis, wenn die Aufnahme näher an einer Kontrastform liegt als an der Zielform. */
+export function findingFor(target: string, contrast: string): Finding {
+  const plural = /^(ils|elles)\s/i.test(target) && /^(il|elle)\s/i.test(contrast);
+  if (plural) {
+    return mk('plural-stem', 2, 1, target, `„${target}“ klang eher wie der Singular „${contrast}“. Im Plural ist der Stamm hier hörbar anders.`);
+  }
+  return mk('contrast', 2, 0, target, `„${target}“ klang eher wie „${contrast}“.`);
 }
