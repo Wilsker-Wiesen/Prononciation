@@ -12,7 +12,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icons/*.svg'],
+      includeAssets: ['icons/*.svg', 'icons/*.png'],
       manifest: {
         name: 'Prononciation – Aussprachetrainer Französisch',
         short_name: 'Prononciation',
@@ -24,16 +24,19 @@ export default defineConfig({
         background_color: '#f7f5f0',
         theme_color: '#1f4e79',
         icons: [
+          { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+          { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+          { src: 'icons/icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
           { src: 'icons/icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' },
-          { src: 'icons/icon-maskable.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'maskable' },
         ],
       },
       workbox: {
         // Das ASR-Modell (~300 MB) wird nicht über Workbox, sondern über die Cache-API
         // in src/asr/modelLoader.ts verwaltet.
-        globPatterns: ['**/*.{js,css,html,svg,wasm,mjs,json}'],
+        globPatterns: ['**/*.{js,css,html,svg,png,wasm,mjs,json,mp3}'],
         maximumFileSizeToCacheInBytes: 30 * 1024 * 1024,
         navigateFallbackDenylist: [/^\/models\//],
+        globIgnores: ['models/**'],
       },
     }),
   ],

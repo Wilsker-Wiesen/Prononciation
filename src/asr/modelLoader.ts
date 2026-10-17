@@ -34,8 +34,15 @@ async function openCache(): Promise<Cache | null> {
 }
 
 /** Datei mit Fortschrittsmeldung laden; Ergebnis wird in der Cache-API abgelegt. */
+/** In der nativen App liegen gebündelte Modelle schon im App-Paket: nicht ein zweites Mal speichern. */
+function isBundledInNativeApp(url: string): boolean {
+  const cap = (globalThis as { Capacitor?: { isNativePlatform?: () => boolean } }).Capacitor;
+  if (!cap?.isNativePlatform?.() || typeof location === 'undefined') return false;
+  return new URL(url, location.href).origin === location.origin;
+}
+
 export async function fetchCached(url: string, onProgress?: ProgressFn, label = url): Promise<ArrayBuffer> {
-  const cache = await openCache();
+  const cache = isBundledInNativeApp(url) ? null : await openCache();
   if (cache) {
     const hit = await cache.match(url);
     if (hit) {

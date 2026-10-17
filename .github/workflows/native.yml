@@ -1,0 +1,107 @@
+# Native Apps für iPhone/iPad und Android aus derselben Web-App (Capacitor).
+# - iOS: Simulator-Build als Prüfung bei jedem Push; mit hinterlegten Apple-Schlüsseln
+#   zusätzlich signiertes Archiv und Upload zu TestFlight (manuell starten).
+# - Android: installierbare APK (Debug-Signatur) als Artefakt und im Release "app-latest".
+name: Native Apps
+
+on:
+  push:
+    branches: [main]
+    paths-ignore: ['docs/**', '**/*.md', 'tools/**']
+  workflow_dispatch:
+    inputs:
+      testflight:
+        description: Signiert bauen und zu TestFlight hochladen (true/false, braucht Apple-Secrets)
+        default: 'false'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: native-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ios:
+    name: iOS (iPhone/iPad)
+    runs-on: macos-15
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Web-App bauen und in die iOS-Hülle kopieren (inkl. Ausspracheerkennung)
+        run: npm run native:build
+      - name: Xcode-Version
+        run: xcodebuild -version
+      - name: Simulator-Build (Prüfung, ohne Signatur)
+        run: |
+          xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Release \
+            -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath build/ios CODE_SIGNING_ALLOWED=NO build | tail -40
+      - name: Signiertes Archiv und Upload zu TestFlight
+        if: ${{ inputs.testflight == 'true' }}
+        env:
+          TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+        run: |
+          set -e
+          test -n "$TEAM_ID" && test -n "$ASC_KEY_ID" && test -n "$ASC_ISSUER_ID" && test -n "$ASC_KEY_P8" || { echo "Apple-Secrets fehlen (siehe docs/App.md)"; exit 1; }
+          echo "$ASC_KEY_P8" > "$RUNNER_TEMP/asc.p8"
+          AUTH="-allowProvisioningUpdates -authenticationKeyPath $RUNNER_TEMP/asc.p8 -authenticationKeyID $ASC_KEY_ID -authenticationKeyIssuerID $ASC_ISSUER_ID"
+          xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Release \
+            -destination 'generic/platform=iOS' -archivePath build/App.xcarchive \
+            DEVELOPMENT_TEAM="$TEAM_ID" CODE_SIGN_STYLE=Automatic \
+            CURRENT_PROJECT_VERSION=${{ github.run_number }} $AUTH archive | tail -40
+          cat > build/export.plist <<PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0"><dict>
+            <key>method</key><string>app-store-connect</string>
+            <key>destination</key><string>upload</string>
+            <key>teamID</key><string>$TEAM_ID</string>
+            <key>signingStyle</key><string>automatic</string>
+          </dict></plist>
+          PLIST
+          xcodebuild -exportArchive -archivePath build/App.xcarchive -exportOptionsPlist build/export.plist -exportPath build/export $AUTH | tail -40
+
+  android:
+    name: Android
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - run: npm ci
+      - name: Web-App bauen und in die Android-Hülle kopieren
+        run: npm run native:build
+      - name: APK bauen
+        run: cd android && ./gradlew --no-daemon assembleDebug
+      - name: APK benennen
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk Prononciation.apk && ls -la Prononciation.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: Prononciation.apk
+      - name: Im Release "app-latest" bereitstellen
+        if: github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if ! gh release view app-latest >/dev/null 2>&1; then
+            gh release create app-latest --prerelease --title "App (aktueller Stand)" --notes "Android-APK zum Testen (Debug-Signatur). iPhone/iPad: über TestFlight, siehe docs/App.md."
+          fi
+          gh release delete-asset app-latest Prononciation.apk -y || true
+          gh release upload app-latest Prononciation.apk

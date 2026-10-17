@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { deleteModelCache, isModelCached, resolveUrl } from '../asr/modelLoader';
 import { MODEL_OPTIONS, modelOption } from '../asr/models';
-import { loadModel, modelSources, unloadModel, useApp, useModelStatus } from '../state/appState';
+import { loadModel, modelSources, navigate, unloadModel, useApp, useModelStatus } from '../state/appState';
 import { clearRecordings, storageEstimate } from '../storage/db';
 import { formatBytes } from './components';
 import { GOAL_OPTIONS } from '../game/daily';
@@ -30,6 +30,10 @@ export function SettingsView() {
   return (
     <div>
       <h1>Einstellungen</h1>
+      <div className="row" style={{ marginBottom: 12 }}>
+        <button className="btn ghost" onClick={() => navigate({ name: 'info' })}>ℹ️ Info und Datenschutz</button>
+        {settings.teacherMode && <button className="btn ghost" onClick={() => navigate({ name: 'teacher' })}>✏️ Editor für Lehrkräfte</button>}
+      </div>
 
       <div className="card">
         <h2>Aussprachebewertung</h2>

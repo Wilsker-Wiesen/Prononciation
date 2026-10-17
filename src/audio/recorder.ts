@@ -14,6 +14,7 @@
  * - Erfassung per AudioWorklet (Code inline als Blob-URL), Rückfall auf
  *   ScriptProcessorNode, wenn kein AudioWorklet vorhanden ist.
  */
+import { setAudioSession } from './audioSession';
 import { getAudioContextCtor } from './audioContext';
 
 export interface RecorderOptions {
@@ -147,6 +148,8 @@ export class Recorder {
     this.totalSamples = 0;
     this.resetLevel();
 
+    // iOS: Aufnahme-Sitzung vor dem Kontext anfordern
+    setAudioSession('play-and-record');
     // Kontext synchron innerhalb der Geste erzeugen und entsperren
     let ctx = new Ctor();
     this.ctx = ctx;
@@ -394,6 +397,8 @@ export class Recorder {
 
 function stopTracks(stream: MediaStream): void {
   for (const track of stream.getTracks()) track.stop();
+  // iOS: zurück auf Wiedergabe (Lautsprecher statt Hörmuschel, unabhängig vom Stummschalter)
+  setAudioSession('playback');
 }
 
 function now(): number {

@@ -12,9 +12,13 @@
     "test:watch": "vitest",
     "typecheck": "tsc -b --noEmit",
     "lint": "eslint .",
-    "models": "node scripts/fetch-models.mjs"
+    "models": "node scripts/fetch-models.mjs",
+    "native:build": "node scripts/fetch-models.mjs && tsc -b && BASE_PATH=/ vite build && cap sync",
+    "native:ios": "npm run native:build && cap open ios",
+    "native:android": "npm run native:build && cap open android"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.4.3",
     "@echogarden/espeak-ng-emscripten": "^0.3.5",
     "@eslint/js": "^10.0.1",
     "@types/node": "^26.6.5",
@@ -33,6 +37,9 @@
     "vitest": "^5.0.5"
   },
   "dependencies": {
+    "@capacitor/android": "^8.4.3",
+    "@capacitor/core": "^8.4.3",
+    "@capacitor/ios": "^8.4.3",
     "idb": "^8.0.4",
     "jszip": "^3.10.2",
     "onnxruntime-web": "^1.30.0",

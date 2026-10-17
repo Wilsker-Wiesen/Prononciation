@@ -20,9 +20,16 @@ function Shell() {
   useEffect(() => { setSoundEnabled(settings.soundEnabled); }, [settings.soundEnabled]);
   useEffect(() => { void loadGame(); }, []);
 
-  const nav = (name: 'home' | 'mission' | 'progress' | 'packs' | 'settings' | 'teacher' | 'info', label: string) => (
-    <button className={route.name === name || (name === 'home' && (route.name === 'lesson' || route.name === 'train' || route.name === 'blitz')) ? 'active' : ''} onClick={() => navigate({ name })}>{label}</button>
-  );
+  const nav = (name: 'home' | 'mission' | 'progress' | 'packs' | 'settings' | 'teacher' | 'info', label: string, icon: string, secondary = false, short = label) => {
+    const active = route.name === name || (name === 'home' && (route.name === 'lesson' || route.name === 'train' || route.name === 'blitz'));
+    return (
+      <button className={`${active ? 'active' : ''}${secondary ? ' secondary' : ''}`} aria-current={active ? 'page' : undefined} onClick={() => navigate({ name })}>
+        <span className="tab-icon" aria-hidden="true">{icon}</span>
+        <span className="tab-label">{label}</span>
+        <span className="tab-short">{short}</span>
+      </button>
+    );
+  };
 
   let view: React.ReactNode;
   if (!ready) view = <div className="card muted">Wird geladen …</div>;
@@ -48,13 +55,13 @@ function Shell() {
           Prononciation
         </a>
         <nav aria-label="Hauptnavigation">
-          {nav('home', 'Lernen')}
-          {nav('mission', 'Lernpfad')}
-          {nav('progress', 'Lernstand')}
-          {nav('packs', 'Pakete')}
-          {settings.teacherMode && nav('teacher', 'Editor')}
-          {nav('settings', 'Einstellungen')}
-          {nav('info', 'Info')}
+          {nav('home', 'Lernen', '🏠')}
+          {nav('mission', 'Lernpfad', '🗺️')}
+          {nav('progress', 'Lernstand', '📈')}
+          {nav('packs', 'Pakete', '📦')}
+          {settings.teacherMode && nav('teacher', 'Editor', '✏️', true)}
+          {nav('settings', 'Einstellungen', '⚙️', false, 'Mehr')}
+          {nav('info', 'Info', 'ℹ️', true)}
         </nav>
       </header>
       <main className="content">{view}</main>

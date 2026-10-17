@@ -1,9 +1,12 @@
 # Prononciation – Aussprachetrainer Französisch
 
-Eine Web-App (PWA) für den Französischunterricht der Sekundarstufe I: Schülerinnen und Schüler hören die
+Eine App für den Französischunterricht der Sekundarstufe I: Schülerinnen und Schüler hören die
 Modellaussprache von Vokabeln und Lektionstexten, sprechen nach, hören ihre eigene Aufnahme im Vergleich
-und erhalten eine Rückmeldung zu einzelnen Lauten – vollständig im Browser, ohne Server, ohne Konten,
+und erhalten eine Rückmeldung zu einzelnen Lauten – vollständig auf dem Gerät, ohne Server, ohne Konten,
 ohne Übertragung von Sprachaufnahmen.
+
+Läuft als **native App auf iPhone und iPad** (TestFlight/App Store), als **Android-App** und als
+**Web-App** in jedem aktuellen Browser (Chromebook, Windows, Mac). Siehe [docs/App.md](docs/App.md).
 
 > Arbeitstitel „Prononciation“. Stand: Oktober 2026, Version 0.1 (Prototyp).
 

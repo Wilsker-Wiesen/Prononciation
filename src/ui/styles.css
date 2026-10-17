@@ -45,6 +45,10 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 button, input, select, textarea { font: inherit; color: inherit; }
+/* Touch: kein Doppeltipp-Zoom, kein grauer Tipp-Schatten, kein Gummiband am Seitenrand */
+html { -webkit-text-size-adjust: 100%; overscroll-behavior-y: none; }
+button, a, select, label { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+button { -webkit-user-select: none; user-select: none; }
 a { color: var(--primary); }
 h1, h2, h3 { line-height: 1.2; margin: 0 0 0.5em; }
 h1 { font-size: 1.5rem; }
@@ -72,6 +76,27 @@ p { margin: 0 0 0.75em; }
 }
 .topbar nav button:hover { opacity: 1; background: rgba(255, 255, 255, 0.1); }
 .topbar nav button.active { background: rgba(255, 255, 255, 0.18); opacity: 1; }
+.topbar nav .tab-icon, .topbar nav .tab-short { display: none; }
+
+/* Telefon: Hauptnavigation als Tab-Leiste unten (wie in nativen Apps) */
+@media (max-width: 720px) {
+  .topbar { justify-content: center; }
+  .topbar nav {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; margin: 0;
+    display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 0;
+    background: var(--surface); color: var(--text); border-top: 1px solid var(--border);
+    padding: 4px 4px calc(4px + env(safe-area-inset-bottom));
+    box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.06);
+  }
+  .topbar nav button { display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 6px 2px; min-height: 48px; border-radius: 10px; opacity: 0.7; font-size: 0.72rem; }
+  .topbar nav button.active { background: var(--surface-2); color: var(--primary); opacity: 1; font-weight: 600; }
+  .topbar nav button.secondary { display: none; }
+  .topbar nav .tab-icon { display: block; font-size: 1.35rem; line-height: 1.2; }
+  .topbar nav .tab-label { display: none; }
+  .topbar nav .tab-short { display: block; }
+  .content { padding-bottom: calc(84px + env(safe-area-inset-bottom)); }
+  .footer { display: none; }
+}
 .content { flex: 1; width: 100%; max-width: 980px; margin: 0 auto; padding: 16px; padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
 
 .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow); margin-bottom: 14px; }

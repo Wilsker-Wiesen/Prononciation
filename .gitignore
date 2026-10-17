@@ -17,3 +17,9 @@ private/
 klett/
 *.zip
 schueleraufnahmen/
+
+# Native Hüllen: Web-Build wird bei cap sync hineinkopiert (nicht einchecken)
+ios/App/App/public/
+android/app/src/main/assets/public/
+android/app/src/main/assets/capacitor.config.json
+ios/App/App/capacitor.config.json
