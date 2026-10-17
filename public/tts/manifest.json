@@ -1,6 +1,6 @@
 {
-"voice": "piper-siwis-medium",
-"credit": "Piper-Stimme fr_FR-siwis-medium, trainiert auf der SIWIS French Speech Synthesis Database (University of Edinburgh, CC BY 4.0)",
+"voice": "piper-siwis-medium+kokoro-ff-siwis",
+"credit": "Piper-Stimme fr_FR-siwis-medium, trainiert auf der SIWIS French Speech Synthesis Database (University of Edinburgh, CC BY 4.0); ergänzend Kokoro-82M (Apache 2.0), Stimme ff_siwis, trainiert auf der SIWIS French Speech Synthesis Database (CC BY 4.0)",
 "format": "mp3",
 "files": {
 "e7e7e0c4": "e7e7e0c4.mp3",
