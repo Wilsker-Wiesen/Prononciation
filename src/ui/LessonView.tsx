@@ -23,9 +23,9 @@ export function LessonView({ pack, lessonId, tab }: { pack: Pack; lessonId: stri
   }, [pack.id, lessonId]);
   if (!lesson) return <div className="card">Lektion nicht gefunden.</div>;
 
-  const playItem = async (text: string, audioId?: string) => {
+  const playItem = async (text: string, audioId?: string, start?: number, end?: number) => {
     const blob = await audioBlob(audioId);
-    if (blob) await player.play(blob);
+    if (blob) await player.play(blob, { start, end });
     else if (settings.ttsFallback && ttsAvailable()) await speakFrench(text).catch(() => undefined);
   };
 
@@ -71,7 +71,7 @@ export function LessonView({ pack, lessonId, tab }: { pack: Pack; lessonId: stri
               <ul className="list" style={{ marginTop: 8 }}>
                 {t.sentences.map((s) => (
                   <li key={s.id}>
-                    <button className="btn ghost" aria-label="Anhören" onClick={() => void playItem(s.fr, s.audioId ?? t.audioId)}><Icon.play /></button>
+                    <button className="btn ghost" aria-label="Anhören" onClick={() => void playItem(s.fr, s.audioId ?? t.audioId, s.audioId ? undefined : s.start, s.audioId ? undefined : s.end)}><Icon.play /></button>
                     <div>
                       <div className="fr">{s.fr}</div>
                       {s.de && <div className="de small">{s.de}</div>}
@@ -90,13 +90,13 @@ export function LessonView({ pack, lessonId, tab }: { pack: Pack; lessonId: stri
   );
 }
 
-function VocabList({ pack, lessonId, entries, best, play, showIpa }: { pack: Pack; lessonId: string; entries: Pack['lessons'][number]['vocab']; best: Map<string, number>; play: (text: string, audioId?: string) => Promise<void>; showIpa: boolean }) {
+function VocabList({ pack, lessonId, entries, best, play, showIpa }: { pack: Pack; lessonId: string; entries: Pack['lessons'][number]['vocab']; best: Map<string, number>; play: (text: string, audioId?: string, start?: number, end?: number) => Promise<void>; showIpa: boolean }) {
   if (!entries.length) return null;
   return (
     <ul className="list">
       {entries.map((v) => (
         <li key={v.id}>
-          <button className="btn ghost" aria-label="Anhören" onClick={() => void play(v.fr, v.audioId)}><Icon.play /></button>
+          <button className="btn ghost" aria-label="Anhören" onClick={() => void play(v.fr, v.audioId, v.start, v.end)}><Icon.play /></button>
           <div>
             <div className="fr">{v.fr}</div>
             <div className="de small">{v.de}{showIpa && <span className="ipa muted"> · [{v.ipa ?? ipaString(transcribe(v.fr))}]</span>}</div>

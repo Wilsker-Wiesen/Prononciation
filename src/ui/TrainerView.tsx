@@ -11,7 +11,7 @@ export function trainItemsForLesson(pack: Pack, lessonId: string, kind: 'vocab' 
   if (!lesson) return [];
   if (kind === 'vocab') {
     return lesson.vocab.filter((v) => v.fr.trim()).map((v) => ({
-      id: v.id, kind: 'vocab', text: v.fr, de: v.de, ipaOverride: v.ipa, audioId: v.audioId, packId: pack.id, lessonId,
+      id: v.id, kind: 'vocab', text: v.fr, de: v.de, ipaOverride: v.ipa, audioId: v.audioId, start: v.start, end: v.end, packId: pack.id, lessonId,
     }));
   }
   const items: TrainItem[] = [];

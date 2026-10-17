@@ -39,8 +39,11 @@ Verlags bzw. der Schule. Die App stellt nur die Technik bereit; siehe [Datenschu
 Urheberrecht. Eigene Aufnahmen (Lehrkraft, Assistant·e, Muttersprachler·innen aus dem Kollegium) sind rechtlich
 unproblematisch und für Lernende oft motivierender.
 
-Technische Hinweise: Einzeldateien pro Vokabel (1–2 s) sind ideal. Lange Vokabeltracks können mit Audacity
-(*Analyse → Stille erkennen*, dann *Export → Mehrere Dateien exportieren*) automatisch zerteilt werden.
+Technische Hinweise: Einzeldateien pro Vokabel (1–2 s) sind ideal. Lange Vokabeltracks (ein Track pro Unité, wie bei
+*Découvertes*) müssen nicht vorab geschnitten werden: In der Audio-Bibliothek den Track mit **„Zerteilen“** öffnen –
+die App erkennt die Pausen, zeigt die Abschnitte zum Vorhören und ordnet sie **der Reihe nach** den Vokabeln der
+Lektion (oder den Sätzen eines Textes) zu. Stimmt die Anzahl nicht, Mindestpause/Schwelle anpassen oder einzelne
+Abschnitte zusammenfassen bzw. entfernen. Die Zuordnung speichert nur Zeitfenster, der Track bleibt eine Datei.
 
 ## 3. Pakete verteilen
 

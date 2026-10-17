@@ -50,6 +50,9 @@ export interface VocabEntry {
   ipa?: string;
   /** Referenz auf die Modellaufnahme (Lehrwerk-Audio) in der Audio-Ablage */
   audioId?: string;
+  /** Zeitfenster in Sekunden innerhalb von audioId (bei zerteilten Tracks) */
+  start?: number;
+  end?: number;
   sectionId?: string;
   /** Beispielsatz */
   example?: string;

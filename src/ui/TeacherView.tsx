@@ -9,6 +9,7 @@ import { navigate, useApp } from '../state/appState';
 import { deleteAudio, getAudio, listAudioForPack, putAudio, savePack } from '../storage/db';
 import { PACK_FORMAT_VERSION, newId, type AudioAsset, type Lesson, type Pack, type Sentence, type TextItem, type VocabEntry } from '../types/content';
 import { Icon } from './components';
+import { SplitAudio } from './SplitAudio';
 import { download } from './ProgressView';
 
 export function TeacherView({ packId, lessonId }: { packId?: string; lessonId?: string }) {
@@ -111,7 +112,7 @@ function PackEditor({ initial, lessonId, onSaved }: { initial: Pack; lessonId?: 
         )}
       </div>
 
-      <AudioLibrary packId={pack.id} assets={assets} reload={reloadAssets} />
+      <AudioLibrary packId={pack.id} assets={assets} reload={reloadAssets} lesson={lesson} updateLesson={updateLesson} />
     </div>
   );
 }
@@ -206,8 +207,9 @@ function VocabRow({ v, assets, updateLesson, onAudioFiles }: { v: VocabEntry; as
         <div className="row" style={{ gap: 4 }}>
           {asset ? (
             <>
-              <button className="btn ghost" title={asset.fileName} onClick={() => void player.play(asset.blob)}><Icon.play /></button>
-              <button className="btn ghost small" onClick={() => set({ audioId: undefined })}>×</button>
+              <button className="btn ghost" title={`${asset.fileName ?? ''}${v.start !== undefined ? ` ${v.start}–${v.end} s` : ''}`} onClick={() => void player.play(asset.blob, { start: v.start, end: v.end })}><Icon.play /></button>
+              {v.start !== undefined && <span className="muted small">{v.start}–{v.end} s</span>}
+              <button className="btn ghost small" onClick={() => set({ audioId: undefined, start: undefined, end: undefined })}>×</button>
             </>
           ) : (
             <>
@@ -290,8 +292,9 @@ function TextEditor({ lesson, assets, updateLesson }: { lesson: Lesson; assets: 
 
 // ---------- Audio-Bibliothek ----------
 
-function AudioLibrary({ packId, assets, reload }: { packId: string; assets: AudioAsset[]; reload: () => Promise<void> }) {
+function AudioLibrary({ packId, assets, reload, lesson, updateLesson }: { packId: string; assets: AudioAsset[]; reload: () => Promise<void>; lesson?: Lesson; updateLesson: (fn: (l: Lesson) => void) => void }) {
   const [over, setOver] = useState(false);
+  const [splitting, setSplitting] = useState<AudioAsset | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const addFiles = async (files: FileList | File[] | null) => {
     if (!files) return;
@@ -327,11 +330,13 @@ function AudioLibrary({ packId, assets, reload }: { packId: string; assets: Audi
               <span className="fr">{a.fileName ?? a.id}</span>
               <span className="spacer" />
               <span className="muted small">{Math.round(a.blob.size / 1024)} kB</span>
+              {lesson && <button className="btn ghost small" title="Track an Pausen zerteilen und Vokabeln/Sätzen zuordnen" onClick={() => setSplitting(a)}>Zerteilen</button>}
               <button className="btn ghost small" onClick={async () => { await deleteAudio(a.id); await reload(); }}>🗑</button>
             </li>
           ))}
         </ul>
       )}
+      {splitting && lesson && <SplitAudio key={splitting.id} asset={splitting} lesson={lesson} updateLesson={updateLesson} onClose={() => setSplitting(null)} />}
     </div>
   );
 }
