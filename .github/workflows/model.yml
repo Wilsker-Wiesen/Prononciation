@@ -83,14 +83,13 @@ jobs:
           mkdir -p out/french export
           optimum-cli export onnx --model Cnam-LMSSC/wav2vec2-french-phonemizer --task automatic-speech-recognition export/
           python3 - <<'PY'
-          from optimum.onnxruntime import ORTQuantizer
-          from optimum.onnxruntime.configuration import AutoQuantizationConfig
-          q = ORTQuantizer.from_pretrained('export', file_name='model.onnx')
-          cfg = AutoQuantizationConfig.avx512_vnni(is_static=False, per_channel=False)
-          q.quantize(save_dir='export/q8', quantization_config=cfg)
+          # Dynamische int8-Quantisierung nur der MatMul-Operatoren (die Faltungen des
+          # Feature-Encoders mit Weight-Norm lassen sich nicht quantisieren).
+          from onnxruntime.quantization import quantize_dynamic, QuantType
+          quantize_dynamic('export/model.onnx', 'export/model_quantized.onnx', op_types_to_quantize=['MatMul'], weight_type=QuantType.QInt8)
           PY
-          ls -la export export/q8
-          cp export/q8/model_quantized.onnx out/french/wav2vec2-french-phonemizer.onnx
+          ls -la export
+          cp export/model_quantized.onnx out/french/wav2vec2-french-phonemizer.onnx
           cp export/vocab.json out/french/wav2vec2-french-phonemizer.vocab.json
           python3 -c "import json; v=json.load(open('out/french/wav2vec2-french-phonemizer.vocab.json')); print(len(v), sorted(v, key=v.get))"
           sha256sum out/french/* > out/french/SHA256SUMS
