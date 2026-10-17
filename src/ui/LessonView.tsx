@@ -1,5 +1,5 @@
 /** Lektionsansicht: Vokabeln und Texte mit Vorhören und Einstieg ins Training. */
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { player } from '../audio/player';
 import { speakFrench, ttsAvailable } from '../audio/tts';
 import { audioBlob } from '../content/pack';
@@ -8,12 +8,19 @@ import { navigate, useApp } from '../state/appState';
 import { listAttemptsForPack } from '../storage/db';
 import type { Attempt, Pack } from '../types/content';
 import { Badge, Icon } from './components';
+import { PHENOMENA, detectPhenomena } from '../phon/phenomena';
 
 export function LessonView({ pack, lessonId, tab }: { pack: Pack; lessonId: string; tab?: string }) {
   const { settings } = useApp();
   const lesson = pack.lessons.find((l) => l.id === lessonId);
   const [best, setBest] = useState<Map<string, number>>(new Map());
+  const [focus, setFocus] = useState('');
   const active = tab === 'text' ? 'text' : 'vocab';
+  const focusCounts = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const v of lesson?.vocab ?? []) for (const ph of detectPhenomena(transcribe(v.fr))) counts.set(ph, (counts.get(ph) ?? 0) + 1);
+    return counts;
+  }, [lesson]);
   useEffect(() => {
     listAttemptsForPack(pack.id).then((rows: Attempt[]) => {
       const m = new Map<string, number>();
@@ -41,9 +48,17 @@ export function LessonView({ pack, lessonId, tab }: { pack: Pack; lessonId: stri
         <div className="card">
           <div className="row between" style={{ marginBottom: 8 }}>
             <h2 style={{ margin: 0 }}>Vokabeln</h2>
-            <button className="btn primary" disabled={!lesson.vocab.length} onClick={() => navigate({ name: 'train', packId: pack.id, lessonId, kind: 'vocab' })}>
-              <Icon.mic /> Training starten
-            </button>
+            <div className="row">
+              <select value={focus} onChange={(e) => setFocus(e.target.value)} aria-label="Fokus" style={{ padding: 8, borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)' }}>
+                <option value="">Alle Wörter</option>
+                {PHENOMENA.filter((p) => (focusCounts.get(p.id) ?? 0) > 0).map((p) => (
+                  <option key={p.id} value={p.id}>{p.emoji} {p.short} ({focusCounts.get(p.id)})</option>
+                ))}
+              </select>
+              <button className="btn primary" disabled={!lesson.vocab.length} onClick={() => navigate({ name: 'train', packId: pack.id, lessonId, kind: 'vocab', focus: focus || undefined })}>
+                <Icon.mic /> Training starten
+              </button>
+            </div>
           </div>
           {lesson.sections?.length ? (
             lesson.sections.map((sec) => (

@@ -1,7 +1,8 @@
 /** Trainingsansicht: Hören – Nachsprechen – Vergleichen – Rückmeldung. */
 import { useEffect, useMemo, useState } from 'react';
 import { loadModel, navigate, useApp, useModelStatus } from '../state/appState';
-import { ipaString } from '../phon/g2p';
+import { ipaString, transcribe } from '../phon/g2p';
+import { PHENOMENON_BY_ID, detectPhenomena, type PhenomenonId } from '../phon/phenomena';
 import type { Pack } from '../types/content';
 import { FindingsList, HighlightedText, Icon, PhoneRow, ScoreRing, Waveform, formatBytes } from './components';
 import { useTrainer, type TrainItem } from './useTrainer';
@@ -30,8 +31,13 @@ export function trainItemsForLesson(pack: Pack, lessonId: string, kind: 'vocab' 
   return items;
 }
 
-export function TrainerView({ pack, lessonId, kind, itemId, index }: { pack: Pack; lessonId: string; kind: 'vocab' | 'text'; itemId?: string; index?: number }) {
-  const items = useMemo(() => trainItemsForLesson(pack, lessonId, kind), [pack, lessonId, kind]);
+export function TrainerView({ pack, lessonId, kind, itemId, index, focus }: { pack: Pack; lessonId: string; kind: 'vocab' | 'text'; itemId?: string; index?: number; focus?: string }) {
+  const items = useMemo(() => {
+    const all = trainItemsForLesson(pack, lessonId, kind);
+    if (!focus || !(focus in PHENOMENON_BY_ID)) return all;
+    return all.filter((i) => detectPhenomena(transcribe(i.text)).has(focus as PhenomenonId));
+  }, [pack, lessonId, kind, focus]);
+  const focusInfo = focus && focus in PHENOMENON_BY_ID ? PHENOMENON_BY_ID[focus as PhenomenonId] : null;
   const startIndex = itemId ? Math.max(0, items.findIndex((i) => i.id === itemId)) : index ?? 0;
   const [pos, setPos] = useState(Math.min(startIndex, Math.max(0, items.length - 1)));
   const item = items[pos];
@@ -50,8 +56,9 @@ export function TrainerView({ pack, lessonId, kind, itemId, index }: { pack: Pac
         <button className="btn ghost" onClick={() => navigate({ name: 'lesson', packId: pack.id, lessonId, tab: kind })}>
           <Icon.prev /> {lesson.title}
         </button>
-        <span className="muted small">{pos + 1} / {items.length}</span>
+        <span className="muted small">{focusInfo ? `${focusInfo.emoji} ${focusInfo.short} · ` : ''}{pos + 1} / {items.length}</span>
       </div>
+      {focusInfo && <div className="banner info small" style={{ marginBottom: 8 }}><b>{focusInfo.title}:</b> {focusInfo.tip}</div>}
       <TrainerCard key={item.id} item={item} />
       <div className="row between" style={{ marginTop: 10 }}>
         <button className="btn" disabled={pos === 0} onClick={() => setPos(pos - 1)}><Icon.prev /> Zurück</button>

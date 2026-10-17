@@ -25,7 +25,7 @@ function Shell() {
     const pack = packs.find((p) => p.id === route.packId);
     if (!pack) view = <div className="card">Paket nicht gefunden. <button className="btn" onClick={() => navigate({ name: 'home' })}>Zur Startseite</button></div>;
     else if (route.name === 'lesson') view = <LessonView pack={pack} lessonId={route.lessonId} tab={route.tab} />;
-    else view = <TrainerView key={location.hash} pack={pack} lessonId={route.lessonId} kind={route.kind} itemId={route.itemId} index={route.index} />;
+    else view = <TrainerView key={location.hash} pack={pack} lessonId={route.lessonId} kind={route.kind} itemId={route.itemId} index={route.index} focus={route.focus} />;
   } else if (route.name === 'mission') view = <MissionsView key={route.phenomenonId ?? 'list'} phenomenonId={route.phenomenonId} />;
   else if (route.name === 'progress') view = <ProgressView />;
   else if (route.name === 'settings') view = <SettingsView />;

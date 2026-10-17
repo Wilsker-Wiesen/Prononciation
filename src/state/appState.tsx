@@ -122,7 +122,7 @@ export async function unloadModel(): Promise<void> {
 export type Route =
   | { name: 'home' }
   | { name: 'lesson'; packId: string; lessonId: string; tab?: string }
-  | { name: 'train'; packId: string; lessonId: string; kind: 'vocab' | 'text'; itemId?: string; index?: number }
+  | { name: 'train'; packId: string; lessonId: string; kind: 'vocab' | 'text'; itemId?: string; index?: number; focus?: string }
   | { name: 'progress' }
   | { name: 'settings' }
   | { name: 'packs' }
@@ -137,7 +137,7 @@ export function parseRoute(hash: string): Route {
       return parts[1] && parts[2] ? { name: 'lesson', packId: parts[1], lessonId: parts[2], tab: parts[3] } : { name: 'home' };
     case 'train':
       return parts[1] && parts[2] && (parts[3] === 'vocab' || parts[3] === 'text')
-        ? { name: 'train', packId: parts[1], lessonId: parts[2], kind: parts[3], itemId: parts[4], index: parts[5] ? Number(parts[5]) : undefined }
+        ? { name: 'train', packId: parts[1], lessonId: parts[2], kind: parts[3], itemId: parts[4] === '-' ? undefined : parts[4], index: parts[5] && parts[5] !== '-' ? Number(parts[5]) : undefined, focus: parts[6] }
         : { name: 'home' };
     case 'progress': return { name: 'progress' };
     case 'settings': return { name: 'settings' };
@@ -154,7 +154,7 @@ export function routeToHash(r: Route): string {
   switch (r.name) {
     case 'home': return '#/';
     case 'lesson': return `#/lesson/${e(r.packId)}/${e(r.lessonId)}${r.tab ? `/${e(r.tab)}` : ''}`;
-    case 'train': return `#/train/${e(r.packId)}/${e(r.lessonId)}/${r.kind}${r.itemId ? `/${e(r.itemId)}` : ''}${r.index !== undefined ? `/${r.index}` : ''}`;
+    case 'train': return `#/train/${e(r.packId)}/${e(r.lessonId)}/${r.kind}${r.focus ? `/${r.itemId ? e(r.itemId) : '-'}/${r.index ?? '-'}/${e(r.focus)}` : `${r.itemId ? `/${e(r.itemId)}` : ''}${r.index !== undefined ? `/${r.index}` : ''}`}`;
     case 'teacher': return `#/teacher${r.packId ? `/${e(r.packId)}` : ''}${r.lessonId ? `/${e(r.lessonId)}` : ''}`;
     case 'mission': return `#/mission${r.phenomenonId ? `/${e(r.phenomenonId)}` : ''}`;
     default: return `#/${r.name}`;

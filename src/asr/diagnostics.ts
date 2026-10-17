@@ -120,6 +120,9 @@ function mk(id: FindingId, severity: 0 | 1 | 2, wordIndex: number, word: string,
  * Leitet aus Wortbewertungen und Einfügungen didaktische Hinweise ab.
  * Pro Fehlertyp wird höchstens ein Hinweis (mit dem ersten betroffenen Wort) ausgegeben.
  */
+/** Unterhalb dieser Modell-Konfidenz werden Ersetzungen nicht als Diagnose gemeldet (nur Punktabzug). */
+export const MIN_CONF_FOR_FINDING = 0.35;
+
 export function diagnose(t: Transcription, result: ScoreResult): Finding[] {
   const findings: Finding[] = [];
   const seen = new Set<FindingId>();
@@ -128,11 +131,12 @@ export function diagnose(t: Transcription, result: ScoreResult): Finding[] {
     seen.add(f.id);
     findings.push(f);
   };
+  const confident = (conf: number | undefined) => conf === undefined || conf >= MIN_CONF_FOR_FINDING;
 
   result.words.forEach((w, wi) => {
     const pw = t.words[wi]!;
     const lastIdx = w.phones.length - 1;
-    const insAfterWord = result.insertions.filter((ins) => ins.afterWord === wi && isLastPhoneOfWord(ins, result, wi));
+    const insAfterWord = result.insertions.filter((ins) => ins.afterWord === wi && isLastPhoneOfWord(ins, result, wi) && confident(ins.conf));
 
     // Stumme Endbuchstaben gesprochen
     if (pw.silentFinal) {
@@ -201,6 +205,8 @@ export function diagnose(t: Transcription, result: ScoreResult): Finding[] {
         if (p.status === 'missing' && !p.optional) add(mk('missing-sound', 0, wi, w.orth, `In „${w.orth}“ wurde [${p.ipa}] nicht gehört.`, p.ipa));
         return;
       }
+      // Unsichere Erkennung: keine inhaltliche Diagnose (Literatur: nur robuste Oppositionen melden)
+      if (!confident(p.conf)) return;
       // u/ou
       if ((p.ipa === 'y' && ['u', 'ʊ', 'o'].includes(heard)) || (p.ipa === 'u' && ['y', 'ʏ', 'ø'].includes(heard))) {
         add(mk('u-ou', 2, wi, w.orth, `In „${w.orth}“: [${p.ipa}] erwartet, [${heard}] gehört.`, p.ipa, heard));
