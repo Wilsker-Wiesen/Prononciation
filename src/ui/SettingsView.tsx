@@ -5,6 +5,9 @@ import { MODEL_OPTIONS, modelOption } from '../asr/models';
 import { loadModel, modelSources, unloadModel, useApp, useModelStatus } from '../state/appState';
 import { clearRecordings, storageEstimate } from '../storage/db';
 import { formatBytes } from './components';
+import { GOAL_OPTIONS } from '../game/daily';
+import { setDailyGoal } from '../game/store';
+import { useGame } from './MissionsView';
 
 export function SettingsView() {
   const { settings, updateSettings } = useApp();
@@ -12,11 +15,13 @@ export function SettingsView() {
   const [cached, setCached] = useState<boolean | null>(null);
   const [storage, setStorage] = useState<{ usage: number; quota: number } | null>(null);
   const [advanced, setAdvanced] = useState(false);
+  const game = useGame();
 
   const refresh = () => {
     Promise.all(modelSources(settings).map((src) => isModelCached(src))).then((r) => setCached(r.some(Boolean)));
     storageEstimate().then(setStorage);
   };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(refresh, [settings.modelId, settings.modelBaseUrl, settings.modelFile, settings.modelVocabFile, model.state]);
 
   return (
@@ -92,6 +97,17 @@ export function SettingsView() {
       </div>
 
       <div className="card">
+        <h2>Tagesziel</h2>
+        <div className="row">
+          {GOAL_OPTIONS.map((o) => (
+            <button key={o.xp} className={`btn${game.dailyGoal === o.xp ? ' primary' : ''}`} onClick={() => void setDailyGoal(o.xp)}>
+              {o.label} · {o.xp} XP <span className="small" style={{ opacity: 0.8 }}>({o.hint})</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="card">
         <h2>Lernen</h2>
         <label className="check">
           <input type="checkbox" checked={settings.showIpa} onChange={(e) => void updateSettings({ showIpa: e.target.checked })} />
@@ -100,6 +116,10 @@ export function SettingsView() {
         <label className="check">
           <input type="checkbox" checked={settings.ttsFallback} onChange={(e) => void updateSettings({ ttsFallback: e.target.checked })} />
           Ersatzstimme des Geräts verwenden, wenn keine Aufnahme vorliegt
+        </label>
+        <label className="check">
+          <input type="checkbox" checked={settings.soundEnabled} onChange={(e) => void updateSettings({ soundEnabled: e.target.checked })} />
+          Töne und Vibration bei Erfolgen
         </label>
         <label className="check">
           <input type="checkbox" checked={settings.keepRecordings} onChange={(e) => void updateSettings({ keepRecordings: e.target.checked })} />

@@ -63,12 +63,13 @@ describe('Belohnungen', () => {
     expect(levelFor(0).level).toBe(1);
     expect(levelFor(160).level).toBe(3);
   });
-  it('zählt Serien tageweise', () => {
-    const d1 = new Date('2026-10-17T10:00:00Z');
-    const g1 = touchStreak(EMPTY_GAME, d1);
+  it('zählt Serien tageweise (lokale Zeit)', () => {
+    const g0 = { ...EMPTY_GAME, freezes: 0 };
+    // Di 13.10.2026
+    const g1 = touchStreak(g0, new Date(2026, 9, 13, 10));
     expect(g1.streakDays).toBe(1);
-    expect(touchStreak(g1, new Date('2026-10-17T18:00:00Z')).streakDays).toBe(1);
-    expect(touchStreak(g1, new Date('2026-10-18T09:00:00Z')).streakDays).toBe(2);
-    expect(touchStreak(g1, new Date('2026-10-20T09:00:00Z')).streakDays).toBe(1);
+    expect(touchStreak(g1, new Date(2026, 9, 13, 23, 30)).streakDays).toBe(1);
+    expect(touchStreak(g1, new Date(2026, 9, 14, 7)).streakDays).toBe(2);
+    expect(touchStreak(g1, new Date(2026, 9, 16, 9)).streakDays).toBe(1);
   });
 });

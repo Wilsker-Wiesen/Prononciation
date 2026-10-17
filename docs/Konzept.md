@@ -50,6 +50,33 @@ gekoppelt mit Hören und Sprechen. Genau so sind die Missionen gebaut:
 Die Zuordnung von Wörtern zu Phänomenen erfolgt automatisch über das G2P-Modul (z. B. „enthält Nasalvokal“, „stummer
 Endkonsonant“, „obligatorische Liaison“), so dass jede importierte Découvertes-Unité sofort Missionen speist.
 
+### Spielmechanik nach dem Vorbild von Duolingo, ethisch angepasst
+
+Grundlage ist das Rechercheprotokoll *Gamification.md* (Duolingo-Mechaniken, Metaanalysen zu Gamification, Risiken bei
+Kindern und Jugendlichen). Umgesetzt:
+
+| Element | Umsetzung | Anpassung gegenüber Duolingo |
+| --- | --- | --- |
+| Maskottchen | Coco le coq, gallischer Hahn in Bleu-Blanc-Rouge, reagiert mit kurzen französischen Sätzen (mit Übersetzung) | nie beschämend, kein Schuldgefühl-Humor |
+| Tagesziel | XP-Ziel wählbar (20–80 XP ≈ 3–12 Minuten), Ring auf der Startseite | XP auch für Mühe (Mindest-XP pro Aufnahme) |
+| Serie | Tage in Folge, Serienschutz (max. 2) | Wochenenden unterbrechen die Serie nie; Bestleistung bleibt |
+| Tagesquests | drei Quests pro Tag, für alle Geräte gleich | inhaltlich an Aussprachezielen ausgerichtet |
+| Kombo | Bonus ab drei Ergebnissen ≥ 85 in Folge | gilt nur in der laufenden Sitzung |
+| Verbesserung | Bonus-XP bei Steigerung gegenüber dem eigenen letzten Versuch | Empfehlung der Recherche: Fortschritt statt nur Leistung belohnen |
+| Lernpfad | vier Etappen mit 16 Missionen, „Weiter hier!“ | nichts gesperrt, nur Empfehlung |
+| Feiern | Konfetti, Fanfare (Web Audio), Vibration | abschaltbar; „Bewegung reduzieren“ wird respektiert |
+| Ohren-Blitz | 60-Sekunden-Hörquiz mit Minimalpaaren, persönlicher Rekord | kein Vergleich mit anderen |
+| Croissants und Boutique | Währung für Quests, Tagesziel, Missionssterne; Outfits für Coco und Serienschutz | rein kosmetisch, nicht an Punktzahlen gekoppelt |
+
+Bewusst **nicht** umgesetzt: Ranglisten und Ligen (Datenschutz, sozialer Druck; Hanus & Fox 2015), Leben/Herzen
+(bestrafen Fehler), Push-Benachrichtigungen, Zufallsbelohnungen, Tracking oder A/B-Tests.
+
+Abweichung von der Empfehlung der Recherche: Das Protokoll rät von Währung und Shop ab, weil erwartete Belohnungen die
+intrinsische Motivation von Kindern untergraben können (Deci, Koestner & Ryan 1999). Auf ausdrücklichen Wunsch nach
+möglichst viel Spielelementen ist die Boutique enthalten, aber so begrenzt: Croissants gibt es für Üben und Quests,
+nicht für Aussprachepunkte; der Shop ist kosmetisch und ohne Einfluss auf das Lernen. Ob er motiviert oder ablenkt,
+sollte in der Erprobung beobachtet werden.
+
 ### Konjugation (eingebautes Paket)
 
 Das Lektionsvokabular enthält fast nur Infinitive; die am besten belegte Fehlerquelle der Sekundarstufe I liegt aber in

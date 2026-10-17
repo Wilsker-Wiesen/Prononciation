@@ -5,7 +5,10 @@ import { speakFrench, ttsAvailable } from '../audio/tts';
 import { audioBlob } from '../content/pack';
 import { missionAvailability, planMission, type ListeningTask, type MissionPlan } from '../game/missions';
 import { BADGES, levelFor, starsFromScore } from '../game/rewards';
-import { gameSnapshot, loadGame, recordMission, subscribeGame } from '../game/store';
+import { gameSnapshot, loadGame, recordListen, recordMission, subscribeGame } from '../game/store';
+import { PATH, nextMission } from '../game/path';
+import { MascotSays } from './Mascot';
+import { confetti, sfx } from './fx';
 import { PHENOMENA, type PhenomenonId } from '../phon/phenomena';
 import { navigate, useApp } from '../state/appState';
 import { newId } from '../types/content';
@@ -24,41 +27,48 @@ export function MissionsView({ phenomenonId }: { phenomenonId?: PhenomenonId }) 
   const availability = useMemo(() => missionAvailability(packs), [packs]);
   if (phenomenonId) return <MissionRun id={phenomenonId} />;
   const level = levelFor(game.points);
+  const next = nextMission(game.missionStars);
   return (
     <div>
-      <h1>Missionen</h1>
+      <h1>Lernpfad</h1>
       <div className="card">
-        <div className="row between">
-          <div className="row" style={{ gap: 16 }}>
-            <div className="stat"><b>{game.points}</b><span className="muted small">Punkte</span></div>
-            <div className="stat"><b>Lv. {level.level}</b><span className="muted small">{level.title}</span></div>
-            <div className="stat"><b>{game.streakDays} 🔥</b><span className="muted small">Tage in Folge</span></div>
-            <div className="stat"><b>{game.badges.length}</b><span className="muted small">Abzeichen</span></div>
-          </div>
+        <div className="hud">
+          <span className="chip">⭐ Lv. {level.level} · {level.title}</span>
+          <span className="chip">⚡ {game.points} XP</span>
+          <span className="chip flame">🔥 {game.streakDays}</span>
+          <span className="chip">🥐 {game.croissants}</span>
+          <span className="chip">🏅 {game.badges.length}/{BADGES.length}</span>
         </div>
         <div className="progress" style={{ marginTop: 8 }}><div style={{ width: `${Math.round(level.progress * 100)}%` }} /></div>
-        <div className="muted small">Nächste Stufe bei {level.next} Punkten</div>
+        <div className="muted small">Nächstes Level bei {level.next} XP</div>
       </div>
-      <p className="muted">Jede Mission nimmt sich eine Aussprache-Regel vor: erst verstehen, dann hören, dann selbst sprechen. Wörter kommen aus deinen Lektionen.</p>
-      <div className="grid">
-        {PHENOMENA.map((p) => {
-          const stars = game.missionStars[p.id] ?? 0;
-          const av = availability[p.id];
-          const ready = av.total >= 3 || p.pairs.length >= 2;
-          return (
-            <div className="card" key={p.id} style={{ marginBottom: 0 }}>
-              <div className="row between">
-                <h3 style={{ margin: 0 }}>{p.emoji} {p.title}</h3>
-                <span title={`${stars} von 3 Sternen`}>{'★'.repeat(stars)}{'☆'.repeat(3 - stars)}</span>
-              </div>
-              <p className="small muted" style={{ margin: '6px 0' }}>{p.rule}</p>
-              <div className="row between">
-                <span className="muted small">{av.total} Wörter{av.withAudio ? ` · ${av.withAudio} mit Audio` : ''}</span>
-                <button className="btn primary" disabled={!ready} onClick={() => navigate({ name: 'mission', phenomenonId: p.id })}>Starten</button>
-              </div>
+      <div className="path">
+        {PATH.map((unit, ui) => (
+          <div key={unit.id} style={{ width: '100%' }}>
+            <div className="path-unit">
+              <h3>{unit.title}</h3>
+              <div className="muted small" style={{ marginTop: 4 }}>{unit.subtitle}</div>
             </div>
-          );
-        })}
+            <div className="path" style={{ padding: 0 }}>
+              {unit.missions.map((id, i) => {
+                const p = PHENOMENA.find((x) => x.id === id)!;
+                const stars = game.missionStars[id] ?? 0;
+                const av = availability[id];
+                const cls = stars >= 3 ? 'done' : id === next ? 'next' : stars > 0 ? 'started' : '';
+                // Schlangenlinie wie ein Pfad
+                const offset = Math.round(Math.sin((i + ui) * 1.1) * 70);
+                return (
+                  <div key={id} className={`path-node ${cls}`} style={{ transform: `translateX(${offset}px)` }}>
+                    {id === next && <div className="small" style={{ fontWeight: 800, color: 'var(--good)' }}>Weiter hier!</div>}
+                    <button aria-label={`Mission ${p.title}`} title={`${p.title} · ${av.total} Wörter`} onClick={() => navigate({ name: 'mission', phenomenonId: id })}>{p.emoji}</button>
+                    <div className="stars">{'★'.repeat(stars)}{'☆'.repeat(3 - stars)}</div>
+                    <div className="label">{p.short}</div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </div>
       <div className="card" style={{ marginTop: 14 }}>
         <h2>Abzeichen</h2>
@@ -109,12 +119,14 @@ function MissionRun({ id }: { id: PhenomenonId }) {
     const r = await recordMission({ id: newId('m'), phenomenon: id, ts: new Date().toISOString(), stars, listening, speaking: speakingRated >= 0 ? speakingRated : speaking, points });
     setNewBadges(r.newBadges);
     setStage('result');
+    sfx.fanfare();
+    if (stars >= 2 || r.goalReachedNow || r.newBadges.length) confetti();
   };
 
   if (stage === 'intro') {
     return (
       <div>
-        <button className="btn ghost" onClick={() => navigate({ name: 'mission' })}><Icon.prev /> Missionen</button>
+        <button className="btn ghost" onClick={() => navigate({ name: 'mission' })}><Icon.prev /> Lernpfad</button>
         <div className="card">
           <h1>{ph.emoji} {ph.title}</h1>
           <p><b>Regel:</b> {ph.rule}</p>
@@ -155,7 +167,7 @@ function MissionRun({ id }: { id: PhenomenonId }) {
               const state = picked === null ? '' : isCorrect(i) ? 'good' : i === picked ? 'bad' : '';
               return (
                 <button key={i} className={`btn big ${state === 'good' ? 'primary' : ''}`} style={state === 'bad' ? { borderColor: 'var(--bad)', color: 'var(--bad)' } : undefined} disabled={picked !== null}
-                  onClick={() => { setPicked(i); if (isCorrect(i)) setListenHits((h) => h + 1); }}>
+                  onClick={() => { setPicked(i); const ok = isCorrect(i); if (ok) { setListenHits((h) => h + 1); sfx.success(); } else sfx.soft(); void recordListen(ok); }}>
                   <span>
                     <div>{o.text}</div>
                     <div className="small muted">[{o.ipa}]{o.de ? ` · ${o.de}` : ''}</div>
@@ -198,16 +210,19 @@ function MissionRun({ id }: { id: PhenomenonId }) {
   return (
     <div>
       <div className="card" style={{ textAlign: 'center' }}>
-        <div style={{ fontSize: '3rem' }}>{'★'.repeat(last?.stars ?? 0)}{'☆'.repeat(3 - (last?.stars ?? 0))}</div>
+        <div style={{ display: 'flex', justifyContent: 'center' }}>
+          <MascotSays mood={(last?.stars ?? 0) >= 2 ? 'cheer' : (last?.stars ?? 0) >= 1 ? 'happy' : 'encourage'} outfit={gameSnapshot().outfit} fr={(last?.stars ?? 0) >= 3 ? 'Incroyable !' : (last?.stars ?? 0) >= 1 ? 'Mission accomplie !' : 'On recommence ensemble ?'} de={(last?.stars ?? 0) >= 1 ? 'Mission geschafft!' : 'Nochmal zusammen?'} />
+        </div>
+        <div style={{ fontSize: '3rem', color: '#e8b84a' }}>{'★'.repeat(last?.stars ?? 0)}{'☆'.repeat(3 - (last?.stars ?? 0))}</div>
         <h1>{(last?.stars ?? 0) >= 3 ? 'Bravo !' : (last?.stars ?? 0) >= 1 ? 'Bien joué !' : 'Encore une fois ?'}</h1>
-        <p>Hörquiz: {Math.round((last?.listening ?? 0) * 100)} % richtig · Sprechen: {last && last.speaking >= 0 ? `${Math.round(last.speaking)} Punkte` : 'nicht bewertet'} · +{last?.points ?? 0} Punkte</p>
+        <p>Hörquiz: {Math.round((last?.listening ?? 0) * 100)} % richtig · Sprechen: {last && last.speaking >= 0 ? `${Math.round(last.speaking)} Punkte` : 'nicht bewertet'} · +{last?.points ?? 0} XP · +{(last?.stars ?? 0) * 2} 🥐</p>
         {newBadges.length > 0 && (
           <div className="banner" style={{ marginTop: 8 }}>
             Neues Abzeichen: {newBadges.map((b) => { const d = BADGES.find((x) => x.id === b); return d ? `${d.emoji} ${d.title}` : b; }).join(', ')}
           </div>
         )}
         <div className="row" style={{ justifyContent: 'center', marginTop: 12 }}>
-          <button className="btn" onClick={() => navigate({ name: 'mission' })}>Zu den Missionen</button>
+          <button className="btn" onClick={() => navigate({ name: 'mission' })}>Zum Lernpfad</button>
           <button className="btn primary" onClick={() => { location.hash = '#/'; setTimeout(() => navigate({ name: 'mission', phenomenonId: id }), 0); }}><Icon.retry /> Noch einmal</button>
         </div>
       </div>

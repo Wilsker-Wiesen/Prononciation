@@ -4,6 +4,7 @@
  */
 import type { Attempt } from '../types/content';
 import type { PhenomenonId } from '../phon/phenomena';
+import { EMPTY_DAILY, advanceStreak, localDay, type DailyState } from './daily';
 
 export interface MissionResult {
   id: string;
@@ -18,7 +19,8 @@ export interface MissionResult {
   points: number;
 }
 
-export interface GameState {
+export interface GameState extends DailyState {
+  /** XP gesamt */
   points: number;
   /** beste Sterne je Mission */
   missionStars: Partial<Record<PhenomenonId, number>>;
@@ -29,7 +31,7 @@ export interface GameState {
   badges: string[];
 }
 
-export const EMPTY_GAME: GameState = { points: 0, missionStars: {}, missions: [], streakDays: 0, lastActiveDay: '', badges: [] };
+export const EMPTY_GAME: GameState = { ...EMPTY_DAILY, points: 0, missionStars: {}, missions: [], streakDays: 0, lastActiveDay: '', badges: [] };
 
 export function starsFromScore(score: number): number {
   if (score >= 85) return 3;
@@ -44,17 +46,9 @@ export function pointsForAttempt(overall: number): number {
   return Math.max(2, Math.round(overall / 10));
 }
 
-function dayKey(d = new Date()): string {
-  return d.toISOString().slice(0, 10);
-}
-
-/** Streak fortschreiben; gibt neuen Zustand zurück. */
+/** Serie fortschreiben (lokale Kalendertage, mit Serienschutz). */
 export function touchStreak(g: GameState, now = new Date()): GameState {
-  const today = dayKey(now);
-  if (g.lastActiveDay === today) return g;
-  const yesterday = dayKey(new Date(now.getTime() - 86400e3));
-  const streakDays = g.lastActiveDay === yesterday ? g.streakDays + 1 : 1;
-  return { ...g, streakDays, lastActiveDay: today };
+  return advanceStreak(g, localDay(now));
 }
 
 export interface BadgeDef {
@@ -78,6 +72,9 @@ export const BADGES: BadgeDef[] = [
   { id: 'liaison-pro', title: 'Liaison-Künstler', emoji: '🔗', description: 'Mission Liaison mit drei Sternen.', test: (g) => (g.missionStars.liaison ?? 0) >= 3 },
   { id: 'plural-pro', title: 'ils/elles-Profi', emoji: '👥', description: 'Mission 3. Person Plural mit drei Sternen.', test: (g) => (g.missionStars['plural-3'] ?? 0) >= 3 },
   { id: 'voicing-pro', title: 'Stimmhaft bis zum Schluss', emoji: '🔊', description: 'Mission Auslaut mit drei Sternen.', test: (g) => (g.missionStars['final-voicing'] ?? 0) >= 3 },
+  { id: 'goal-7', title: 'Objectif atteint', emoji: '🎯', description: 'An 7 Tagen das Tagesziel erreicht.', test: (g) => g.goalDays >= 7 },
+  { id: 'combo-5', title: 'Combo !', emoji: '⚡', description: 'Fünfmal hintereinander 85 Punkte oder mehr.', test: (g) => g.bestCombo >= 5 },
+  { id: 'chic', title: 'Très chic', emoji: '🎩', description: 'Coco ein Outfit gekauft.', test: (g) => g.outfits.length >= 1 },
   { id: 'all-missions', title: 'Tour complet', emoji: '🗺️', description: 'Jede Mission mindestens einmal bestanden.', test: (g) => Object.values(g.missionStars).filter((s) => (s ?? 0) >= 1).length >= 14 },
 ];
 

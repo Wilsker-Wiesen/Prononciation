@@ -180,3 +180,59 @@ table.tbl input { width: 100%; background: var(--surface); border: 1px solid var
   .trainer-text { font-size: 1.5rem; }
   .topbar nav button { padding: 6px 8px; font-size: 0.9rem; }
 }
+
+/* ---------- Spielelemente ---------- */
+.mascot-says { display: flex; align-items: flex-end; gap: 10px; }
+.bubble {
+  position: relative; background: var(--surface); border: 2px solid var(--border); border-radius: 16px;
+  padding: 8px 12px; max-width: 320px; box-shadow: var(--shadow); margin-bottom: 18px;
+}
+.bubble::before {
+  content: ''; position: absolute; left: -10px; bottom: 12px; width: 14px; height: 14px; background: var(--surface);
+  border-left: 2px solid var(--border); border-bottom: 2px solid var(--border); transform: rotate(45deg);
+}
+.hud { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; font-weight: 700; }
+.hud .chip { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; background: var(--surface-2); }
+.hud .chip.flame { color: #d9480f; }
+.hud .chip.flame.off { color: var(--muted); filter: grayscale(1); }
+.ring { position: relative; width: 84px; height: 84px; flex-shrink: 0; }
+.ring svg { transform: rotate(-90deg); }
+.ring .ring-label { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; font-weight: 800; font-size: 0.95rem; line-height: 1.1; }
+.ring .ring-label small { font-weight: 600; color: var(--muted); font-size: 0.7rem; }
+.quest { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+.quest:last-child { border-bottom: 0; }
+.quest .qbar { flex: 1; }
+.quest.done .qtitle { text-decoration: line-through; color: var(--muted); }
+.qbar .progress { height: 12px; border-radius: 6px; }
+.qbar .progress > div { background: var(--good); border-radius: 6px; }
+.reward-pop { animation: pop 0.45s cubic-bezier(0.2, 1.6, 0.4, 1); display: inline-block; }
+@keyframes pop { 0% { transform: scale(0.3); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+.combo-badge { background: linear-gradient(90deg, #e63946, #e8b84a); color: #fff; }
+.confetti { position: fixed; inset: 0; pointer-events: none; z-index: 1000; overflow: hidden; }
+.confetti span { position: absolute; top: -20px; border-radius: 2px; animation-name: fall; animation-timing-function: cubic-bezier(0.3, 0.6, 0.5, 1); animation-fill-mode: forwards; box-shadow: 0 0 1px rgba(0,0,0,0.3); }
+@keyframes fall { to { transform: translateY(110vh) rotate(720deg); } }
+
+/* Lernpfad */
+.path { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 0; }
+.path-unit { width: 100%; text-align: center; margin: 14px 0 4px; }
+.path-unit h3 { display: inline-block; background: var(--primary); color: var(--primary-contrast); padding: 6px 14px; border-radius: 999px; font-size: 0.95rem; margin: 0; }
+.path-node { display: flex; flex-direction: column; align-items: center; gap: 2px; width: 120px; }
+.path-node button {
+  width: 76px; height: 70px; border-radius: 50%; border: 0; cursor: pointer; font-size: 2rem;
+  background: var(--surface-2); box-shadow: 0 6px 0 var(--border); transition: transform 0.08s;
+}
+.path-node button:active { transform: translateY(4px); box-shadow: 0 2px 0 var(--border); }
+.path-node.done button { background: #e8b84a; box-shadow: 0 6px 0 #b8862a; }
+.path-node.started button { background: color-mix(in srgb, var(--good) 40%, var(--surface)); box-shadow: 0 6px 0 color-mix(in srgb, var(--good) 60%, #000); }
+.path-node.next button { background: var(--good); box-shadow: 0 6px 0 color-mix(in srgb, var(--good) 60%, #000); animation: bounce 1.6s infinite; }
+@keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+.path-node .label { font-size: 0.8rem; font-weight: 700; text-align: center; }
+.path-node .stars { color: #e8b84a; font-size: 0.9rem; letter-spacing: 1px; }
+.shop { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.shop-item { border: 1px solid var(--border); border-radius: 12px; padding: 10px; text-align: center; background: var(--surface); }
+.shop-item.owned { border-color: var(--good); }
+.blitz-timer { font-size: 2rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.blitz-timer.low { color: var(--bad); }
+@media (prefers-reduced-motion: reduce) {
+  .path-node.next button, .reward-pop, .btn.record.on { animation: none; }
+}

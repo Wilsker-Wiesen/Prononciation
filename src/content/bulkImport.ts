@@ -22,7 +22,7 @@ const AUDIO_RE = /\.(mp3|m4a|aac|wav|ogg|oga|opus|webm|flac)$/i;
 const LIST_RE = /\.(csv|tsv|txt)$/i;
 
 export function parseWordList(text: string): ParsedRow[] {
-  const lines = text.replace(/^﻿/, '').split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+  const lines = text.replace(/^\uFEFF/, '').split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
   const rows: ParsedRow[] = [];
   for (const line of lines) {
     if (line.startsWith('#')) continue;

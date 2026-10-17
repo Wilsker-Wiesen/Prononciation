@@ -13,7 +13,7 @@ import { audioBlob } from '../content/pack';
 import { compareRecordings, type SimilarityResult } from '../dsp/compare';
 import { trimSilence } from '../dsp/trim';
 import { transcribe, type Transcription } from '../phon/g2p';
-import { addAttempt, getRecording, putRecording } from '../storage/db';
+import { addAttempt, getRecording, listAttemptsForItem, putRecording } from '../storage/db';
 import { newId, type Attempt, type ItemKind, type Settings } from '../types/content';
 
 export interface TrainItem {
@@ -40,6 +40,8 @@ export interface TrainResult {
   ownBlob: Blob;
   modelPcm16k: Float32Array | null;
   recognitionMs?: number;
+  /** letzter bewerteter Versuch an diesem Eintrag vor diesem (für den Verbesserungsbonus) */
+  previousScore?: number;
 }
 
 export type TrainerPhase = 'idle' | 'recording' | 'analyzing' | 'done';
@@ -188,7 +190,9 @@ export function useTrainer(item: TrainItem, settings: Settings) {
       else if (assessment) overall = assessment.overall;
       else if (similarity) overall = Math.round(0.8 * similarity.similarity + 0.2 * similarity.tempo);
       else overall = -1;
-      const res: TrainResult = { overall, assessment, similarity, ownPcm16k: trimmed, ownBlob, modelPcm16k: modelPcm, recognitionMs };
+      const earlier = await listAttemptsForItem(item.id).catch(() => []);
+      const lastRated = earlier.filter((a) => a.overall >= 0).pop();
+      const res: TrainResult = { overall, assessment, similarity, ownPcm16k: trimmed, ownBlob, modelPcm16k: modelPcm, recognitionMs, previousScore: lastRated?.overall };
       setResult(res);
       setPhase('done');
       if (overall >= 0) {

@@ -132,3 +132,19 @@ export function formatBytes(n: number): string {
   if (n > 1e3) return `${(n / 1e3).toFixed(0)} kB`;
   return `${n} B`;
 }
+
+/** Fortschrittsring (z. B. Tagesziel). */
+export function GoalRing({ value, max, label }: { value: number; max: number; label?: string }) {
+  const r = 34;
+  const c = 2 * Math.PI * r;
+  const frac = Math.max(0, Math.min(1, max ? value / max : 0));
+  return (
+    <div className="ring" aria-label={`${label ?? 'Tagesziel'}: ${value} von ${max} XP`}>
+      <svg width="84" height="84" viewBox="0 0 84 84">
+        <circle cx="42" cy="42" r={r} fill="none" stroke="var(--surface-2)" strokeWidth="9" />
+        <circle cx="42" cy="42" r={r} fill="none" stroke={frac >= 1 ? 'var(--good)' : 'var(--accent)'} strokeWidth="9" strokeLinecap="round" strokeDasharray={`${c * frac} ${c}`} />
+      </svg>
+      <div className="ring-label"><span>{Math.min(value, 999)}<br /><small>/ {max} XP</small></span></div>
+    </div>
+  );
+}

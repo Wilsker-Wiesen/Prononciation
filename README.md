@@ -18,6 +18,7 @@ ohne Übertragung von Sprachaufnahmen.
 | **Hinweise** | Didaktische Diagnose typischer Fehler deutschsprachiger Lernender (stumme Endkonsonanten, Verbendung -ent, Nasalvokale, u/ou, [ʒ], Liaison, Auslautverhärtung, h, ui …) mit Erklärung und Tipp. |
 | **Lesen** | Lektionstexte Satz für Satz üben, mit Zeitfenstern im Gesamt-Audio oder eigenen Satz-Audios. |
 | **Lernstand** | Versuche, Bestwerte, häufigste Fehlertypen; Export als CSV/JSON (freiwillig, lokal). |
+| **Spielwelt** | Maskottchen Coco le coq, Tagesziel mit Fortschrittsring, Serie mit Serienschutz (Wochenenden zählen nicht), drei Tagesquests, Kombo, Bonus für Verbesserung, Lernpfad in vier Etappen, 60-Sekunden-Ohren-Blitz, Croissants und Boutique mit Outfits für Coco, Konfetti und Töne. Keine Ranglisten, keine Strafen, keine Benachrichtigungen. |
 | **Missionen** | Spielerische Fokus-Einheiten je Aussprache-Regel (stumme Enden, -ent, Nasale, u/ou, Liaison, [ʒ], ch, h, ui, eu, oi, r): Regel → Hörquiz mit Minimalpaaren → Sprechrunde mit Wörtern aus den eigenen Lektionen → Sterne. Punkte, Level, Übungsserien und Abzeichen. |
 | **Konjugation** | Eingebautes Paket mit 42 Verben im Präsens (252 Formen), gegliedert danach, ob die 3. Person Plural hörbar ist (ils parlent = il parle; ils‿aiment; ils prennent ≠ il prend). Prüfung, ob eine Pluralform wie der Singular klang. |
 | **Lehrkraft-Editor** | Pakete mit Lektionen, Vokabeln (Listen einfügen, Ordner-Import), Texten (Fließtext → Sätze), Audio-Zuordnung (Drag & Drop, automatische Zuordnung über Dateinamen, Zerteilen langer Tracks an Pausen), Lautschrift-Korrektur, Export als ZIP. |
@@ -53,6 +54,7 @@ Die App funktioniert nur über HTTPS (oder `localhost`), weil Mikrofonzugriff un
 - [docs/Konzept.md](docs/Konzept.md) – Didaktisches und technisches Konzept, Bewertungsverfahren, Grenzen
 - [docs/Lehrkraefte.md](docs/Lehrkraefte.md) – Anleitung für Lehrkräfte: Pakete erstellen, Audio zuordnen, verteilen, Modell selbst hosten
 - [docs/Datenschutz.md](docs/Datenschutz.md) – Datenschutz und Urheberrecht (DSGVO, Schulkontext NRW, Verlagsmaterial)
+- [docs/Gamification.md](docs/Gamification.md) – Recherche: warum Duolingo motiviert, was die Forschung zu Gamification sagt, Empfehlungen
 - [docs/Aussprachefehler.md](docs/Aussprachefehler.md) – Forschungsmemo: typische Fehler deutschsprachiger Lernender, Minimalpaare, Didaktik, Grenzen automatischer Bewertung
 - [docs/Entwicklung.md](docs/Entwicklung.md) – Architektur, Module, Tests, Roadmap
 

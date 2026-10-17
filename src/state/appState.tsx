@@ -135,6 +135,8 @@ export type Route =
   | { name: 'packs' }
   | { name: 'teacher'; packId?: string; lessonId?: string }
   | { name: 'mission'; phenomenonId?: import('../phon/phenomena').PhenomenonId }
+  | { name: 'blitz' }
+  | { name: 'shop' }
   | { name: 'info' };
 
 export function parseRoute(hash: string): Route {
@@ -152,6 +154,8 @@ export function parseRoute(hash: string): Route {
     case 'teacher': return { name: 'teacher', packId: parts[1], lessonId: parts[2] };
     case 'mission': return { name: 'mission', phenomenonId: parts[1] as import('../phon/phenomena').PhenomenonId | undefined };
     case 'info': return { name: 'info' };
+    case 'blitz': return { name: 'blitz' };
+    case 'shop': return { name: 'shop' };
     default: return { name: 'home' };
   }
 }

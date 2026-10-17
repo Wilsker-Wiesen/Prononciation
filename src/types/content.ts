@@ -145,6 +145,8 @@ export interface Settings {
   learnerName: string;
   /** zuletzt installierte Version des eingebauten Konjugationspakets */
   conjugationVersion: number;
+  /** Töne und Vibration bei Erfolgen */
+  soundEnabled: boolean;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -159,6 +161,7 @@ export const DEFAULT_SETTINGS: Settings = {
   showIpa: true,
   learnerName: '',
   conjugationVersion: 0,
+  soundEnabled: true,
 };
 
 export function newId(prefix = ''): string {
