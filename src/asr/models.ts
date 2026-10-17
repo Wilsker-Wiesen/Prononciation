@@ -16,15 +16,20 @@ export interface ModelOption {
   sources: ModelSource[];
 }
 
-const RELEASE_BASE = 'https://github.com/Wilsker-Wiesen/Prononciation/releases/download/models-v1/';
+/**
+ * Die Modelldateien werden beim Bau der Seite aus dem GitHub-Release
+ * (models-v1) nach /models/ kopiert und vom selben Ursprung ausgeliefert.
+ * Direkte Release-Links funktionieren im Browser nicht (kein CORS-Header).
+ */
+const LOCAL_BASE = `${import.meta.env.BASE_URL}models/`;
 
 export const MODEL_OPTIONS: ModelOption[] = [
   {
     id: 'french',
-    label: 'Französisch (wav2vec2-french-phonemizer, ≈ 86 MB) – empfohlen',
+    label: 'Französisch (wav2vec2-french-phonemizer, ≈ 120 MB) – empfohlen',
     description: 'Nur Französisch, klein und schnell. Prüfstand mit echten Wortaufnahmen: 82 Punkte im Mittel, Nasalvokale werden sicher erkannt, ≈ 120 ms je Wort.',
-    sizeMb: 86,
-    sources: [{ baseUrl: RELEASE_BASE, modelFile: 'wav2vec2-french-phonemizer.onnx', vocabFile: 'wav2vec2-french-phonemizer.vocab.json' }],
+    sizeMb: 120,
+    sources: [{ baseUrl: LOCAL_BASE, modelFile: 'wav2vec2-french-phonemizer.onnx', vocabFile: 'wav2vec2-french-phonemizer.vocab.json' }],
   },
   {
     id: 'multilingual',
@@ -32,7 +37,7 @@ export const MODEL_OPTIONS: ModelOption[] = [
     description: 'Phonemerkennung für 60 Sprachen. Prüfstand mit echten Wortaufnahmen: 66 Punkte im Mittel, ≈ 350 ms je Wort. Als Vergleich und Ausweichmodell.',
     sizeMb: 190,
     sources: [
-      { baseUrl: RELEASE_BASE, modelFile: 'wav2vec2-lv-60-espeak-cv-ft.onnx', vocabFile: 'wav2vec2-lv-60-espeak-cv-ft.vocab.json' },
+      { baseUrl: LOCAL_BASE, modelFile: 'wav2vec2-lv-60-espeak-cv-ft.onnx', vocabFile: 'wav2vec2-lv-60-espeak-cv-ft.vocab.json' },
       { baseUrl: 'https://huggingface.co/onnx-community/wav2vec2-lv-60-espeak-cv-ft-ONNX/resolve/main/', modelFile: 'onnx/model_quantized.onnx', vocabFile: `${import.meta.env.BASE_URL}models/wav2vec2-lv-60-espeak-cv-ft/vocab.json` },
     ],
   },

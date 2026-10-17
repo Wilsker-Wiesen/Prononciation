@@ -90,7 +90,7 @@ Fehler von eSpeak. 113 Unit-Tests sichern Standardfälle ab.
 
 - Modelle (wählbar): `facebook/wav2vec2-lv-60-espeak-cv-ft` (300 M Parameter, 60 Sprachen, eSpeak-Phonemsatz, ONNX
   int8 ≈ 190 MB) und `Cnam-LMSSC/wav2vec2-french-phonemizer` (95 M Parameter, nur Französisch, Common Voice 13,
-  MIT; vom Workflow nach ONNX exportiert und in den MatMul-Operatoren int8-quantisiert, ≈ 86 MB, rund dreimal schneller).
+  MIT; vom Workflow nach ONNX exportiert und in den MatMul-Operatoren int8-quantisiert, ≈ 120 MB, rund dreimal schneller).
   Beide laufen mit onnxruntime-web (WebAssembly, SIMD) in einem Web Worker; der Download wird in der Cache-API abgelegt.
   Die Abbildung der Zielphone auf den Zeichensatz des jeweiligen Modells ist vokabularabhängig (ipa.ts).
 - Prüfstand: `tools/validate-model.mjs` bewertet ein Modell unter Node mit demselben Code wie die App, wahlweise mit
@@ -98,7 +98,7 @@ Fehler von eSpeak. 113 Unit-Tests sichern Standardfälle ab.
 
   | Modell | eSpeak-Synthese (60 Wörter) | echte Wortaufnahmen, Lingua Libre (10 Wörter) | Zeit je Wort (CPU) |
   | --- | --- | --- | --- |
-  | wav2vec2-french-phonemizer (86 MB) | 50,5 Punkte | **81,8 Punkte**, 8/10 ≥ 65; Nasale korrekt (bonjour → [bɔ̃ʒo], garçon → [ɡaʁsɔ̃]) | ≈ 120 ms |
+  | wav2vec2-french-phonemizer (120 MB) | 50,5 Punkte | **81,8 Punkte**, 8/10 ≥ 65; Nasale korrekt (bonjour → [bɔ̃ʒo], garçon → [ɡaʁsɔ̃]) | ≈ 120 ms |
   | wav2vec2-lv-60-espeak (190 MB) | 44,8 Punkte | 65,9 Punkte, 5/10 ≥ 65 | ≈ 350 ms |
 
   Die Lingua-Libre-Aufnahmen enthalten nur das nackte Wort (ohne Artikel), die Zielwörter des Prüfstands teils mit

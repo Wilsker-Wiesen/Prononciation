@@ -10,14 +10,14 @@ Alle Verarbeitung findet im Browser des jeweiligen Geräts statt.
 | Sprachaufnahmen der Lernenden | IndexedDB des Browsers (optional, nur letzte Aufnahme je Eintrag; abschaltbar) | nie |
 | Bewertungsergebnisse, Lernstand | IndexedDB des Browsers | nur bei ausdrücklichem Export durch die Person selbst (CSV/JSON) |
 | Inhaltspakete (Vokabeln, Texte, Audio der Lehrkraft) | IndexedDB des Browsers | nur beim Import (vom Gerät oder einer vom Nutzer angegebenen URL) |
-| Erkennungsmodell | Cache-API des Browsers | einmaliger Download von github.com (Release dieses Repositories), ersatzweise huggingface.co, oder von einem Schulserver |
+| Erkennungsmodell | Cache-API des Browsers | einmaliger Download vom selben Server wie die App (GitHub Pages), beim mehrsprachigen Modell ersatzweise huggingface.co, oder von einem Schulserver |
 | Name (freiwillig, nur für den Export) | IndexedDB | nie |
 
 Es werden keine Konten angelegt, keine Cookies gesetzt, keine Analyse-/Tracking-Dienste eingebunden.
 
 **Externe Verbindungen** entstehen nur beim Laden der App selbst (Hosting, z. B. GitHub Pages) und beim einmaligen
-Modell-Download (github.com, GitHub Inc., USA; ersatzweise huggingface.co, Hugging Face Inc., USA; oder ein selbst
-gewählter Server). Dabei werden technisch
+Modell-Download (vom selben Server wie die App, also GitHub Pages, GitHub Inc., USA; beim mehrsprachigen Modell
+ersatzweise huggingface.co, Hugging Face Inc., USA; oder ein selbst gewählter Server). Dabei werden technisch
 IP-Adresse und Browserkennung an den jeweiligen Anbieter übermittelt – wie bei jedem Website-Aufruf. Es werden dabei
 keine Aufnahmen und keine Inhalte übertragen. Für ein vollständig schulinternes Setup lassen sich App und Modell auf
 einem Schulserver hosten (siehe Lehrkraefte.md).

@@ -26,7 +26,7 @@ export function SettingsView() {
       <div className="card">
         <h2>Aussprachebewertung</h2>
         <p className="muted small">
-          Die Bewertung nutzt ein Phonem-Erkennungsmodell, das einmalig heruntergeladen (≈ 86 MB) und danach auf dem Gerät gespeichert wird.
+          Die Bewertung nutzt ein Phonem-Erkennungsmodell, das einmalig heruntergeladen (≈ 120 MB) und danach auf dem Gerät gespeichert wird.
           Deine Aufnahmen werden ausschließlich auf dem Gerät ausgewertet und nie übertragen.
         </p>
         <label className="check">

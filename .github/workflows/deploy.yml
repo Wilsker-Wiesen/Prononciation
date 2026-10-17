@@ -26,9 +26,13 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: Modelldateien aus dem Release in die Seite übernehmen
+        run: node scripts/fetch-models.mjs
       - run: npm run build
         env:
           BASE_PATH: /${{ github.event.repository.name }}/
+      - name: Modelldateien im Build prüfen
+        run: ls -la dist/models
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

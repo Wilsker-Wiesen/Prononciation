@@ -41,8 +41,9 @@ sind weder Pages noch Release-Downloads ohne Anmeldung erreichbar), und einmalig
 Der Workflow `.github/workflows/model.yml` („Modelle beschaffen und prüfen“, manuell startbar) lädt das mehrsprachige
 Phonem-Modell von Hugging Face, exportiert zusätzlich ein rein französisches wav2vec2-Modell nach ONNX, prüft beide
 mit synthetischer Sprache und mit echten Wortaufnahmen (Lingua Libre, CC BY-SA) und veröffentlicht die Dateien als
-GitHub-Release `models-v1`. Die App lädt zuerst von dort, ersatzweise von Hugging Face. Prüfberichte liegen dem Release
-bei (`report.txt`).
+GitHub-Release `models-v1`. Beim Bau der Seite kopiert `scripts/fetch-models.mjs` die Modelldateien aus dem Release nach
+`/models/`, so dass sie vom selben Ursprung wie die App kommen (direkte Release-Links scheitern im Browser, weil GitHub
+dort keinen CORS-Header sendet). Für die lokale Entwicklung: `npm run models`. Prüfberichte liegen dem Release bei.
 
 Die App funktioniert nur über HTTPS (oder `localhost`), weil Mikrofonzugriff und Service Worker das verlangen.
 
