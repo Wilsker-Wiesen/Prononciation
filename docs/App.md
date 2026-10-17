@@ -25,9 +25,8 @@ doch ein Apple-Konto eingerichtet, ist kein Umbau nötig.
 
 - echtes App-Symbol und Startbildschirm, Installation über App Store, TestFlight oder Schul-MDM
 - Ausspracheerkennung ist **im App-Paket enthalten** (kein Download von 122 MB beim ersten Start)
-- iOS gibt den Speicher einer installierten App nicht automatisch frei (bei Websites kann Safari
-  Daten nach längerer Nichtnutzung löschen)
-- Ton über den Lautsprecher, auch wenn der Stummschalter aktiv ist
+- Speicher sicher vor automatischem Löschen (für die Web-App gilt das nur, wenn sie über
+  „Zum Home-Bildschirm“ abgelegt ist; im normalen Safari-Tab kann iOS Daten nach Wochen ohne Nutzung löschen)
 
 Technik: [Capacitor 8](https://capacitorjs.com) packt die Web-App in eine native Hülle
 (`ios/`, `android/`). Mikrofonfreigabe: iOS fragt einmal mit dem Text aus `Info.plist`,
