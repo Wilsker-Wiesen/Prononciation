@@ -28,12 +28,25 @@ src/
   asr/modelLoader.ts   Download + Cache-API
   asr/worker.ts        onnxruntime-web im Worker
   asr/client.ts        Hauptthread-Schnittstelle
+  asr/models.ts        Modelloptionen mit Quellen und Ausweichquellen
+  phon/phenomena.ts    Aussprachephänomene: Erkennung im Wortschatz, Regeln, Tipps, Minimalpaare
+  game/rewards.ts      Punkte, Sterne, Level, Serien, Abzeichen
+  game/missions.ts     Missionsplanung (Beispiele, Hörquiz, Sprechrunde)
+  game/store.ts        Spielstand (IndexedDB)
+  content/bulkImport.ts Ordner-Import (Wortliste + Audio)
   state/appState.tsx   Einstellungen, Pakete, Modellstatus, Hash-Routing
   ui/                  Ansichten und Bausteine
 tools/
-  fixtures/words.txt            Testkorpus (970 Einträge)
+  fixtures/words.txt            Testkorpus G2P (970 Einträge)
+  fixtures/validation-words.txt Prüfwörter für Modelle
   espeak-reference.mjs          erzeugt eSpeak-Referenz (GPL-Werkzeug, nicht Teil der App)
   g2p-compare.ts                Vergleich G2P ↔ eSpeak:  npx tsx tools/g2p-compare.ts [--all]
+  validate-model.mjs            Prüfstand: ONNX-Modell mit eSpeak-Synthese oder WAV-Ordner bewerten
+  fetch-lingualibre.mjs         lädt CC-lizenzierte Wortaufnahmen (Lingua Libre) für den Prüfstand
+.github/workflows/
+  ci.yml       Lint, Typecheck, Tests, Build
+  deploy.yml   GitHub Pages
+  model.yml    Modelle beschaffen, exportieren, prüfen, als Release veröffentlichen (manuell)
 ```
 
 ## Befehle
@@ -62,11 +75,22 @@ Hinweis zum Hugging-Face-Repository: `onnx-community/wav2vec2-lv-60-espeak-cv-ft
 (Header `Cross-Origin-Opener-Policy: same-origin` und `Cross-Origin-Embedder-Policy: require-corp`). GitHub Pages
 setzt diese Header nicht; beim Hosting auf einem eigenen Server lohnt sich das Setzen (Erkennung 2–4× schneller).
 
+## Prüfstand mit eigenen Aufnahmen
+
+```bash
+# WAV-Dateien (beliebige Abtastrate, 16 Bit), Dateiname = gesprochenes Wort, z. B. "le collège.wav"
+npm install --no-save onnxruntime-node   # schneller als onnxruntime-web unter Node
+npx tsx tools/validate-model.mjs --model modell.onnx --vocab vocab.json --audio-dir meine-aufnahmen --report bericht.json
+```
+
+Der Bericht enthält je Wort Ziel- und erkannte Lautung, Punktwert und Diagnosen – damit lassen sich Bewertungsgewichte
+und Konfidenzschwellen an echten Schüleraufnahmen kalibrieren.
+
 ## Offene Punkte / bekannte Lücken
 
-- Das Zusammenspiel mit dem echten ONNX-Modell wurde in der Entwicklungsumgebung ohne Zugriff auf huggingface.co nur
-  mit einem synthetischen Testmodell geprüft (Ladepfad, Caching, Inferenz, Dekodierung, Anzeige). Erster Lauf mit dem
-  echten Modell: Einstellungen → Modell herunterladen; bei Fehlern Konsole prüfen (Eingabenamen, Opset).
+- Beide Modelle wurden in GitHub Actions mit onnxruntime-node geladen und mit eSpeak-Synthese sowie echten
+  Wortaufnahmen (Lingua Libre) geprüft; Ergebnisse siehe Release `models-v1` (report.txt). Der Browserpfad
+  (Worker, Cache, Dekodierung, Anzeige) wurde mit einem synthetischen Testmodell geprüft.
 - Die Gewichte der Bewertung (`PHONEME_WEIGHT`, `SIMILARITY_SCALE`, Alignment-Kosten) sind Heuristiken, die an
   Schüleraufnahmen kalibriert werden sollten.
 - Das G2P-Modul kennt keinen Wortakzent; prosodische Bewertung fehlt.
