@@ -141,6 +141,8 @@ function MissionRun({ id }: { id: PhenomenonId }) {
   if (stage === 'listen') {
     const task: ListeningTask | undefined = plan.listening[li];
     if (!task) { setStage('speak'); return null; }
+    const sameSound = task.options.length === 2 && task.options[0]!.ipa === task.options[1]!.ipa;
+    const isCorrect = (i: number) => sameSound || i === task.correct;
     return (
       <div>
         <div className="row between"><span className="muted small">Hörquiz {li + 1} / {plan.listening.length}</span><span className="muted small">{listenHits} richtig</span></div>
@@ -149,10 +151,10 @@ function MissionRun({ id }: { id: PhenomenonId }) {
           <button className="btn big" onClick={() => void playText(task.play.text, task.play.audioId, task.play.start, task.play.end)}><Icon.play /> Abspielen</button>
           <div className="row" style={{ marginTop: 14, gap: 14 }}>
             {task.options.map((o, i) => {
-              const state = picked === null ? '' : i === task.correct ? 'good' : i === picked ? 'bad' : '';
+              const state = picked === null ? '' : isCorrect(i) ? 'good' : i === picked ? 'bad' : '';
               return (
                 <button key={i} className={`btn big ${state === 'good' ? 'primary' : ''}`} style={state === 'bad' ? { borderColor: 'var(--bad)', color: 'var(--bad)' } : undefined} disabled={picked !== null}
-                  onClick={() => { setPicked(i); if (i === task.correct) setListenHits((h) => h + 1); }}>
+                  onClick={() => { setPicked(i); if (isCorrect(i)) setListenHits((h) => h + 1); }}>
                   <span>
                     <div>{o.text}</div>
                     <div className="small muted">[{o.ipa}]{o.de ? ` · ${o.de}` : ''}</div>
@@ -163,7 +165,7 @@ function MissionRun({ id }: { id: PhenomenonId }) {
           </div>
           {picked !== null && (
             <div style={{ marginTop: 12 }}>
-              <div className={`badge ${picked === task.correct ? 'good' : 'bad'}`}>{picked === task.correct ? 'Richtig!' : `Es war „${task.options[task.correct]!.text}“.`}</div>
+              <div className={`badge ${isCorrect(picked) ? 'good' : 'bad'}`}>{sameSound ? 'Richtig – beide klingen genau gleich! Nur die Schrift unterscheidet sie.' : isCorrect(picked) ? 'Richtig!' : `Es war „${task.options[task.correct]!.text}“.`}</div>
               <div className="row" style={{ marginTop: 10 }}>
                 <button className="btn primary" onClick={() => { setPicked(null); if (li + 1 < plan.listening.length) setLi(li + 1); else setStage('speak'); }}>Weiter <Icon.next /></button>
               </div>

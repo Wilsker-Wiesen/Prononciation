@@ -17,7 +17,8 @@ export type PhenomenonId =
   | 'h'
   | 'glide-ui'
   | 'eu'
-  | 'oi';
+  | 'oi'
+  | 'final-voicing';
 
 export interface MinimalPair {
   a: string;
@@ -97,6 +98,9 @@ export const PHENOMENA: Phenomenon[] = [
     pairs: [
       { a: 'il chante', b: 'ils chantent', ipaA: 'il ʃɑ̃t', ipaB: 'il ʃɑ̃t', deA: 'er singt', deB: 'sie singen' },
       { a: 'elle parle', b: 'elles parlent', ipaA: 'ɛl paʁl', ipaB: 'ɛl paʁl', deA: 'sie spricht', deB: 'sie sprechen' },
+      { a: 'ils parlent', b: 'parler', ipaA: 'il paʁl', ipaB: 'paʁle', deA: 'sie sprechen', deB: 'sprechen' },
+      { a: 'ils trouvent', b: 'souvent', ipaA: 'il tʁuv', ipaB: 'suvɑ̃', deA: 'sie finden', deB: 'oft' },
+      { a: 'ils chantent', b: 'chanter', ipaA: 'il ʃɑ̃t', ipaB: 'ʃɑ̃te', deA: 'sie singen', deB: 'singen' },
     ],
     year: 1,
   },
@@ -120,6 +124,11 @@ export const PHENOMENA: Phenomenon[] = [
       { a: 'blanc', b: 'blond', ipaA: 'blɑ̃', ipaB: 'blɔ̃', deA: 'weiß', deB: 'blond' },
       { a: 'sans', b: 'son', ipaA: 'sɑ̃', ipaB: 'sɔ̃', deA: 'ohne', deB: 'sein' },
       { a: 'main', b: 'mon', ipaA: 'mɛ̃', ipaB: 'mɔ̃', deA: 'Hand', deB: 'mein' },
+      { a: 'vent', b: 'vont', ipaA: 'vɑ̃', ipaB: 'vɔ̃', deA: 'Wind', deB: 'sie gehen' },
+      { a: 'lent', b: 'long', ipaA: 'lɑ̃', ipaB: 'lɔ̃', deA: 'langsam', deB: 'lang' },
+      { a: 'dans', b: 'dont', ipaA: 'dɑ̃', ipaB: 'dɔ̃', deA: 'in', deB: 'dessen' },
+      { a: 'temps', b: 'teint', ipaA: 'tɑ̃', ipaB: 'tɛ̃', deA: 'Zeit/Wetter', deB: 'Teint' },
+      { a: 'brun', b: 'brune', ipaA: 'bʁœ̃', ipaB: 'bʁyn', deA: 'braun (m.)', deB: 'braun (w.)' },
     ],
     year: 1,
   },
@@ -202,6 +211,8 @@ export const PHENOMENA: Phenomenon[] = [
     pairs: [
       { a: 'les amis', b: 'les mamies', ipaA: 'lez‿ami', ipaB: 'le mami', deA: 'die Freunde', deB: 'die Omas' },
       { a: 'ils ont', b: 'ils sont', ipaA: 'ilz‿ɔ̃', ipaB: 'il sɔ̃', deA: 'sie haben', deB: 'sie sind' },
+      { a: 'vous avez', b: 'vous savez', ipaA: 'vuz‿ave', ipaB: 'vu save', deA: 'ihr habt', deB: 'ihr wisst' },
+      { a: 'elles aiment', b: 'elles sèment', ipaA: 'ɛlz‿ɛm', ipaB: 'ɛl sɛm', deA: 'sie lieben', deB: 'sie säen' },
     ],
     year: 1,
   },
@@ -248,6 +259,26 @@ export const PHENOMENA: Phenomenon[] = [
     year: 1,
   },
   {
+    id: 'final-voicing',
+    title: 'Stimmhafte Konsonanten am Wortende',
+    short: 'Auslaut',
+    emoji: '🔊',
+    rule: 'b, d, g, v, z und j/g [ʒ] bleiben am Wortende stimmhaft: „rouge“ endet auf [ʒ], „douze“ auf [z], „grande“ auf [d]. Im Deutschen werden sie hart („Rad“ = „Rat“), im Französischen nicht.',
+    tip: 'Leg die Hand an den Hals: Beim letzten Laut muss es noch summen. Zieh den Vokal davor etwas in die Länge.',
+    pitfall: '„rouge“ als „rusch“, „douze“ als „duss“, „grande“ als „grant“.',
+    examples: [{ fr: 'rouge', ipa: 'ʁuʒ' }, { fr: 'douze', ipa: 'duz' }, { fr: 'grande', ipa: 'ɡʁɑ̃d' }, { fr: 'neuve', ipa: 'nœv' }],
+    pairs: [
+      { a: 'douce', b: 'douze', ipaA: 'dus', ipaB: 'duz', deA: 'sanft (w.)', deB: 'zwölf' },
+      { a: 'bouche', b: 'bouge', ipaA: 'buʃ', ipaB: 'buʒ', deA: 'Mund', deB: 'beweg dich' },
+      { a: 'neuf', b: 'neuve', ipaA: 'nœf', ipaB: 'nœv', deA: 'neu (m.)', deB: 'neu (w.)' },
+      { a: 'vite', b: 'vide', ipaA: 'vit', ipaB: 'vid', deA: 'schnell', deB: 'leer' },
+      { a: 'poisson', b: 'poison', ipaA: 'pwasɔ̃', ipaB: 'pwazɔ̃', deA: 'Fisch', deB: 'Gift' },
+      { a: 'dessert', b: 'désert', ipaA: 'desɛʁ', ipaB: 'dezɛʁ', deA: 'Nachtisch', deB: 'Wüste' },
+      { a: 'casse', b: 'case', ipaA: 'kas', ipaB: 'kaz', deA: 'Bruch', deB: 'Kästchen' },
+    ],
+    year: 2,
+  },
+  {
     id: 'oi',
     title: 'oi wie [wa]',
     short: 'oi [wa]',
@@ -285,6 +316,8 @@ export function detectPhenomena(t: Transcription): Set<PhenomenonId> {
     if (ipa.includes('ɥ')) out.add('glide-ui');
     if (ipa.includes('ø') || ipa.includes('œ')) out.add('eu');
     if (/oi/.test(lower) && ipa.includes('w')) out.add('oi');
+    const last = ipa[ipa.length - 1];
+    if (last && ['b', 'd', 'ɡ', 'v', 'z', 'ʒ'].includes(last)) out.add('final-voicing');
   }
   return out;
 }
