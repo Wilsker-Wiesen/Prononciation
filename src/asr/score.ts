@@ -117,6 +117,12 @@ export function scoreAlignment(t: Transcription, targets: AlignTarget[], flat: (
       if (e.heard.length) pr.heard = e.heard.join('');
       if (e.conf.length) pr.conf = e.conf.reduce((a, b) => a + b, 0) / e.conf.length;
     }
+    // Verbendungen -ez, -er, -é: geschlossenes [e]; offenes [ɛ] ist hier ein typischer Lesefehler
+    const word = t.words[p.wordIndex];
+    if (p.ipa === 'e' && pr.heard === 'ɛ' && word && /(ez|er|é|és|ée|ées)$/.test(word.lower) && p.end >= word.end - 2) {
+      pr.score = Math.min(pr.score, 65);
+      pr.status = 'weak';
+    }
     if (pr.status === 'skipped') {
       // fakultativ, nicht realisiert: nicht werten
     } else if (p.optional && pr.status !== 'missing') {
@@ -137,9 +143,18 @@ export function scoreAlignment(t: Transcription, targets: AlignTarget[], flat: (
     const ratedPhones = w.phones.filter((p) => p.status !== 'skipped');
     w.score = ratedPhones.length ? Math.round(ratedPhones.reduce((a, p) => a + p.score, 0) / ratedPhones.length) : 100;
   }
-  // Einfügungen: kleiner Abzug (Schwa und Zögerlaute halb)
-  const insPenalty = insertions.reduce((a, ins) => a + (ins.ipa === 'ə' || ins.ipa === 'ɐ' ? 1.5 : 3), 0);
+  // Einfügungen: kleiner Abzug (Schwa und Zögerlaute halb). Gesprochene stumme Endungen
+  // (petit-t, parlez-z, parlent-ɑ̃) sind der Kern der Leseaussprache und wiegen schwer.
+  const lastFlatOfWord = new Map<number, number>();
+  flat.forEach((p, i) => lastFlatOfWord.set(p.wordIndex, i));
+  const insPenalty = insertions.reduce((a, ins) => {
+    const w = ins.afterWord >= 0 ? t.words[ins.afterWord] : undefined;
+    const atWordEnd = w !== undefined && ins.afterTarget === lastFlatOfWord.get(ins.afterWord);
+    const silentEnding = atWordEnd && w && (w.silentFinal || (/ent$/.test(w.lower) && w.phones[w.phones.length - 1]?.ipa !== 'ɑ̃'));
+    if (silentEnding && ins.ipa !== 'ə') return a + 15;
+    return a + (ins.ipa === 'ə' || ins.ipa === 'ɐ' ? 1.5 : 3);
+  }, 0);
   const base = rated ? sum / rated : 0;
-  const overall = Math.max(0, Math.min(100, Math.round(base - Math.min(20, insPenalty))));
+  const overall = Math.max(0, Math.min(100, Math.round(base - Math.min(35, insPenalty))));
   return { overall, words, insertions, accuracy: rated ? okCount / rated : 0, rated };
 }

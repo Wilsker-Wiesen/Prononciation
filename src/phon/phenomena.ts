@@ -19,7 +19,8 @@ export type PhenomenonId =
   | 'eu'
   | 'oi'
   | 'final-voicing'
-  | 'plural-3';
+  | 'plural-3'
+  | 'verb-endings';
 
 export interface MinimalPair {
   a: string;
@@ -292,6 +293,26 @@ export const PHENOMENA: Phenomenon[] = [
     year: 1,
   },
   {
+    id: 'verb-endings',
+    title: 'Verbendungen: -ez, -er, -é, -ons',
+    short: '-ez/-ons',
+    emoji: '🔚',
+    rule: '„vous parlez“, „parler“ und „parlé“ klingen gleich: [paʁle], mit geschlossenem [e]. Das z von -ez und das r von -er sind stumm. Bei „nous parlons“ endet das Wort auf dem Nasal [ɔ̃]: kein [n], kein [s].',
+    tip: 'Für [e] die Lippen breit ziehen wie beim Lächeln, nicht wie beim deutschen „ä“. Nach -ez und -ons sofort aufhören.',
+    pitfall: '„vous parlez“ als [paʁlɛts] mit gesprochenem z, „nous parlons“ als [paʁlɔns]. Vor Vokal wird das z gebunden: „vous‿avez“ [vuzave].',
+    examples: [{ fr: 'vous parlez', ipa: 'vu paʁle' }, { fr: 'parler', ipa: 'paʁle' }, { fr: 'nous parlons', ipa: 'nu paʁlɔ̃' }, { fr: 'vous avez', ipa: 'vuz‿ave' }],
+    pairs: [
+      { a: 'vous parlez', b: 'parler', ipaA: 'vu paʁle', ipaB: 'paʁle', deA: 'ihr sprecht', deB: 'sprechen' },
+      { a: 'vous chantez', b: 'chanté', ipaA: 'vu ʃɑ̃te', ipaB: 'ʃɑ̃te', deA: 'ihr singt', deB: 'gesungen' },
+      { a: 'nous parlons', b: 'ils parlent', ipaA: 'nu paʁlɔ̃', ipaB: 'il paʁl', deA: 'wir sprechen', deB: 'sie sprechen' },
+      { a: 'nous chantons', b: 'ils chantent', ipaA: 'nu ʃɑ̃tɔ̃', ipaB: 'il ʃɑ̃t', deA: 'wir singen', deB: 'sie singen' },
+      { a: 'vous êtes', b: 'vous faites', ipaA: 'vuz‿ɛt', ipaB: 'vu fɛt', deA: 'ihr seid', deB: 'ihr macht' },
+      { a: 'vous avez', b: 'vous savez', ipaA: 'vuz‿ave', ipaB: 'vu save', deA: 'ihr habt', deB: 'ihr wisst' },
+      { a: 'vous parlez', b: 'vous parlait', ipaA: 'vu paʁle', ipaB: 'vu paʁlɛ', deA: 'ihr sprecht', deB: '(Kontrast [e]/[ɛ])' },
+    ],
+    year: 1,
+  },
+  {
     id: 'final-voicing',
     title: 'Stimmhafte Konsonanten am Wortende',
     short: 'Auslaut',
@@ -350,6 +371,8 @@ export function detectPhenomena(t: Transcription): Set<PhenomenonId> {
     if (ipa.includes('ø') || ipa.includes('œ')) out.add('eu');
     if (/oi/.test(lower) && ipa.includes('w')) out.add('oi');
     if ((lower === 'ils' || lower === 'elles') && t.words.indexOf(w) < t.words.length - 1) out.add('plural-3');
+    const prevLower = t.words[t.words.indexOf(w) - 1]?.lower;
+    if ((prevLower === 'vous' && /ez$/.test(lower)) || (prevLower === 'nous' && /ons$/.test(lower))) out.add('verb-endings');
     const last = ipa[ipa.length - 1];
     if (last && ['b', 'd', 'ɡ', 'v', 'z', 'ʒ'].includes(last)) out.add('final-voicing');
   }

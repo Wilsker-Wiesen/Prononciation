@@ -21,6 +21,7 @@ export type FindingId =
   | 'glottal-stop'
   | 'plural-stem'
   | 'contrast'
+  | 'ez-ending'
   | 'glide-ui'
   | 'ch'
   | 'e-ouvert-ferme'
@@ -88,6 +89,10 @@ const TEXT: Record<FindingId, { title: string; tip: string }> = {
   'plural-stem': {
     title: 'Pluralstamm hörbar machen',
     tip: 'Viele Verben haben im Plural einen eigenen Stamm: il prend – ils prennent [pʁɛn], il peut – ils peuvent [pœv], il finit – ils finissent [finis]. Der Konsonant vor -ent wird gesprochen, nur -ent selbst ist stumm.',
+  },
+  'ez-ending': {
+    title: 'Endung -ez, -er, -é = geschlossenes [e]',
+    tip: '„vous parlez“, „parler“ und „parlé“ klingen gleich: [paʁle]. Geschlossenes e wie in „See“, Lippen breit. Das z von -ez und das r von -er sind stumm.',
   },
   contrast: {
     title: 'Verwechslungsgefahr',
@@ -219,6 +224,10 @@ export function diagnose(t: Transcription, result: ScoreResult): Finding[] {
           return;
         }
       }
+      if (p.status === 'weak' && heard === 'ɛ' && p.ipa === 'e' && /(ez|er|é|és|ée|ées)$/.test(pw.lower) && pi === lastIdx) {
+        add(mk('ez-ending', 1, wi, w.orth, `„${w.orth}“ endet auf geschlossenes [e], gehört wurde offenes [ɛ].`, p.ipa, heard));
+        return;
+      }
       if (p.status !== 'sub' || !heard) {
         if (p.status === 'missing' && !p.optional) add(mk('missing-sound', 0, wi, w.orth, `In „${w.orth}“ wurde [${p.ipa}] nicht gehört.`, p.ipa));
         return;
@@ -248,6 +257,10 @@ export function diagnose(t: Transcription, result: ScoreResult): Finding[] {
       }
       if (p.ipa === 'ʃ' && ['ç', 'x', 'k', 'tʃ'].includes(heard)) {
         add(mk('ch', 1, wi, w.orth, `In „${w.orth}“: „ch“ wurde als [${heard}] gesprochen.`, p.ipa, heard));
+        return;
+      }
+      if (p.ipa === 'e' && heard === 'ɛ' && /(ez|er|é|és|ée|ées)$/.test(pw.lower) && pi === lastIdx) {
+        add(mk('ez-ending', 1, wi, w.orth, `„${w.orth}“ endet auf geschlossenes [e], gehört wurde offenes [ɛ].`, p.ipa, heard));
         return;
       }
       if ((p.ipa === 'e' && heard === 'ɛ') || (p.ipa === 'ɛ' && heard === 'e')) {

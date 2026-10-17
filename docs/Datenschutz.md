@@ -36,6 +36,13 @@ Schulträger kann eine Verfahrensbeschreibung gewünscht sein; dieses Dokument k
 
 ## Urheberrecht
 
+**Was öffentlich ist und was nicht.** Öffentlich (GitHub-Repository und die Seite auf github.io) sind ausschließlich der
+Programmcode, die eigenen Beispiel- und Konjugationsinhalte und die frei lizenzierten Erkennungsmodelle. Verlagsmaterial
+wird nie ins Repository oder auf die Seite geladen: Vokabellisten, Texte und Audiodateien eines Lehrwerks gelangen nur als
+Inhaltspaket (ZIP) in die App, und zwar lokal in den Browser des jeweiligen Geräts. Die Lehrkraft verteilt das Paket über
+einen geschlossenen Kanal (Moodle/Logineo, Schulcloud, AirDrop), nicht über einen öffentlichen Link. Das Repository
+schließt die Arbeitsordner `private/`, `klett/` und `schueleraufnahmen/` sowie ZIP-Dateien technisch aus (`.gitignore`).
+
 - Die App enthält **kein Material des Ernst Klett Verlags** oder anderer Verlage. Wortschatz, Texte und Audio eines
   Lehrwerks werden ausschließlich von der Lehrkraft als Paket eingebracht.
 - Wortlisten als solche (Vokabel + Übersetzung) sind in der Regel nicht schutzfähig; die redaktionelle Auswahl und

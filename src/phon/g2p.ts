@@ -217,7 +217,7 @@ const RULES: Rule[] = [
   { g: 'ier', right: END_S, out: (c) => (afterObstruentLiquid(c.before) ? 'i j? e' : 'j e') },
   { g: 'ière', right: END_S, out: (c) => (afterObstruentLiquid(c.before) ? 'i j? ɛ ʁ' : 'j ɛ ʁ') },
   { g: 'er', right: END_S, out: (c) => (c.before.length <= 1 ? 'ɛ ʁ' : 'e') },
-  { g: 'ez', right: END, out: 'e' },
+  { g: 'ez', right: END, out: (c) => { c.latent = 'z'; c.silentFinal = 'z'; return 'e'; } },
   { g: 'et', right: END_S, out: 'ɛ' },
   { g: 'es', right: END, cond: (c) => hasVowel(c.before), out: finalSilent('z', 'es') },
   { g: 'aient', right: END, out: 'ɛ' },

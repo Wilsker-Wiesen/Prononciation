@@ -141,6 +141,22 @@ describe('Bewertung und Diagnose', () => {
     const same = assess('ils parlent', rec('ilpaʁl'), undefined, undefined, { contrast: 'il parle' });
     expect(same.contrast).toBeUndefined();
   });
+  it('bewertet vous parlez mit gesprochenem z oder offenem e deutlich schlechter', () => {
+    expect(assess('vous parlez', rec('vupaʁle')).overall).toBeGreaterThanOrEqual(95);
+    const z = assess('vous parlez', rec('vupaʁlez'));
+    expect(z.findings.map((f) => f.id)).toContain('silent-final');
+    expect(z.overall).toBeLessThan(85);
+    const ts = assess('vous parlez', rec('vupaʁlɛts'));
+    expect(ts.overall).toBeLessThan(75);
+    const open = assess('vous parlez', rec('vupaʁlɛ'));
+    expect(open.findings.map((f) => f.id)).toContain('ez-ending');
+    expect(open.overall).toBeLessThan(95);
+  });
+  it('bewertet nous parlons mit [n] oder [s] schlechter', () => {
+    expect(assess('nous parlons', rec('nupaʁlɔ̃')).overall).toBeGreaterThanOrEqual(95);
+    expect(assess('nous parlons', rec('nupaʁlɔ̃s')).overall).toBeLessThan(85);
+    expect(assess('nous parlons', rec('nupaʁlɔns')).overall).toBeLessThan(80);
+  });
   it('erkennt gerolltes r', () => {
     const a = assess('rue', rec('ry'));
     expect(a.findings.map((f) => f.id)).toContain('r');

@@ -10,3 +10,10 @@ public/models/**/*.onnx
 public/models/*.vocab.json
 public/models/test/
 tools/out/
+
+# Verlagsmaterial (Klett u. a.) und Schüleraufnahmen gehören NIE ins öffentliche Repository.
+# Arbeitsordner für private Inhalte:
+private/
+klett/
+*.zip
+schueleraufnahmen/
