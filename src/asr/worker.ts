@@ -4,16 +4,16 @@
  */
 import * as ort from 'onnxruntime-web/wasm';
 import { ctcGreedyDecode, type RecognizedPhone } from './ctc';
-import { fetchCached, parseVocab, type ModelSource } from './modelLoader';
+import { fetchCached, parseVocab, resolveUrl, type ModelSource } from './modelLoader';
 
 export type WorkerRequest =
-  | { type: 'load'; seq: number; source: ModelSource; vocabUrl: string; numThreads: number }
+  | { type: 'load'; seq: number; sources: ModelSource[]; numThreads: number }
   | { type: 'recognize'; seq: number; pcm: Float32Array }
   | { type: 'unload'; seq: number };
 
 export type WorkerResponse =
   | { type: 'progress'; file: string; loaded: number; total: number }
-  | { type: 'loaded'; seq: number; vocabSize: number; vocab: string[]; ms: number }
+  | { type: 'loaded'; seq: number; vocabSize: number; vocab: string[]; ms: number; source?: ModelSource }
   | { type: 'result'; seq: number; phones: RecognizedPhone[]; frames: number; ms: number }
   | { type: 'error'; seq: number; message: string };
 
@@ -26,15 +26,21 @@ async function load(req: Extract<WorkerRequest, { type: 'load' }>): Promise<void
   const t0 = performance.now();
   ort.env.wasm.numThreads = req.numThreads;
   ort.env.wasm.proxy = false;
-  const vocabBuf = await fetchCached(req.vocabUrl, undefined, 'Vokabular');
-  vocab = parseVocab(JSON.parse(new TextDecoder().decode(vocabBuf)));
-  const modelUrl = req.source.baseUrl + req.source.modelFile;
-  const modelBuf = await fetchCached(modelUrl, (p) => post({ type: 'progress', ...p, file: 'Modell' }), 'Modell');
-  session = await ort.InferenceSession.create(modelBuf, {
-    executionProviders: ['wasm'],
-    graphOptimizationLevel: 'all',
-  });
-  post({ type: 'loaded', seq: req.seq, vocabSize: vocab.length, vocab, ms: Math.round(performance.now() - t0) });
+  const errors: string[] = [];
+  for (const source of req.sources) {
+    try {
+      const vocabBuf = await fetchCached(resolveUrl(source.baseUrl, source.vocabFile), undefined, 'Vokabular');
+      const v = parseVocab(JSON.parse(new TextDecoder().decode(vocabBuf)));
+      const modelBuf = await fetchCached(resolveUrl(source.baseUrl, source.modelFile), (p) => post({ type: 'progress', ...p, file: 'Modell' }), 'Modell');
+      session = await ort.InferenceSession.create(modelBuf, { executionProviders: ['wasm'], graphOptimizationLevel: 'all' });
+      vocab = v;
+      post({ type: 'loaded', seq: req.seq, vocabSize: vocab.length, vocab, ms: Math.round(performance.now() - t0), source });
+      return;
+    } catch (e) {
+      errors.push(`${source.baseUrl}${source.modelFile}: ${e instanceof Error ? e.message : String(e)}`);
+    }
+  }
+  throw new Error(`Kein Modell ladbar.\n${errors.join('\n')}`);
 }
 
 /** Wav2Vec2-Vorverarbeitung: Mittelwert 0, Varianz 1 (feature_extractor do_normalize). */

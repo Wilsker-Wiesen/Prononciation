@@ -64,14 +64,16 @@ export class PhonemeRecognizer {
     });
   }
 
-  async load(source: ModelSource, vocabUrl: string): Promise<void> {
+  activeSource: ModelSource | null = null;
+
+  async load(sources: ModelSource[]): Promise<void> {
     if (this.state === 'ready') return;
     this.state = 'loading';
     this.lastError = null;
     const threads = typeof crossOriginIsolated !== 'undefined' && crossOriginIsolated ? Math.min(4, navigator.hardwareConcurrency || 1) : 1;
     try {
-      const res = await this.send({ type: 'load', seq: ++this.seq, source, vocabUrl, numThreads: threads });
-      if (res.type === 'loaded') { this.vocabSize = res.vocabSize; this.vocab = new Set(res.vocab.map((v) => v.replace(/[ːˈˌ]/g, ''))); }
+      const res = await this.send({ type: 'load', seq: ++this.seq, sources, numThreads: threads });
+      if (res.type === 'loaded') { this.vocabSize = res.vocabSize; this.vocab = new Set(res.vocab.map((v) => v.replace(/[ːˈˌ]/g, ''))); this.activeSource = res.source ?? null; }
       this.state = 'ready';
     } catch (e) {
       this.state = 'error';

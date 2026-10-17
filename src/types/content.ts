@@ -125,9 +125,12 @@ export interface StoredRecording {
 export interface Settings {
   /** Phonem-Bewertung mit lokalem Modell aktiv */
   assessmentEnabled: boolean;
-  /** Quelle des Modells: Hugging Face Hub oder eigene URL (Schulserver) */
+  /** gewähltes Modell (siehe asr/models.ts) */
+  modelId: 'multilingual' | 'french' | 'custom';
+  /** eigene Quelle (nur bei modelId = custom) */
   modelBaseUrl: string;
   modelFile: string;
+  modelVocabFile: string;
   /** Aufnahmen behalten (nur lokal) */
   keepRecordings: boolean;
   /** System-Sprachausgabe als Ersatz, wenn keine Modellaufnahme vorliegt */
@@ -142,8 +145,10 @@ export interface Settings {
 
 export const DEFAULT_SETTINGS: Settings = {
   assessmentEnabled: true,
-  modelBaseUrl: 'https://huggingface.co/onnx-community/wav2vec2-lv-60-espeak-cv-ft-ONNX/resolve/main/',
-  modelFile: 'onnx/model_quantized.onnx',
+  modelId: 'multilingual',
+  modelBaseUrl: '',
+  modelFile: 'model.onnx',
+  modelVocabFile: 'vocab.json',
   keepRecordings: true,
   ttsFallback: true,
   teacherMode: false,

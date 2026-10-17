@@ -11,6 +11,13 @@ export interface ModelSource {
   baseUrl: string;
   /** Pfad der ONNX-Datei relativ zur Basis */
   modelFile: string;
+  /** Vokabular (vocab.json oder tokenizer.json), relativ zur Basis oder absolut */
+  vocabFile: string;
+}
+
+export function resolveUrl(base: string, file: string): string {
+  if (/^https?:\/\//.test(file) || file.startsWith('/')) return file;
+  return base + file;
 }
 
 export type ProgressFn = (info: { file: string; loaded: number; total: number }) => void;

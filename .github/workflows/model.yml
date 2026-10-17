@@ -101,6 +101,37 @@ jobs:
           name: french
           path: out/french
 
+  real-speech:
+    name: Prüfstand mit echten Aufnahmen (Lingua Libre)
+    needs: [multilingual, french]
+    if: ${{ always() && needs.multilingual.result == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm install --no-save onnxruntime-node
+      - uses: actions/download-artifact@v4
+        with:
+          path: assets
+      - name: Aufnahmen laden (Wikimedia Commons, CC BY-SA)
+        run: node tools/fetch-lingualibre.mjs tools/fixtures/validation-words.txt out/real-audio 80
+      - name: Prüfstand mehrsprachig
+        run: npx tsx tools/validate-model.mjs --model assets/multilingual/wav2vec2-lv-60-espeak-cv-ft.onnx --vocab assets/multilingual/wav2vec2-lv-60-espeak-cv-ft.vocab.json --audio-dir out/real-audio --report out/report-real-multilingual.json --min-mean 0 2>&1 | grep -v '^var ' | tee out/report-real-multilingual.txt
+      - name: Prüfstand französisch
+        if: ${{ needs.french.result == 'success' }}
+        run: npx tsx tools/validate-model.mjs --model assets/french/wav2vec2-french-phonemizer.onnx --vocab assets/french/wav2vec2-french-phonemizer.vocab.json --audio-dir out/real-audio --report out/report-real-french.json --min-mean 0 2>&1 | grep -v '^var ' | tee out/report-real-french.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: real-speech-reports
+          path: |
+            out/report-real-*.txt
+            out/report-real-*.json
+            out/real-audio/QUELLEN.txt
+
   release:
     name: Als Release veröffentlichen
     needs: [multilingual, french]

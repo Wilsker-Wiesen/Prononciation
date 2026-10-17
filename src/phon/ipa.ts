@@ -117,8 +117,8 @@ export function toModelSpace<T extends { ipa: string; optional?: boolean }>(phon
 
 /** Modell-Ausgabe (eSpeak-Zeichensatz) in Standard-IPA rückübersetzen, soweit eindeutig. */
 export function normalizeModelPhone(p: string): string {
-  // Längen- und Betonungszeichen entfernen
-  const base = p.replace(/[ːˈˌ]/g, '');
+  // Längen-, Betonungs-, Ton- und Palatalisierungszeichen entfernen (Modell ist mehrsprachig)
+  const base = p.replace(/[ːˈˌ0-9.ʲ\u0329\u02B0]/g, '');
   if (base === 'g') return 'ɡ';
   if (base === 'ɹ' || base === 'ɾ' || base === 'ʀ') return base === 'ʀ' ? 'ʁ' : base;
   return base;

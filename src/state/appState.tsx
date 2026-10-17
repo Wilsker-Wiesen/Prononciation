@@ -3,6 +3,8 @@
  */
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, useSyncExternalStore, type ReactNode } from 'react';
 import { recognizer, type LoadProgress, type ModelState } from '../asr/client';
+import { modelOption } from '../asr/models';
+import type { ModelSource } from '../asr/modelLoader';
 import { demoPack, DEMO_PACK_ID } from '../content/demo';
 import { getPack, listPacks, loadSettings, savePack, saveSettings } from '../storage/db';
 import { DEFAULT_SETTINGS, type Pack, type Settings } from '../types/content';
@@ -91,9 +93,8 @@ export function loadModel(settings: Settings): Promise<void> {
   if (recognizer.state === 'ready') return Promise.resolve();
   if (loadPromise) return loadPromise;
   setModelStatus({ state: 'loading', error: null, progress: null });
-  const vocabUrl = `${import.meta.env.BASE_URL}models/wav2vec2-lv-60-espeak-cv-ft/vocab.json`;
   loadPromise = recognizer
-    .load({ baseUrl: settings.modelBaseUrl, modelFile: settings.modelFile }, vocabUrl)
+    .load(modelSources(settings))
     .then(() => setModelStatus({ state: 'ready', progress: null }))
     .catch((e: unknown) => {
       setModelStatus({ state: 'error', error: e instanceof Error ? e.message : String(e) });
@@ -101,6 +102,14 @@ export function loadModel(settings: Settings): Promise<void> {
     })
     .finally(() => { loadPromise = null; });
   return loadPromise;
+}
+
+export function modelSources(settings: Settings): ModelSource[] {
+  if (settings.modelId === 'custom') {
+    const base = settings.modelBaseUrl.endsWith('/') ? settings.modelBaseUrl : `${settings.modelBaseUrl}/`;
+    return [{ baseUrl: base, modelFile: settings.modelFile, vocabFile: settings.modelVocabFile }];
+  }
+  return modelOption(settings.modelId).sources;
 }
 
 export async function unloadModel(): Promise<void> {

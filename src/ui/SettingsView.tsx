@@ -1,9 +1,9 @@
 /** Einstellungen: Bewertungsmodell, Datenschutz, Daten auf dem Gerät. */
 import { useEffect, useState } from 'react';
-import { deleteModelCache, isModelCached } from '../asr/modelLoader';
-import { loadModel, unloadModel, useApp, useModelStatus } from '../state/appState';
+import { deleteModelCache, isModelCached, resolveUrl } from '../asr/modelLoader';
+import { MODEL_OPTIONS, modelOption } from '../asr/models';
+import { loadModel, modelSources, unloadModel, useApp, useModelStatus } from '../state/appState';
 import { clearRecordings, storageEstimate } from '../storage/db';
-import { DEFAULT_SETTINGS } from '../types/content';
 import { formatBytes } from './components';
 
 export function SettingsView() {
@@ -14,10 +14,10 @@ export function SettingsView() {
   const [advanced, setAdvanced] = useState(false);
 
   const refresh = () => {
-    isModelCached({ baseUrl: settings.modelBaseUrl, modelFile: settings.modelFile }).then(setCached);
+    Promise.all(modelSources(settings).map((src) => isModelCached(src))).then((r) => setCached(r.some(Boolean)));
     storageEstimate().then(setStorage);
   };
-  useEffect(refresh, [settings.modelBaseUrl, settings.modelFile, model.state]);
+  useEffect(refresh, [settings.modelId, settings.modelBaseUrl, settings.modelFile, settings.modelVocabFile, model.state]);
 
   return (
     <div>
@@ -33,6 +33,13 @@ export function SettingsView() {
           <input type="checkbox" checked={settings.assessmentEnabled} onChange={(e) => void updateSettings({ assessmentEnabled: e.target.checked })} />
           Bewertung der Laute aktivieren
         </label>
+        <label className="field" style={{ marginTop: 10 }}>
+          Modell
+          <select value={settings.modelId} disabled={model.state === 'loading'} onChange={async (e) => { await unloadModel(); void updateSettings({ modelId: e.target.value as typeof settings.modelId }); }}>
+            {MODEL_OPTIONS.map((m) => <option key={m.id} value={m.id}>{m.label}</option>)}
+          </select>
+        </label>
+        <p className="muted small">{modelOption(settings.modelId).description}</p>
         <div className="row" style={{ marginTop: 10 }}>
           <span>
             Status: <b>{model.state === 'ready' ? 'bereit' : model.state === 'loading' ? 'wird geladen' : model.state === 'error' ? 'Fehler' : cached ? 'gespeichert, nicht geladen' : 'nicht heruntergeladen'}</b>
@@ -55,19 +62,30 @@ export function SettingsView() {
         <button className="btn ghost small" style={{ marginTop: 8 }} onClick={() => setAdvanced(!advanced)}>{advanced ? 'Erweitert ausblenden' : 'Erweitert …'}</button>
         {advanced && (
           <div className="stack" style={{ marginTop: 8 }}>
-            <label className="field">
-              Modell-Basis-URL (Hugging Face oder eigener Server)
-              <input value={settings.modelBaseUrl} onChange={(e) => void updateSettings({ modelBaseUrl: e.target.value })} />
-            </label>
-            <label className="field">
-              Modelldatei
-              <input value={settings.modelFile} onChange={(e) => void updateSettings({ modelFile: e.target.value })} />
-            </label>
-            <div className="row">
-              <button className="btn" onClick={() => void updateSettings({ modelBaseUrl: DEFAULT_SETTINGS.modelBaseUrl, modelFile: DEFAULT_SETTINGS.modelFile })}>Standard wiederherstellen</button>
-            </div>
+            {settings.modelId === 'custom' ? (
+              <>
+                <label className="field">
+                  Basis-URL (endet mit /)
+                  <input value={settings.modelBaseUrl} placeholder="https://schule.example/modelle/" onChange={(e) => void updateSettings({ modelBaseUrl: e.target.value })} />
+                </label>
+                <label className="field">
+                  Modelldatei (ONNX)
+                  <input value={settings.modelFile} onChange={(e) => void updateSettings({ modelFile: e.target.value })} />
+                </label>
+                <label className="field">
+                  Vokabulardatei (vocab.json oder tokenizer.json)
+                  <input value={settings.modelVocabFile} onChange={(e) => void updateSettings({ modelVocabFile: e.target.value })} />
+                </label>
+              </>
+            ) : (
+              <ul className="small muted">
+                {modelSources(settings).map((src, i) => (
+                  <li key={i}>{i === 0 ? 'Quelle' : 'Ausweichquelle'}: {resolveUrl(src.baseUrl, src.modelFile)}</li>
+                ))}
+              </ul>
+            )}
             <p className="muted small">
-              Für Schulnetze ohne Zugriff auf huggingface.co kann die Modelldatei auf einem eigenen Server abgelegt werden (siehe Dokumentation, „Modell selbst hosten“).
+              Für Schulnetze ohne Zugriff auf GitHub/Hugging Face können die Modelldateien auf einem eigenen Server abgelegt werden („Eigene Quelle“, siehe Dokumentation).
             </p>
           </div>
         )}
