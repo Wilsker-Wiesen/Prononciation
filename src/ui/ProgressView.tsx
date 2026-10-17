@@ -20,6 +20,7 @@ const ISSUE_LABEL: Record<string, string> = {
   'h-aspire': 'h gesprochen',
   'liaison-missing': 'Liaison fehlt',
   'liaison-false': 'Falsche Liaison',
+  'glottal-stop': 'Knacklaut statt Bindung',
   'glide-ui': 'ui [ɥi]',
   ch: 'ch [ʃ]',
   'e-ouvert-ferme': 'e / è',

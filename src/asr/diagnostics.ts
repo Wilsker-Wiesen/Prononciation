@@ -18,6 +18,7 @@ export type FindingId =
   | 'h-aspire'
   | 'liaison-missing'
   | 'liaison-false'
+  | 'glottal-stop'
   | 'glide-ui'
   | 'ch'
   | 'e-ouvert-ferme'
@@ -81,6 +82,10 @@ const TEXT: Record<FindingId, { title: string; tip: string }> = {
   'liaison-false': {
     title: 'Keine Liaison an dieser Stelle',
     tip: 'Nach „et“, vor h aspiré und nach Nomen im Singular wird nicht gebunden.',
+  },
+  'glottal-stop': {
+    title: 'Knacklaut statt Bindung',
+    tip: 'Im Französischen beginnen Wörter mit Vokal ohne harten Einsatz: „il a un ami“ fließt wie ein einziges Wort [ilaœ̃nami]. Hänge den Vokal an den Konsonanten davor.',
   },
   'glide-ui': {
     title: 'ui wie in „huit“',
@@ -152,6 +157,11 @@ export function diagnose(t: Transcription, result: ScoreResult): Finding[] {
     if (/e$/i.test(pw.lower) && lastIdx >= 0 && !pw.phones[lastIdx]!.optional && pw.lower.length > 2) {
       const ins = insAfterWord.find((x) => ['ə', 'e', 'ɛ', 'ɐ'].includes(x.ipa));
       if (ins) add(mk('silent-e', 1, wi, w.orth, `Das -e am Ende von „${w.orth}“ wird nicht gesprochen (gehört: [${ins.ipa}]).`, '', ins.ipa));
+    }
+    // Knacklaut (Glottisverschluss) vor vokalisch anlautendem Wort innerhalb der Gruppe
+    if (wi > 0 && !t.words[wi - 1]!.boundaryAfter && pw.phones[0] && isVowelLike(pw.phones[0].ipa)) {
+      const insBefore = result.insertions.find((ins) => ins.afterWord === wi - 1 && ins.ipa === 'ʔ' && isLastPhoneOfWord(ins, result, wi - 1));
+      if (insBefore) add(mk('glottal-stop', 1, wi, w.orth, `Vor „${w.orth}“ wurde ein harter Vokaleinsatz (Knacklaut) gehört; im Französischen wird gebunden.`, '', 'ʔ'));
     }
     // h gesprochen
     if (/^h/i.test(pw.lower)) {

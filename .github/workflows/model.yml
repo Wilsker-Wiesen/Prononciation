@@ -53,9 +53,10 @@ jobs:
           fi
           curl -fL "https://huggingface.co/facebook/wav2vec2-lv-60-espeak-cv-ft/resolve/main/vocab.json" -o out/multilingual/wav2vec2-lv-60-espeak-cv-ft.vocab.json
           ls -la out/multilingual
-          sha256sum out/multilingual/* > out/multilingual/SHA256SUMS
       - name: Prüfstand (eSpeak-Synthese)
-        run: npx tsx tools/validate-model.mjs --model out/multilingual/wav2vec2-lv-60-espeak-cv-ft.onnx --vocab out/multilingual/wav2vec2-lv-60-espeak-cv-ft.vocab.json --report out/multilingual/report.json --min-mean 30 2>&1 | grep -v '^var ' | tee out/multilingual/report.txt
+        run: |
+          npx tsx tools/validate-model.mjs --model out/multilingual/wav2vec2-lv-60-espeak-cv-ft.onnx --vocab out/multilingual/wav2vec2-lv-60-espeak-cv-ft.vocab.json --report out/multilingual/wav2vec2-lv-60-espeak-cv-ft.report.json --min-mean 30 2>&1 | grep -v '^var ' | tee out/multilingual/wav2vec2-lv-60-espeak-cv-ft.report.txt
+          (cd out/multilingual && sha256sum *.onnx *.json > wav2vec2-lv-60-espeak-cv-ft.SHA256SUMS)
       - uses: actions/upload-artifact@v4
         with:
           name: multilingual
@@ -92,9 +93,10 @@ jobs:
           cp export/model_quantized.onnx out/french/wav2vec2-french-phonemizer.onnx
           cp export/vocab.json out/french/wav2vec2-french-phonemizer.vocab.json
           python3 -c "import json; v=json.load(open('out/french/wav2vec2-french-phonemizer.vocab.json')); print(len(v), sorted(v, key=v.get))"
-          sha256sum out/french/* > out/french/SHA256SUMS
       - name: Prüfstand (eSpeak-Synthese)
-        run: npx tsx tools/validate-model.mjs --model out/french/wav2vec2-french-phonemizer.onnx --vocab out/french/wav2vec2-french-phonemizer.vocab.json --report out/french/report.json --min-mean 30 2>&1 | grep -v '^var ' | tee out/french/report.txt
+        run: |
+          npx tsx tools/validate-model.mjs --model out/french/wav2vec2-french-phonemizer.onnx --vocab out/french/wav2vec2-french-phonemizer.vocab.json --report out/french/wav2vec2-french-phonemizer.report.json --min-mean 30 2>&1 | grep -v '^var ' | tee out/french/wav2vec2-french-phonemizer.report.txt
+          (cd out/french && sha256sum *.onnx *.json > wav2vec2-french-phonemizer.SHA256SUMS)
       - uses: actions/upload-artifact@v4
         with:
           name: french
@@ -135,7 +137,7 @@ jobs:
 
   release:
     name: Als Release veröffentlichen
-    needs: [multilingual, french]
+    needs: [multilingual, french, real-speech]
     if: ${{ always() && needs.multilingual.result == 'success' && inputs.publish == 'true' }}
     runs-on: ubuntu-latest
     steps:
@@ -149,7 +151,7 @@ jobs:
           TAG: ${{ inputs.release_tag }}
         run: |
           set -e
-          files=$(find assets -type f \( -name '*.onnx' -o -name '*.onnx_data' -o -name '*.vocab.json' -o -name 'report.txt' -o -name 'SHA256SUMS' \))
+          files=$(find assets -type f \( -name '*.onnx' -o -name '*.onnx_data' -o -name '*.vocab.json' -o -name '*.report.txt' -o -name '*.SHA256SUMS' -o -name 'report-real-*.txt' -o -name 'QUELLEN.txt' \))
           echo "$files"
           # Vorhandenes Release ersetzen (Asset-Überschreiben per --clobber ist unzuverlässig)
           if gh release view "$TAG" >/dev/null 2>&1; then

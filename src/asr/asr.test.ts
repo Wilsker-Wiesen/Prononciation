@@ -109,6 +109,10 @@ describe('Bewertung und Diagnose', () => {
     const a = assess('habiter', rec('habite'));
     expect(a.findings.map((f) => f.id)).toContain('h-aspire');
   });
+  it('erkennt den deutschen Knacklaut vor Vokal', () => {
+    const a = assess('il a', rec('ilʔa'));
+    expect(a.findings.map((f) => f.id)).toContain('glottal-stop');
+  });
   it('erkennt gerolltes r', () => {
     const a = assess('rue', rec('ry'));
     expect(a.findings.map((f) => f.id)).toContain('r');

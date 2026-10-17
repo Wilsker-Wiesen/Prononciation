@@ -9,7 +9,7 @@
  * ohne Leerzeichen werden gesucht; Treffer sind nicht garantiert.
  */
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 const [listFile = 'tools/fixtures/validation-words.txt', outDir = 'out/real-audio', maxStr = '80'] = process.argv.slice(2);
@@ -18,11 +18,40 @@ mkdirSync(outDir, { recursive: true });
 const UA = 'Prononciation-Validation/0.1 (https://github.com/Wilsker-Wiesen/Prononciation)';
 const words = readFileSync(listFile, 'utf8').split('\n').map((l) => l.trim()).filter((l) => l && !l.startsWith('#'));
 
+const HEADERS = { 'User-Agent': UA, 'Api-User-Agent': UA, Accept: '*/*' };
+
 async function api(params) {
   const url = 'https://commons.wikimedia.org/w/api.php?' + new URLSearchParams({ format: 'json', ...params });
-  const res = await fetch(url, { headers: { 'User-Agent': UA } });
+  const res = await fetch(url, { headers: HEADERS });
   if (!res.ok) throw new Error(`${res.status} ${url}`);
   return res.json();
+}
+
+function looksLikeAudio(buf) {
+  const head = buf.subarray(0, 4).toString('latin1');
+  return head === 'RIFF' || head === 'OggS' || head.startsWith('ID3') || head === 'fLaC' || (buf[0] === 0xff && (buf[1] & 0xe0) === 0xe0);
+}
+
+/** Datei laden; bei Nicht-Audio die transkodierte MP3-Fassung versuchen. */
+async function downloadAudio(url) {
+  const tryUrl = async (u) => {
+    const res = await fetch(u, { headers: HEADERS, redirect: 'follow' });
+    const buf = Buffer.from(await res.arrayBuffer());
+    if (!res.ok || !looksLikeAudio(buf)) {
+      console.log(`  ! ${res.status} ${res.headers.get('content-type')} ${u} → ${buf.subarray(0, 60).toString('utf8').replace(/\s+/g, ' ')}`);
+      return null;
+    }
+    return buf;
+  };
+  const direct = await tryUrl(url);
+  if (direct) return { buf: direct, ext: url.split('.').pop() };
+  const m = /^(https:\/\/upload\.wikimedia\.org\/wikipedia\/commons)\/(.+)$/.exec(url);
+  if (m) {
+    const name = url.split('/').pop();
+    const mp3 = await tryUrl(`${m[1]}/transcoded/${m[2]}/${name}.mp3`);
+    if (mp3) return { buf: mp3, ext: 'mp3' };
+  }
+  return null;
 }
 
 let found = 0;
@@ -40,14 +69,16 @@ for (const word of words) {
     const page = Object.values(info.query.pages)[0];
     const url = page.imageinfo?.[0]?.url;
     if (!url) continue;
-    const raw = join(outDir, `${word}.src.wav`);
-    const res = await fetch(url, { headers: { 'User-Agent': UA } });
-    writeFileSync(raw, Buffer.from(await res.arrayBuffer()));
+    const dl = await downloadAudio(url);
+    if (!dl) { console.log(`– ${word}: Download lieferte kein Audio`); continue; }
+    const raw = join(outDir, `${word}.src.${dl.ext}`);
+    writeFileSync(raw, dl.buf);
     try {
       execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-i', raw, '-ac', '1', '-ar', '16000', '-sample_fmt', 's16', join(outDir, `${word}.wav`)]);
     } catch {
+      if (dl.ext !== 'wav') { console.log(`– ${word}: ffmpeg fehlt, ${dl.ext} nicht nutzbar`); continue; }
       // ohne ffmpeg: WAV unverändert übernehmen (der Prüfstand resampelt selbst)
-      writeFileSync(join(outDir, `${word}.wav`), readFileSync(raw));
+      writeFileSync(join(outDir, `${word}.wav`), dl.buf);
     }
     credits.push(`${word}: ${title} (${page.imageinfo?.[0]?.user ?? '?'}, CC BY-SA 4.0, ${url})`);
     found++;

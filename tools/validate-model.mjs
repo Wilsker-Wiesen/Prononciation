@@ -11,7 +11,7 @@
  * Der Prüfstand lädt das Modell mit onnxruntime-node, dekodiert CTC und bewertet
  * mit demselben Code wie die App (ctc.ts, assess.ts).
  */
-import { readFileSync, readdirSync, writeFileSync, existsSync } from 'node:fs';
+import { readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { basename, extname, join } from 'node:path';
 import { ctcGreedyDecode } from '../src/asr/ctc.ts';
 import { assess } from '../src/asr/assess.ts';
@@ -78,10 +78,14 @@ async function recognize(pcm16k) {
 // ---- Testsignale ----
 const samples = []; // { text, pcm16k, source }
 if (args['audio-dir']) {
-  for (const f of readdirSync(args['audio-dir']).filter((f) => extname(f).toLowerCase() === '.wav').sort()) {
-    const { pcm, sampleRate } = decodeWav(readFileSync(join(args['audio-dir'], f)).buffer);
-    const text = basename(f, extname(f)).replace(/[_-]+/g, ' ');
-    samples.push({ text, pcm16k: sampleRate === 16000 ? pcm : resampleTo(pcm, sampleRate, 16000), source: f });
+  for (const f of readdirSync(args['audio-dir']).filter((f) => extname(f).toLowerCase() === '.wav' && !/\.src\.wav$/.test(f)).sort()) {
+    try {
+      const { pcm, sampleRate } = decodeWav(readFileSync(join(args['audio-dir'], f)).buffer);
+      const text = basename(f, extname(f)).replace(/[_-]+/g, ' ');
+      samples.push({ text, pcm16k: sampleRate === 16000 ? pcm : resampleTo(pcm, sampleRate, 16000), source: f });
+    } catch (e) {
+      console.log(`! ${f}: ${e instanceof Error ? e.message : e}`);
+    }
   }
 } else {
   const { default: Init } = await import('@echogarden/espeak-ng-emscripten');
