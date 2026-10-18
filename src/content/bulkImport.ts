@@ -91,6 +91,32 @@ export async function planBulkImport(files: File[], opts: { defaultLessonTitle?:
   };
 }
 
+/**
+ * Lektionstitel der Form „D1 Unité 3 – Vokabeln“ in Einheit („D1 Unité 3“) und Teil („Vokabeln“) zerlegen.
+ * Ohne Gedankenstrich ist der ganze Titel die Einheit.
+ */
+export function splitLessonTitle(title: string): { unit: string; part: string } {
+  const i = title.indexOf(' – ');
+  return i > 0 ? { unit: title.slice(0, i).trim(), part: title.slice(i + 3).trim() } : { unit: title.trim(), part: title.trim() };
+}
+
+/**
+ * Plan nach Einheit (z. B. Unité) aufteilen: je Einheit ein eigenes Paket. So bleiben die Pakete
+ * klein genug für Export und Import auf Tablets. Reihenfolge = erstes Auftreten in der Liste (Buchreihenfolge).
+ */
+export function groupPlanByUnit(plan: BulkPlan): { unit: string; plan: BulkPlan }[] {
+  const groups = new Map<string, BulkPlan['lessons']>();
+  for (const l of plan.lessons) {
+    const { unit, part } = splitLessonTitle(l.title);
+    if (!groups.has(unit)) groups.set(unit, []);
+    groups.get(unit)!.push({ title: part, entries: l.entries });
+  }
+  return [...groups.entries()].map(([unit, lessons]) => ({
+    unit,
+    plan: { lessons, unmatchedAudio: [], unmatchedRows: [], audioFiles: lessons.flatMap((l) => l.entries.flatMap((e) => (e.file ? [e.file] : []))) },
+  }));
+}
+
 /** Plan in Lektionen und Audio-Assets umsetzen (Assets werden vom Aufrufer gespeichert). */
 export function materialize(plan: BulkPlan, packId: string, opts: { includeUnmatchedAudio?: boolean } = {}): { lessons: Lesson[]; assets: AudioAsset[] } {
   const assets: AudioAsset[] = [];

@@ -62,11 +62,21 @@ erhalten.
 
 ### Ordner-Import (ganze Bände)
 
-Für große Bestände (z. B. die Vokabelaufnahmen eines ganzen Bandes) gibt es im Editor „Ordner importieren“: Ein Ordner
-mit allen Audiodateien und einer Wortliste (CSV/TSV/TXT; Spalten: französisch, deutsch, optional Lektion, optional
-Dateiname) wird in einem Schritt zu Lektionen mit zugeordnetem Audio. Die Zuordnung läuft über den Dateinamen
-(„le_college.mp3“ ↔ „le collège“) oder die vierte Spalte. Nicht zugeordnete Dateien landen in einer Sammel-Lektion
-zum Nachbearbeiten.
+Für große Bestände gibt es zwei Wege:
+
+- **Band importieren** (Lehrkraft-Editor, Paketübersicht): Ein Ordner mit allen Audiodateien und einer Wortliste wird in
+  **ein Paket je Einheit** zerlegt, z. B. „D1 Unité 3“. Die Einheit steht in der Spalte *Lektion* vor dem Gedankenstrich
+  („D1 Unité 3 – Vokabeln“), der Teil dahinter wird zum Lektionstitel. Kleine Pakete lassen sich einzeln exportieren und
+  auch auf dem iPad problemlos importieren. Reihenfolge der Pakete = Reihenfolge in der Liste (Buchreihenfolge).
+- **Ordner importieren** (im geöffneten Paket): alle Lektionen in dieses eine Paket.
+
+Wortliste (CSV/TSV/TXT, Kopfzeile wird erkannt): `französisch ⇥ deutsch ⇥ Lektion ⇥ Dateiname ⇥ Lautschrift`.
+„deutsch“ darf leer sein (z. B. Sätze aus Lektionstexten). Die Lautschrift aus dem Lehrwerk wird nur angezeigt; bewertet
+wird mit der App-eigenen Transkription, weil nur sie Wortgrenzen, stumme Endungen und Liaison kennt. Zuordnung der
+Audiodateien über die Spalte *Dateiname*, sonst über den Dateinamen („le_college.mp3“ ↔ „le collège“).
+
+Der Ordner-Import braucht einen Browser auf dem Computer (Safari, Chrome, Edge); iPad und iPhone können keine Ordner
+auswählen. Auf das iPad kommen die Pakete als ZIP (*Als ZIP exportieren*, dann per AirDrop an das eigene Gerät).
 
 ## 4. Das Bewertungsmodell
 

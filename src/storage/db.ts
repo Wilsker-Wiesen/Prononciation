@@ -48,7 +48,7 @@ export function getDb(): Promise<IDBPDatabase<PrononciationDB>> {
 export async function listPacks(): Promise<Pack[]> {
   const db = await getDb();
   const packs = await db.getAll('packs');
-  return packs.sort((a, b) => a.title.localeCompare(b.title, 'de'));
+  return packs.sort((a, b) => (a.sortKey ?? a.title).localeCompare(b.sortKey ?? b.title, 'de', { numeric: true }));
 }
 
 export async function getPack(id: string): Promise<Pack | undefined> {
@@ -80,6 +80,18 @@ export async function deletePack(id: string): Promise<void> {
 
 export async function putAudio(asset: AudioAsset): Promise<void> {
   await (await getDb()).put('audio', asset);
+}
+
+/** Viele Audiodateien in Stapeln speichern (ganze Bände: über 1.000 Dateien). */
+export async function putAudioMany(assets: AudioAsset[], onProgress?: (done: number, total: number) => void): Promise<void> {
+  const db = await getDb();
+  const BATCH = 25;
+  for (let i = 0; i < assets.length; i += BATCH) {
+    const tx = db.transaction('audio', 'readwrite');
+    for (const a of assets.slice(i, i + BATCH)) void tx.store.put(a);
+    await tx.done;
+    onProgress?.(Math.min(i + BATCH, assets.length), assets.length);
+  }
 }
 
 export async function getAudio(id: string): Promise<AudioAsset | undefined> {

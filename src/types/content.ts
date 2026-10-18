@@ -19,6 +19,8 @@ export interface Pack {
   author?: string;
   /** Hinweis zu Rechten an den Audiodateien, wird im Paket mitgeführt */
   rightsNote?: string;
+  /** Sortierschlüssel in der Paketliste (Buchreihenfolge), sonst alphabetisch nach Titel */
+  sortKey?: string;
   formatVersion: number;
   createdAt: string;
   updatedAt: string;
