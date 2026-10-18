@@ -16,7 +16,7 @@ export function trainItemsForLesson(pack: Pack, lessonId: string, kind: 'vocab' 
   if (!lesson) return [];
   if (kind === 'vocab') {
     return lesson.vocab.filter((v) => v.fr.trim()).map((v) => ({
-      id: v.id, kind: 'vocab', text: v.fr, de: v.de, ipaOverride: v.ipa, contrast: v.contrast, audioId: v.audioId, start: v.start, end: v.end, packId: pack.id, lessonId,
+      id: v.id, kind: 'vocab', text: v.fr, de: v.de, ipaOverride: v.ipa, ipaRef: v.ipaRef, contrast: v.contrast, audioId: v.audioId, start: v.start, end: v.end, packId: pack.id, lessonId,
     }));
   }
   const items: TrainItem[] = [];
@@ -93,7 +93,7 @@ export function TrainerCard({ item, onResult }: { item: TrainItem; onResult?: (o
   }, [result]);
   const shownReward = reward && reward.for === result ? reward : null;
   const assessment = result?.assessment ?? null;
-  const ipa = item.ipaOverride ?? ipaString(state.transcription);
+  const ipa = item.ipaRef ?? item.ipaOverride ?? ipaString(state.transcription);
   const canAssess = settings.assessmentEnabled;
 
   useEffect(() => {

@@ -43,7 +43,7 @@ export function collectItems(packs: Pack[]): (MissionItem & { phenomena: Set<Phe
     for (const l of p.lessons) {
       for (const v of l.vocab) {
         if (!v.fr.trim()) continue;
-        out.push({ id: v.id, kind: 'vocab', text: v.fr, de: v.de, ipaOverride: v.ipa, contrast: v.contrast, audioId: v.audioId, start: v.start, end: v.end, packId: p.id, lessonId: l.id, hasAudio: !!v.audioId, phenomena: phenomenaFor(v.fr) });
+        out.push({ id: v.id, kind: 'vocab', text: v.fr, de: v.de, ipaOverride: v.ipa, ipaRef: v.ipaRef, contrast: v.contrast, audioId: v.audioId, start: v.start, end: v.end, packId: p.id, lessonId: l.id, hasAudio: !!v.audioId, phenomena: phenomenaFor(v.fr) });
       }
     }
   }

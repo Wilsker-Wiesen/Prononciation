@@ -110,7 +110,7 @@ function VocabList({ pack, lessonId, entries, best, play, showIpa }: { pack: Pac
           <button className="btn ghost" aria-label="Anhören" onClick={() => void play(v.fr, v.audioId, v.start, v.end)}><Icon.play /></button>
           <div>
             <div className="fr">{v.fr}</div>
-            <div className="de small">{v.de}{showIpa && <span className="ipa muted"> · [{v.ipa ?? ipaString(transcribe(v.fr))}]</span>}</div>
+            <div className="de small">{v.de}{showIpa && <span className="ipa muted"> · [{v.ipaRef ?? v.ipa ?? ipaString(transcribe(v.fr))}]</span>}</div>
           </div>
           <span className="spacer" />
           {best.has(v.id) && <Badge score={best.get(v.id)} />}

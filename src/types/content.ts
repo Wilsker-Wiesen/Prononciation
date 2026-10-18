@@ -48,6 +48,11 @@ export interface VocabEntry {
   de: string;
   /** Lautschrift-Override durch die Lehrkraft; leer = automatische Transkription */
   ipa?: string;
+  /**
+   * Lautschrift aus dem Lehrwerk (nur Anzeige). Bewertet wird weiter mit der automatischen
+   * Transkription, weil nur sie Wortgrenzen, stumme Endungen und Liaison markiert.
+   */
+  ipaRef?: string;
   /** Referenz auf die Modellaufnahme (Lehrwerk-Audio) in der Audio-Ablage */
   audioId?: string;
   /** Zeitfenster in Sekunden innerhalb von audioId (bei zerteilten Tracks) */

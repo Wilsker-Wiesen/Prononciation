@@ -1,6 +1,7 @@
 /** Missionen: Übersicht und Durchlauf (Einführung → Hörquiz → Sprechrunde → Ergebnis). */
 import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
 import { playText as playModelText } from '../audio/modelVoice';
+import { ipaString, transcribe } from '../phon/g2p';
 import { missionAvailability, planMission, type ListeningTask, type MissionPlan } from '../game/missions';
 import { BADGES, levelFor, starsFromScore } from '../game/rewards';
 import { gameSnapshot, loadGame, recordListen, recordMission, subscribeGame } from '../game/store';
@@ -129,7 +130,7 @@ function MissionRun({ id }: { id: PhenomenonId }) {
           <p className="muted"><b>Typischer Fehler:</b> {ph.pitfall}</p>
           <h3>Hör mal rein</h3>
           <ul className="list">
-            {(plan.examples.length ? plan.examples.map((e) => ({ fr: e.text, ipa: e.ipaOverride, audioId: e.audioId, start: e.start, end: e.end })) : ph.examples.map((e) => ({ fr: e.fr, ipa: e.ipa, audioId: undefined, start: undefined, end: undefined }))).map((e, i) => (
+            {(plan.examples.length ? plan.examples.map((e) => ({ fr: e.text, ipa: e.ipaRef ?? e.ipaOverride ?? ipaString(transcribe(e.text)), audioId: e.audioId, start: e.start, end: e.end })) : ph.examples.map((e) => ({ fr: e.fr, ipa: e.ipa, audioId: undefined, start: undefined, end: undefined }))).map((e, i) => (
               <li key={i}>
                 <button className="btn ghost" aria-label="Anhören" onClick={() => void playText(e.fr, e.audioId, e.start, e.end)}><Icon.play /></button>
                 <span className="fr">{e.fr}</span>

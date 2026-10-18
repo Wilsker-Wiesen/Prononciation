@@ -22,6 +22,8 @@ export interface TrainItem {
   text: string;
   de?: string;
   ipaOverride?: string;
+  /** Lautschrift aus dem Lehrwerk, nur zur Anzeige */
+  ipaRef?: string;
   /** Kontrastform für den Verwechslungs-Check */
   contrast?: string;
   audioId?: string;

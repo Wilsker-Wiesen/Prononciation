@@ -49,7 +49,10 @@ Abschnitte zusammenfassen bzw. entfernen. Die Zuordnung speichert nur Zeitfenste
 
 ## 3. Pakete verteilen
 
-Die ZIP-Datei über Moodle/Logineo, Schulcloud, E-Mail oder AirDrop an die Lernenden geben. Import in der App:
+**Pakete mit eigenen Inhalten** (eigene Aufnahmen, eigene Wortlisten) können frei über Moodle/Logineo, Schulcloud,
+E-Mail oder AirDrop an die Lernenden gehen. **Pakete mit Lehrwerk-Audio** erst dann, wenn die Schullizenz die Weitergabe
+ausdrücklich erlaubt; die gesetzliche Unterrichtserlaubnis greift für Schulbücher nicht (§ 60a Abs. 3 Nr. 3 UrhG,
+Einzelheiten in Datenschutz.md). Import in der App:
 *Pakete → ZIP-Datei auswählen* oder *Von URL laden* (wenn die Datei auf einer per HTTPS erreichbaren Adresse liegt,
 die Cross-Origin-Zugriff erlaubt – bei eigenen Servern `Access-Control-Allow-Origin` setzen; GitHub-Pages-Dateien im
 selben Repository gehen immer).

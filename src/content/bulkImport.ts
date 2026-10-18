@@ -2,7 +2,9 @@
  * Massenimport: Ordner mit Audiodateien und einer Wortliste → Lektion(en).
  *
  * Wortliste (CSV/TSV/TXT), eine Zeile je Eintrag:
- *   französisch<Tab>deutsch[<Tab>Lektion][<Tab>Audiodateiname]
+ *   französisch<Tab>deutsch[<Tab>Lektion][<Tab>Audiodateiname][<Tab>Lautschrift]
+ * „deutsch“ darf leer sein (z. B. Sätze aus Lektionstexten). Die Lautschrift (Spalte 5)
+ * wird nur angezeigt, bewertet wird mit der automatischen Transkription.
  * Trennzeichen: Tab, Semikolon, „ – “ oder „ - “. Eine Kopfzeile wird erkannt.
  * Audiodateien werden über den normalisierten Dateinamen (ohne Artikel,
  * Akzente, Sonderzeichen) den Einträgen zugeordnet; alternativ über die
@@ -16,6 +18,8 @@ export interface ParsedRow {
   de: string;
   lesson?: string;
   audio?: string;
+  /** Lautschrift aus der Quelle, ohne [ ] bzw. / / */
+  ipa?: string;
 }
 
 const AUDIO_RE = /\.(mp3|m4a|aac|wav|ogg|oga|opus|webm|flac)$/i;
@@ -28,9 +32,10 @@ export function parseWordList(text: string): ParsedRow[] {
     if (line.startsWith('#')) continue;
     const parts = line.includes('\t') ? line.split('\t') : line.includes(';') ? line.split(';') : line.split(/\s[–-]\s/);
     const cols = parts.map((c) => c.trim().replace(/^"|"$/g, ''));
-    const [fr = '', de = '', lesson, audio] = cols;
+    const [fr = '', de = '', lesson, audio, ipa] = cols;
     if (!fr) continue;
-    rows.push({ fr, de, lesson: lesson || undefined, audio: audio || undefined });
+    const ipaClean = ipa?.replace(/^[[/]|[\]/]$/g, '').trim();
+    rows.push({ fr, de, lesson: lesson || undefined, audio: audio || undefined, ipa: ipaClean || undefined });
   }
   // Kopfzeile erkennen
   const first = rows[0];
@@ -103,7 +108,7 @@ export function materialize(plan: BulkPlan, packId: string, opts: { includeUnmat
     id: newId('les'),
     title: l.title,
     sections: [],
-    vocab: l.entries.map(({ row, file }): VocabEntry => ({ id: newId('v'), fr: row.fr, de: row.de, audioId: file ? ensureAsset(file) : undefined })),
+    vocab: l.entries.map(({ row, file }): VocabEntry => ({ id: newId('v'), fr: row.fr, de: row.de, ipaRef: row.ipa, audioId: file ? ensureAsset(file) : undefined })),
     texts: [],
   }));
   if (opts.includeUnmatchedAudio && plan.unmatchedAudio.length) {
