@@ -75,6 +75,13 @@ Wortliste (CSV/TSV/TXT, Kopfzeile wird erkannt): `französisch ⇥ deutsch ⇥ L
 wird mit der App-eigenen Transkription, weil nur sie Wortgrenzen, stumme Endungen und Liaison kennt. Zuordnung der
 Audiodateien über die Spalte *Dateiname*, sonst über den Dateinamen („le_college.mp3“ ↔ „le collège“).
 
+**Schneller ohne Browser:** Das Skript `tools/build-packs.py` baut aus einem Importordner direkt die fertigen ZIP-Pakete
+(je Einheit eines, feste IDs, Lernstand bleibt bei erneutem Import erhalten). Nur Python 3, keine Zusatzpakete:
+
+```bash
+python3 tools/build-packs.py "<Importordner>" "<Zielordner außerhalb des Repositorys>"
+```
+
 Der Ordner-Import braucht einen Browser auf dem Computer (Safari, Chrome, Edge); iPad und iPhone können keine Ordner
 auswählen. Auf das iPad kommen die Pakete als ZIP (*Als ZIP exportieren*, dann per AirDrop an das eigene Gerät).
 
