@@ -1,4 +1,4 @@
 Vorbildstimme: Piper-Stimme fr_FR-siwis-medium, trainiert auf der SIWIS French Speech Synthesis Database (University of Edinburgh, CC BY 4.0); ergänzend Kokoro-82M (Apache 2.0), Stimme ff_siwis, trainiert auf der SIWIS French Speech Synthesis Database (CC BY 4.0)
-426 Aufnahmen, Mittelwert 98.2 Punkte, Ersatzstimme bei 8 Texten.
+430 Aufnahmen, Mittelwert 98.0 Punkte, Ersatzstimme bei 6 Texten.
 
 Unter 80 Punkten (bitte nachhören):
