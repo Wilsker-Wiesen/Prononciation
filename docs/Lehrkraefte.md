@@ -67,17 +67,12 @@ zum Nachbearbeiten.
 
 ## 4. Das Bewertungsmodell
 
-Beim ersten Training lädt die App das Phonem-Erkennungsmodell (≈ 300 MB) von Hugging Face herunter und speichert es im
-Browser. Im Schulnetz lohnt es sich, dies einmal vor der Stunde auf jedem Gerät anzustoßen (*Einstellungen → Modell
-herunterladen*).
+Beim ersten Training lädt die App das französische Phonem-Erkennungsmodell (≈ 122 MB) einmalig von der eigenen
+Seite (GitHub Pages) und speichert es auf dem Gerät. Im Schulnetz lohnt es sich, dies einmal vor der Stunde auf jedem
+Gerät anzustoßen (*Einstellungen → Modell herunterladen*), am besten im WLAN statt über mobile Daten.
 
-**Modell selbst hosten** (wenn huggingface.co gesperrt ist oder die Bandbreite knapp ist): Die Dateien
-`onnx/model_quantized.onnx` aus dem Repository `onnx-community/wav2vec2-lv-60-espeak-cv-ft-ONNX` auf einen eigenen
-HTTPS-Server legen (CORS erlauben) und in *Einstellungen → Erweitert* die Basis-URL eintragen, z. B.
-`https://schule.example/modelle/` mit Modelldatei `model_quantized.onnx`. Alternativ den Ordner `public/models/…`
-im Repository ergänzen und `modelBaseUrl` in `src/types/content.ts` auf den eigenen Pfad setzen – dann liefert
-GitHub Pages das Modell mit aus (Dateien bis 100 MB pro Datei; das int8-Modell muss dafür ggf. mit
-`split`/Range-Requests gestückelt werden, siehe Entwicklung.md).
+**Modell selbst hosten** (eigener Schulserver): Die Dateien aus dem Release `models-v1` des Repositorys auf einen
+HTTPS-Server legen (CORS erlauben) und in *Einstellungen → Erweitert* die Basis-URL eintragen.
 
 ## 5. Im Unterricht
 
