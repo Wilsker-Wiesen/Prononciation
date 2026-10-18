@@ -84,6 +84,20 @@ registerProcessor('${PROCESSOR_NAME}', PcmCaptureProcessor);
 
 type State = 'idle' | 'starting' | 'recording' | 'stopping';
 
+/**
+ * Ein Aufnahme-Kontext für alle Aufnahmen. iOS begrenzt die Zahl der Audio-Kontexte und gibt
+ * geschlossene nur verzögert frei; ein neuer Kontext je Aufnahme führte nach einigen Versuchen
+ * zu Fehlern beim Mikrofonzugriff. Zwischen den Aufnahmen wird der Kontext nur angehalten.
+ */
+let sharedCtx: AudioContext | null = null;
+/** Kontexte, in denen der Worklet-Prozessor schon registriert ist (zweites Registrieren wirft). */
+const workletReady = new WeakSet<BaseAudioContext>();
+
+function recordingContext(Ctor: typeof AudioContext): AudioContext {
+  if (!sharedCtx || sharedCtx.state === 'closed') sharedCtx = new Ctor();
+  return sharedCtx;
+}
+
 export class Recorder {
   private readonly maxSeconds: number;
   private readonly onLevel: RecorderOptions['onLevel'];
@@ -155,19 +169,26 @@ export class Recorder {
     this.totalSamples = 0;
     this.resetLevel();
 
-    // Kontext synchron innerhalb der Geste erzeugen und entsperren
-    let ctx = new Ctor();
+    // Kontext synchron innerhalb der Geste holen und entsperren
+    let ctx = recordingContext(Ctor);
     this.ctx = ctx;
     void ctx.resume().catch(() => undefined);
 
     let stream: MediaStream;
+    const constraints = { audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1 } };
     try {
-      stream = await navigator.mediaDevices.getUserMedia({
-        audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1 },
-      });
-    } catch (err) {
-      if (gen === this.generation) this.release();
-      throw toRecorderError(err);
+      stream = await navigator.mediaDevices.getUserMedia(constraints);
+    } catch (first) {
+      // Ein unerwarteter Fehler (iOS nach mehreren Aufnahmen) ist oft vorübergehend: einmal neu versuchen
+      const retry = toRecorderError(first).code === 'unsupported';
+      try {
+        if (!retry) throw first;
+        await new Promise((r) => setTimeout(r, 400));
+        stream = await navigator.mediaDevices.getUserMedia(constraints);
+      } catch (err) {
+        if (gen === this.generation) this.release();
+        throw toRecorderError(err);
+      }
     }
     if (gen !== this.generation || this.state !== 'starting') {
       // Zwischenzeitlich abgebrochen
@@ -179,13 +200,15 @@ export class Recorder {
     // Safari: Hardware-Rate kann sich beim Aktivieren des Mikrofons ändern → Kontext neu erzeugen
     const trackRate = stream.getAudioTracks()[0]?.getSettings().sampleRate;
     if (typeof trackRate === 'number' && trackRate > 0 && trackRate !== ctx.sampleRate) {
-      const fresh = new Ctor();
-      if (fresh.sampleRate !== ctx.sampleRate) {
+      // nur bei tatsächlich anderer Rate einmalig ersetzen; danach passt der gemeinsame Kontext
+      try {
+        const fresh = new Ctor({ sampleRate: trackRate });
         void ctx.close().catch(() => undefined);
+        sharedCtx = fresh;
         ctx = fresh;
         this.ctx = fresh;
-      } else {
-        void fresh.close().catch(() => undefined);
+      } catch {
+        /* Rate nicht einstellbar: mit dem bisherigen Kontext weiter (Web Audio rechnet um) */
       }
     }
     if (ctx.state !== 'running') void ctx.resume().catch(() => undefined);
@@ -250,13 +273,16 @@ export class Recorder {
 
   private async createWorkletNode(ctx: AudioContext): Promise<AudioWorkletNode | null> {
     if (!ctx.audioWorklet || typeof AudioWorkletNode === 'undefined' || typeof URL === 'undefined') return null;
-    const url = URL.createObjectURL(new Blob([PROCESSOR_SOURCE], { type: 'application/javascript' }));
-    try {
-      await ctx.audioWorklet.addModule(url);
-    } catch {
-      return null; // z. B. CSP ohne blob: → ScriptProcessor-Rückfall
-    } finally {
-      URL.revokeObjectURL(url);
+    if (!workletReady.has(ctx)) {
+      const url = URL.createObjectURL(new Blob([PROCESSOR_SOURCE], { type: 'application/javascript' }));
+      try {
+        await ctx.audioWorklet.addModule(url);
+        workletReady.add(ctx);
+      } catch {
+        return null; // z. B. CSP ohne blob: → ScriptProcessor-Rückfall
+      } finally {
+        URL.revokeObjectURL(url);
+      }
     }
     try {
       const node = new AudioWorkletNode(ctx, PROCESSOR_NAME, {
@@ -444,7 +470,9 @@ export class Recorder {
     const ctx = this.ctx;
     this.ctx = null;
     this.stream = this.source = this.workletNode = this.scriptNode = this.sink = null;
-    if (ctx && ctx.state !== 'closed') void ctx.close().catch(() => undefined);
+    // gemeinsamen Kontext nicht schließen, nur anhalten (spart Akku, nächste Aufnahme setzt fort)
+    if (ctx && ctx.state === 'running') void ctx.suspend().catch(() => undefined);
+    if (ctx && ctx !== sharedCtx && ctx.state !== 'closed') void ctx.close().catch(() => undefined);
     this.state = 'idle';
   }
 }
@@ -474,6 +502,6 @@ function toRecorderError(err: unknown): RecorderError {
     case 'AbortError':
       return new RecorderError('not-found', 'Mikrofon nicht verfügbar (wird evtl. von einer anderen App benutzt).', err);
     default:
-      return new RecorderError('unsupported', 'Mikrofonaufnahme wird nicht unterstützt.', err);
+      return new RecorderError('unsupported', `Mikrofon nicht verfügbar (${name || 'unbekannter Fehler'}${err instanceof Error && err.message ? `: ${err.message}` : ''}).`, err);
   }
 }

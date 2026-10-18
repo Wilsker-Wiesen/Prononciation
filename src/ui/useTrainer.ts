@@ -155,7 +155,7 @@ export function useTrainer(item: TrainItem, settings: Settings) {
           : code === 'not-found'
             ? 'Kein Mikrofon gefunden.'
             : code === 'unsupported'
-              ? 'Dieser Browser unterstützt keine Aufnahme.'
+              ? `${e instanceof Error ? e.message : 'Mikrofon nicht verfügbar.'} Bitte noch einmal tippen; hilft das nicht, die App schließen und neu öffnen.`
               : `Aufnahme nicht möglich: ${e instanceof Error ? e.message : String(e)}`,
       );
     }
