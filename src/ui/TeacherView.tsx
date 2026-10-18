@@ -10,7 +10,7 @@ import { deleteAudio, getAudio, listAudioForPack, putAudio, putAudioMany, savePa
 import { PACK_FORMAT_VERSION, newId, type AudioAsset, type Lesson, type Pack, type Sentence, type TextItem, type VocabEntry } from '../types/content';
 import { Icon } from './components';
 import { SplitAudio } from './SplitAudio';
-import { groupPlanByUnit, materialize, planBulkImport, type BulkPlan } from '../content/bulkImport';
+import { groupPlanByBand, materialize, planBulkImport, type BulkPlan } from '../content/bulkImport';
 import { download } from './ProgressView';
 
 export function TeacherView({ packId, lessonId }: { packId?: string; lessonId?: string }) {
@@ -373,17 +373,17 @@ function BulkImport({ pack, onDone, onPacks }: { pack?: Pack; onDone?: (lessons:
     setBusy(true);
     try {
       if (splitMode) {
-        const groups = groupPlanByUnit(plan);
+        const groups = groupPlanByBand(plan);
         const now = new Date().toISOString();
         const stamp = Date.now().toString(36);
         const ids: string[] = [];
         for (const [i, g] of groups.entries()) {
           const id = newId('pack');
           const { lessons, assets } = materialize(g.plan, id);
-          await store(assets, `${g.unit} (${i + 1}/${groups.length})`);
-          const band = /^(\S+)/.exec(g.unit)?.[1] ?? '';
+          await store(assets, `${g.title} (${i + 1}/${groups.length})`);
+          const band = g.band;
           await savePack({
-            id, title: g.unit, level: /^D\d$/.test(band) ? `Lernjahr ${band.slice(1)}` : undefined,
+            id, title: g.title, level: /^D\d$/.test(band) ? `Lernjahr ${band.slice(1)}` : undefined,
             source: pack?.source, rightsNote: 'Lehrwerk-Audio: nur für den eigenen Unterricht, Weitergabe nur mit ausdrücklicher Lizenz.',
             sortKey: `${band}-${stamp}-${String(i).padStart(3, '0')}`,
             formatVersion: PACK_FORMAT_VERSION, createdAt: now, updatedAt: now, lessons,
@@ -399,13 +399,13 @@ function BulkImport({ pack, onDone, onPacks }: { pack?: Pack; onDone?: (lessons:
       setPlan(null);
     } finally { setBusy(false); setProgress(''); }
   };
-  const units = plan && splitMode ? groupPlanByUnit(plan) : null;
+  const units = plan && splitMode ? groupPlanByBand(plan) : null;
   return (
     <div className="card">
       <h2>{splitMode ? 'Band importieren (Ordner)' : 'Ordner importieren'}</h2>
       <p className="muted small">
         Ein Ordner mit Audiodateien und einer Wortliste (CSV/TSV/TXT: „französisch ⇥ deutsch [⇥ Lektion] [⇥ Dateiname] [⇥ Lautschrift]“) wird zu Lektionen mit zugeordnetem Audio.
-        {splitMode ? ' Je Einheit (z. B. „D1 Unité 3“ vor dem Gedankenstrich in der Spalte Lektion) entsteht ein eigenes Paket.' : ' Ohne Liste werden die Dateinamen als Vokabeln übernommen.'}
+        {splitMode ? ' Je Band (z. B. „D1“ am Anfang der Spalte Lektion) entsteht ein Paket; die Unités wählt man danach auf der Startseite.' : ' Ohne Liste werden die Dateinamen als Vokabeln übernommen.'}
       </p>
       <div className="row">
         {!splitMode && <label className="field">Lektionstitel (falls die Liste keinen nennt)<input value={title} onChange={(e) => setTitle(e.target.value)} /></label>}
@@ -419,7 +419,7 @@ function BulkImport({ pack, onDone, onPacks }: { pack?: Pack; onDone?: (lessons:
             {plan.audioFiles.length} Audiodateien · {plan.lessons.reduce((a, l) => a + l.entries.length, 0)} Listeneinträge in {plan.lessons.length} Lektion(en) ·
             {' '}{plan.lessons.reduce((a, l) => a + l.entries.filter((e) => e.file).length, 0)} zugeordnet · {plan.unmatchedRows.length} Einträge ohne Audio · {plan.unmatchedAudio.length} Audiodateien ohne Eintrag
           </p>
-          {units && <p className="small">Es entstehen {units.length} Pakete: {units.map((u) => u.unit).join(', ')}</p>}
+          {units && <p className="small">Es entsteht {units.length === 1 ? 'ein Paket' : `${units.length} Pakete`}: {units.map((u) => `${u.title} (${u.plan.lessons.length} Lektionen)`).join(', ')}</p>}
           {plan.unmatchedRows.length > 0 && <p className="muted small">Ohne Audio: {plan.unmatchedRows.slice(0, 15).map((r) => r.fr).join(', ')}{plan.unmatchedRows.length > 15 ? ' …' : ''}</p>}
           {plan.unmatchedAudio.length > 0 && <p className="muted small">Ohne Eintrag: {plan.unmatchedAudio.slice(0, 15).map((f) => f.name).join(', ')}{plan.unmatchedAudio.length > 15 ? ' …' : ''}</p>}
           {!splitMode && <label className="check"><input type="checkbox" checked={includeUnmatched} onChange={(e) => setIncludeUnmatched(e.target.checked)} /> Nicht zugeordnete Audiodateien als eigene Lektion „Nicht zugeordnete Aufnahmen“ anlegen</label>}

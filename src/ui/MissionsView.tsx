@@ -40,23 +40,23 @@ export function MissionsView({ phenomenonId }: { phenomenonId?: PhenomenonId }) 
         <div className="progress" style={{ marginTop: 8 }}><div style={{ width: `${Math.round(level.progress * 100)}%` }} /></div>
         <div className="muted small">Nächstes Level bei {level.next} XP</div>
       </div>
-      <div className="path">
+      <div className="path-map">
         {PATH.map((unit, ui) => (
-          <div key={unit.id} style={{ width: '100%' }}>
+          <div key={unit.id} className="path-etape">
             <div className="path-unit">
               <h3>{unit.title}</h3>
               <div className="muted small" style={{ marginTop: 4 }}>{unit.subtitle}</div>
             </div>
-            <div className="path" style={{ padding: 0 }}>
+            <div className="path-track">
               {unit.missions.map((id, i) => {
                 const p = PHENOMENA.find((x) => x.id === id)!;
                 const stars = game.missionStars[id] ?? 0;
                 const av = availability[id];
                 const cls = stars >= 3 ? 'done' : id === next ? 'next' : stars > 0 ? 'started' : '';
-                // Schlangenlinie wie ein Pfad
-                const offset = Math.round(Math.sin((i + ui) * 1.1) * 70);
+                // Schlangenlinie wie ein Pfad: auf dem Telefon seitlich, auf breiten Bildschirmen auf und ab
+                const wave = Math.round(Math.sin((i + ui) * 1.1) * 70);
                 return (
-                  <div key={id} className={`path-node ${cls}`} style={{ transform: `translateX(${offset}px)` }}>
+                  <div key={id} className={`path-node ${cls}`} style={{ '--wave': wave } as React.CSSProperties}>
                     {id === next && <div className="small" style={{ fontWeight: 800, color: 'var(--good)' }}>Weiter hier!</div>}
                     <button aria-label={`Mission ${p.title}`} title={`${p.title} · ${av.total} Wörter`} onClick={() => navigate({ name: 'mission', phenomenonId: id })}>{p.emoji}</button>
                     <div className="stars">{'★'.repeat(stars)}{'☆'.repeat(3 - stars)}</div>

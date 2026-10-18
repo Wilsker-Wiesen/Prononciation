@@ -60,6 +60,35 @@ export async function savePack(pack: Pack): Promise<void> {
   await (await getDb()).put('packs', pack);
 }
 
+/**
+ * Frühere Pakete in ein neues überführen: Lernstand und eigene Aufnahmen bekommen die neue Paket-ID,
+ * die alten Pakete und ihr restliches Audio werden gelöscht. Gibt die Zahl der ersetzten Pakete zurück.
+ */
+export async function absorbPacks(oldIds: string[], newId: string): Promise<number> {
+  const db = await getDb();
+  let replaced = 0;
+  for (const oldId of oldIds) {
+    if (oldId === newId || !(await db.get('packs', oldId))) continue;
+    const tx = db.transaction(['packs', 'audio', 'attempts', 'recordings'], 'readwrite');
+    for (const store of ['attempts', 'recordings'] as const) {
+      let cursor = await tx.objectStore(store).index('byPack').openCursor(oldId);
+      while (cursor) {
+        await cursor.update({ ...cursor.value, packId: newId });
+        cursor = await cursor.continue();
+      }
+    }
+    let audio = await tx.objectStore('audio').index('byPack').openKeyCursor(oldId);
+    while (audio) {
+      await tx.objectStore('audio').delete(audio.primaryKey);
+      audio = await audio.continue();
+    }
+    await tx.objectStore('packs').delete(oldId);
+    await tx.done;
+    replaced++;
+  }
+  return replaced;
+}
+
 /** Löscht ein Paket samt Audio, Aufnahmen und Lernstatistik. */
 export async function deletePack(id: string): Promise<void> {
   const db = await getDb();

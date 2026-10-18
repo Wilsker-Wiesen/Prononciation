@@ -117,6 +117,29 @@ export function groupPlanByUnit(plan: BulkPlan): { unit: string; plan: BulkPlan 
   }));
 }
 
+/**
+ * Plan nach Band aufteilen (erstes Wort der Einheit, z. B. „D1“ aus „D1 Unité 3“): je Band ein Paket,
+ * Lektionen heißen „Unité 3 – Vokabeln“. Ein Band ist ein Import, die Unités wählt man danach in der App.
+ */
+export function groupPlanByBand(plan: BulkPlan): { band: string; title: string; plan: BulkPlan }[] {
+  const groups = new Map<string, BulkPlan['lessons']>();
+  for (const l of plan.lessons) {
+    const { unit, part } = splitLessonTitle(l.title);
+    const band = unit.split(/\s+/)[0] ?? unit;
+    const rest = unit.slice(band.length).trim();
+    if (!groups.has(band)) groups.set(band, []);
+    groups.get(band)!.push({ title: rest ? `${rest} – ${part}` : part, entries: l.entries });
+  }
+  return [...groups.entries()].map(([band, lessons]) => {
+    const m = /^D(\d)$/.exec(band);
+    return {
+      band,
+      title: m ? `Découvertes ${m[1]}` : band,
+      plan: { lessons, unmatchedAudio: [], unmatchedRows: [], audioFiles: lessons.flatMap((l) => l.entries.flatMap((e) => (e.file ? [e.file] : []))) },
+    };
+  });
+}
+
 /** Plan in Lektionen und Audio-Assets umsetzen (Assets werden vom Aufrufer gespeichert). */
 export function materialize(plan: BulkPlan, packId: string, opts: { includeUnmatchedAudio?: boolean } = {}): { lessons: Lesson[]; assets: AudioAsset[] } {
   const assets: AudioAsset[] = [];

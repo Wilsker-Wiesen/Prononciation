@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { groupPlanByUnit, materialize, parseWordList, planBulkImport, splitLessonTitle } from './bulkImport';
+import { groupPlanByBand, groupPlanByUnit, materialize, parseWordList, planBulkImport, splitLessonTitle } from './bulkImport';
 
 describe('parseWordList', () => {
   it('liest Tab-, Semikolon- und Gedankenstrich-Listen', () => {
@@ -59,5 +59,22 @@ describe('groupPlanByUnit', () => {
     expect(groups[0]!.plan.lessons.map((l) => l.title)).toEqual(['Vokabeln', 'Texte']);
     expect(groups[0]!.plan.audioFiles).toHaveLength(2);
     expect(splitLessonTitle('Unité 1')).toEqual({ unit: 'Unité 1', part: 'Unité 1' });
+  });
+});
+
+describe('groupPlanByBand', () => {
+  it('fasst alle Einheiten eines Bandes in einem Paket zusammen', async () => {
+    const list = new File([
+      'französisch\tdeutsch\tLektion\tAudiodateiname\n' +
+        'le marché\tder Markt\tD1 Unité 1 – Vokabeln\ta.mp3\n' +
+        'Il arrive.\t\tD1 Unité 1 – Lektionstexte\tb.mp3\n' +
+        'la gare\tder Bahnhof\tD1 Unité 2 – Vokabeln\tc.mp3\n' +
+        'le train\tder Zug\tD2 Unité 1 – Vokabeln\td.mp3\n',
+    ], 'wortliste.tsv');
+    const files = ['a.mp3', 'b.mp3', 'c.mp3', 'd.mp3'].map((n) => new File([new Uint8Array(4)], n, { type: 'audio/mpeg' }));
+    const groups = groupPlanByBand(await planBulkImport([list, ...files]));
+    expect(groups.map((g) => g.title)).toEqual(['Découvertes 1', 'Découvertes 2']);
+    expect(groups[0]!.plan.lessons.map((l) => l.title)).toEqual(['Unité 1 – Vokabeln', 'Unité 1 – Lektionstexte', 'Unité 2 – Vokabeln']);
+    expect(groups[0]!.plan.audioFiles).toHaveLength(3);
   });
 });

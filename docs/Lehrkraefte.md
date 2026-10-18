@@ -64,10 +64,9 @@ erhalten.
 
 Für große Bestände gibt es zwei Wege:
 
-- **Band importieren** (Lehrkraft-Editor, Paketübersicht): Ein Ordner mit allen Audiodateien und einer Wortliste wird in
-  **ein Paket je Einheit** zerlegt, z. B. „D1 Unité 3“. Die Einheit steht in der Spalte *Lektion* vor dem Gedankenstrich
-  („D1 Unité 3 – Vokabeln“), der Teil dahinter wird zum Lektionstitel. Kleine Pakete lassen sich einzeln exportieren und
-  auch auf dem iPad problemlos importieren. Reihenfolge der Pakete = Reihenfolge in der Liste (Buchreihenfolge).
+- **Band importieren** (Lehrkraft-Editor, Paketübersicht): Ein Ordner mit allen Audiodateien und einer Wortliste wird zu
+  **einem Paket je Band** („D1 Unité 3 – Vokabeln“ in der Spalte *Lektion* → Paket „Découvertes 1“, Lektion
+  „Unité 3 – Vokabeln“). Auf der Startseite stehen die Unités dann zeilenweise mit ihren Teilen.
 - **Ordner importieren** (im geöffneten Paket): alle Lektionen in dieses eine Paket.
 
 Wortliste (CSV/TSV/TXT, Kopfzeile wird erkannt): `französisch ⇥ deutsch ⇥ Lektion ⇥ Dateiname ⇥ Lautschrift`.
@@ -75,15 +74,18 @@ Wortliste (CSV/TSV/TXT, Kopfzeile wird erkannt): `französisch ⇥ deutsch ⇥ L
 wird mit der App-eigenen Transkription, weil nur sie Wortgrenzen, stumme Endungen und Liaison kennt. Zuordnung der
 Audiodateien über die Spalte *Dateiname*, sonst über den Dateinamen („le_college.mp3“ ↔ „le collège“).
 
-**Schneller ohne Browser:** Das Skript `tools/build-packs.py` baut aus einem Importordner direkt die fertigen ZIP-Pakete
-(je Einheit eines, feste IDs, Lernstand bleibt bei erneutem Import erhalten). Nur Python 3, keine Zusatzpakete:
+**Schneller ohne Browser:** Das Skript `tools/build-packs.py` baut aus einem Importordner direkt ein fertiges ZIP-Paket
+je Band (z. B. „Découvertes 1“, Lektionen „Unité 3 – Vokabeln“ usw.; feste IDs, der Lernstand bleibt bei erneutem Import
+erhalten; frühere Einzelpakete je Unité werden beim Import ersetzt). Mit `--per-unit` entsteht wie früher ein Paket je
+Unité. Nur Python 3, keine Zusatzpakete:
 
 ```bash
 python3 tools/build-packs.py "<Importordner>" "<Zielordner außerhalb des Repositorys>"
 ```
 
 Der Ordner-Import braucht einen Browser auf dem Computer (Safari, Chrome, Edge); iPad und iPhone können keine Ordner
-auswählen. Auf das iPad kommen die Pakete als ZIP (*Als ZIP exportieren*, dann per AirDrop an das eigene Gerät).
+auswählen. Auf das iPad kommen die Pakete als ZIP (per AirDrop an das eigene Gerät); in der App lassen sich unter
+*Pakete* mehrere ZIP-Dateien auf einmal auswählen (in der Dateiauswahl oben „Auswählen“ tippen).
 
 ## 4. Das Bewertungsmodell
 

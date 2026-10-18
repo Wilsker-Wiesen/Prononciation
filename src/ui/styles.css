@@ -1,35 +1,40 @@
 :root {
-  --bg: #f7f5f0;
+  /* Hellblau: helle Flächen, kräftiges Blau für Bedienelemente (Kontrast ≥ 4,5:1 geprüft) */
+  --bg: #eaf4fc;
   --surface: #ffffff;
-  --surface-2: #efece4;
-  --text: #1d2430;
-  --muted: #5d6675;
-  --primary: #1f4e79;
+  --surface-2: #dcedfa;
+  --text: #13293d;
+  --muted: #4a6075;
+  --primary: #1f6aa8;
   --primary-contrast: #ffffff;
-  --accent: #e8b84a;
+  --accent: #f2b84b;
   --good: #2e8b57;
   --mid: #d98c1f;
   --bad: #c83e3e;
-  --border: #d9d4c7;
+  --border: #c6def2;
+  --topbar: #cfe6f8;
+  --topbar-text: #13293d;
   --radius: 14px;
-  --shadow: 0 1px 2px rgba(0, 0, 0, 0.06), 0 6px 20px rgba(0, 0, 0, 0.05);
+  --shadow: 0 1px 2px rgba(31, 106, 168, 0.08), 0 6px 20px rgba(31, 106, 168, 0.08);
   --font: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --font-ipa: 'Charis SIL', 'Doulos SIL', 'Gentium Plus', 'Noto Sans', 'DejaVu Sans', 'Segoe UI', system-ui, sans-serif;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --bg: #15181d;
-    --surface: #1f242b;
-    --surface-2: #272d36;
-    --text: #e8e6e1;
-    --muted: #a3a9b3;
-    --primary: #6ea4d8;
-    --primary-contrast: #0f1a26;
-    --accent: #e8b84a;
+    --bg: #0e1a24;
+    --surface: #142534;
+    --surface-2: #1b3245;
+    --text: #e6f1fa;
+    --muted: #9db4c7;
+    --primary: #7cc0f0;
+    --primary-contrast: #0e1a24;
+    --accent: #f2b84b;
     --good: #4cc07a;
     --mid: #e6a23c;
     --bad: #e46a6a;
-    --border: #3a414b;
+    --border: #284257;
+    --topbar: #142534;
+    --topbar-text: #e6f1fa;
     --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 6px 20px rgba(0, 0, 0, 0.3);
   }
 }
@@ -63,7 +68,7 @@ p { margin: 0 0 0.75em; }
 .app { min-height: 100%; display: flex; flex-direction: column; }
 .topbar {
   display: flex; align-items: center; gap: 12px; padding: 10px 16px;
-  background: var(--primary); color: var(--primary-contrast);
+  background: var(--topbar); color: var(--topbar-text); border-bottom: 1px solid var(--border);
   position: sticky; top: 0; z-index: 10;
   padding-top: calc(10px + env(safe-area-inset-top));
 }
@@ -74,8 +79,8 @@ p { margin: 0 0 0.75em; }
   background: transparent; border: 1px solid transparent; color: inherit; padding: 6px 10px; border-radius: 8px; cursor: pointer;
   opacity: 0.85;
 }
-.topbar nav button:hover { opacity: 1; background: rgba(255, 255, 255, 0.1); }
-.topbar nav button.active { background: rgba(255, 255, 255, 0.18); opacity: 1; }
+.topbar nav button:hover { opacity: 1; background: color-mix(in srgb, var(--surface) 55%, transparent); }
+.topbar nav button.active { background: var(--surface); color: var(--primary); font-weight: 600; opacity: 1; }
 .topbar nav .tab-icon, .topbar nav .tab-short { display: none; }
 
 /* Telefon: Hauptnavigation als Tab-Leiste unten (wie in nativen Apps) */
@@ -234,10 +239,33 @@ table.tbl input { width: 100%; background: var(--surface); border: 1px solid var
 @keyframes fall { to { transform: translateY(110vh) rotate(720deg); } }
 
 /* Lernpfad */
-.path { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 0; }
+.path-map { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 0; }
+.path-etape { width: 100%; }
+.path-track { display: flex; flex-direction: column; align-items: center; gap: 6px; }
 .path-unit { width: 100%; text-align: center; margin: 14px 0 4px; }
 .path-unit h3 { display: inline-block; background: var(--primary); color: var(--primary-contrast); padding: 6px 14px; border-radius: 999px; font-size: 0.95rem; margin: 0; }
-.path-node { display: flex; flex-direction: column; align-items: center; gap: 2px; width: 120px; }
+.path-node { display: flex; flex-direction: column; align-items: center; gap: 2px; width: 120px; transform: translateX(calc(var(--wave, 0) * 1px)); }
+
+/* iPad und größer: jede Étape als Zeile, der Pfad läuft von links nach rechts */
+@media (min-width: 700px) {
+  .path-map { align-items: stretch; gap: 12px; }
+  .path-etape {
+    display: grid; grid-template-columns: minmax(150px, 210px) 1fr; align-items: center; gap: 12px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow);
+    padding: 10px 16px;
+  }
+  .path-unit { text-align: left; margin: 0; }
+  .path-track { position: relative; flex-direction: row; flex-wrap: wrap; justify-content: flex-start; gap: 10px 2px; padding: 16px 0; }
+  .path-track::before { content: ''; position: absolute; left: 50px; right: 50px; top: 50%; border-top: 4px dotted var(--border); }
+  .path-node { width: 108px; transform: translateY(calc(var(--wave, 0) * 0.16px)); position: relative; }
+}
+/* iPad hochkant: Titel über der Zeile, damit alle Missionen einer Étape nebeneinander passen */
+@media (min-width: 700px) and (max-width: 1050px) {
+  .path-etape { grid-template-columns: 1fr; gap: 0; }
+  .path-unit { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  .path-track { justify-content: space-around; flex-wrap: nowrap; }
+  .path-node { width: 104px; }
+}
 .path-node button {
   width: 76px; height: 70px; border-radius: 50%; border: 0; cursor: pointer; font-size: 2rem;
   background: var(--surface-2); box-shadow: 0 6px 0 var(--border); transition: transform 0.08s;
@@ -254,3 +282,10 @@ table.tbl input { width: 100%; background: var(--surface); border: 1px solid var
 @media (prefers-reduced-motion: reduce) {
   .path-node.next button, .reward-pop, .btn.record.on { animation: none; }
 }
+
+/* Startseite: Lektionen eines Bandes je Unité in einer Zeile */
+.unit-grid { display: flex; flex-direction: column; gap: 4px; }
+.unit-row { display: grid; grid-template-columns: minmax(110px, 160px) 1fr; align-items: center; gap: 10px; padding: 6px 0; border-top: 1px solid var(--border); }
+.unit-row:first-child { border-top: 0; }
+.unit-name { font-weight: 700; }
+@media (max-width: 520px) { .unit-row { grid-template-columns: 1fr; gap: 4px; } }

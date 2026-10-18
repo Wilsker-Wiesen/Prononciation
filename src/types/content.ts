@@ -21,6 +21,8 @@ export interface Pack {
   rightsNote?: string;
   /** Sortierschlüssel in der Paketliste (Buchreihenfolge), sonst alphabetisch nach Titel */
   sortKey?: string;
+  /** IDs früherer Pakete, die dieses ersetzt (z. B. Einzel-Unités → ganzer Band); Lernstand wird übernommen */
+  replaces?: string[];
   formatVersion: number;
   createdAt: string;
   updatedAt: string;

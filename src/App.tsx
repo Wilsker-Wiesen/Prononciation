@@ -51,7 +51,7 @@ function Shell() {
     <div className="app">
       <header className="topbar">
         <a className="brand" href="#/" style={{ color: 'inherit', textDecoration: 'none' }}>
-          <svg viewBox="0 0 128 128" aria-hidden="true"><rect width="128" height="128" rx="28" fill="#f7f5f0" /><path d="M40 92V36h22c14 0 22 8 22 19s-8 19-22 19H52v18z" fill="#1f4e79" /><path d="M52 47v16h10c6 0 10-3 10-8s-4-8-10-8z" fill="#f7f5f0" /><path d="M86 44c6 6 9 13 9 20s-3 14-9 20" stroke="#e8b84a" strokeWidth="5" fill="none" strokeLinecap="round" /></svg>
+          <svg viewBox="0 0 128 128" aria-hidden="true"><rect width="128" height="128" rx="28" fill="#1f6aa8" /><path d="M40 92V36h22c14 0 22 8 22 19s-8 19-22 19H52v18z" fill="#ffffff" /><path d="M52 47v16h10c6 0 10-3 10-8s-4-8-10-8z" fill="#1f6aa8" /><path d="M86 44c6 6 9 13 9 20s-3 14-9 20" stroke="#e8b84a" strokeWidth="5" fill="none" strokeLinecap="round" /></svg>
           Prononciation
         </a>
         <nav aria-label="Hauptnavigation">

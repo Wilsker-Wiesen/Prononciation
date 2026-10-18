@@ -1,5 +1,7 @@
 /** Startseite: Pakete und Lektionen. */
+import { splitLessonTitle } from '../content/bulkImport';
 import { navigate, useApp } from '../state/appState';
+import type { Lesson, Pack } from '../types/content';
 import { Icon } from './components';
 import { InstallHint } from './InstallHint';
 import { TodayPanel } from './TodayPanel';
@@ -27,19 +29,55 @@ export function HomeView() {
             </div>
             {settings.teacherMode && <button className="btn ghost" onClick={() => navigate({ name: 'teacher', packId: p.id })}>Bearbeiten</button>}
           </div>
-          <ul className="list" style={{ marginTop: 8 }}>
-            {p.lessons.map((l) => (
-              <li key={l.id}>
-                <div>
-                  <div className="fr">{l.title}</div>
-                  <div className="de small">{l.vocab.length} Vokabeln · {l.texts.length} Texte</div>
-                </div>
-                <span className="spacer" />
-                <button className="btn" onClick={() => navigate({ name: 'lesson', packId: p.id, lessonId: l.id })}>Öffnen <Icon.next /></button>
-              </li>
+          <PackLessons pack={p} />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/**
+ * Lektionen eines Pakets. Heißen sie „Unité 3 – Vokabeln“, werden sie je Einheit in einer Zeile
+ * zusammengefasst (ganze Bände bleiben so übersichtlich), sonst einfache Liste.
+ */
+function PackLessons({ pack }: { pack: Pack }) {
+  const groups = new Map<string, { part: string; lesson: Lesson }[]>();
+  for (const l of pack.lessons) {
+    const { unit, part } = splitLessonTitle(l.title);
+    if (!groups.has(unit)) groups.set(unit, []);
+    groups.get(unit)!.push({ part, lesson: l });
+  }
+  const grouped = [...groups.values()].some((g) => g.length > 1 || g[0]!.part !== g[0]!.lesson.title);
+  const count = (l: Lesson) => l.vocab.length + l.texts.reduce((a, t) => a + t.sentences.length, 0);
+  if (!pack.lessons.length) return <p className="muted">Keine Lektionen.</p>;
+  if (!grouped) {
+    return (
+      <ul className="list" style={{ marginTop: 8 }}>
+        {pack.lessons.map((l) => (
+          <li key={l.id}>
+            <div>
+              <div className="fr">{l.title}</div>
+              <div className="de small">{l.vocab.length} Vokabeln · {l.texts.length} Texte</div>
+            </div>
+            <span className="spacer" />
+            <button className="btn" onClick={() => navigate({ name: 'lesson', packId: pack.id, lessonId: l.id })}>Öffnen <Icon.next /></button>
+          </li>
+        ))}
+      </ul>
+    );
+  }
+  return (
+    <div className="unit-grid" style={{ marginTop: 8 }}>
+      {[...groups.entries()].map(([unit, parts]) => (
+        <div key={unit} className="unit-row">
+          <div className="unit-name">{unit}</div>
+          <div className="row" style={{ gap: 6 }}>
+            {parts.map(({ part, lesson }) => (
+              <button key={lesson.id} className="btn" onClick={() => navigate({ name: 'lesson', packId: pack.id, lessonId: lesson.id })}>
+                {part} <span className="muted small">{count(lesson)}</span>
+              </button>
             ))}
-            {p.lessons.length === 0 && <li className="muted">Keine Lektionen.</li>}
-          </ul>
+          </div>
         </div>
       ))}
     </div>

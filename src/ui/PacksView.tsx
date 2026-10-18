@@ -14,16 +14,26 @@ export function PacksView() {
   const [msg, setMsg] = useState<string | null>(null);
   const [url, setUrl] = useState('');
 
-  const onFile = async (f: File | undefined) => {
-    if (!f) return;
+  /** Mehrere ZIP-Dateien nacheinander importieren (z. B. alle vier Bände auf einmal). */
+  const onFiles = async (list: FileList | null) => {
+    const files = Array.from(list ?? []);
+    if (!files.length) return;
     setBusy(true);
     setMsg(null);
+    const done: string[] = [];
+    const failed: string[] = [];
     try {
-      const r = await importPackZip(f);
+      for (const [i, f] of files.entries()) {
+        setMsg(`Importiere ${i + 1} von ${files.length}: ${f.name} …`);
+        try {
+          const r = await importPackZip(f);
+          done.push(`„${r.pack.title}“ (${r.audioCount} Audiodateien)${r.warnings.length ? ` – ${r.warnings.join(' ')}` : ''}`);
+        } catch (e) {
+          failed.push(`${f.name}: ${e instanceof Error ? e.message : String(e)}`);
+        }
+      }
       await refreshPacks();
-      setMsg(`„${r.pack.title}“ importiert (${r.audioCount} Audiodateien).${r.warnings.length ? ' Hinweise: ' + r.warnings.join(' ') : ''}`);
-    } catch (e) {
-      setMsg(`Import fehlgeschlagen: ${e instanceof Error ? e.message : String(e)}`);
+      setMsg([done.length ? `Importiert: ${done.join('; ')}.` : '', failed.length ? `Fehlgeschlagen: ${failed.join('; ')}.` : ''].filter(Boolean).join(' '));
     } finally {
       setBusy(false);
       if (fileRef.current) fileRef.current.value = '';
@@ -53,8 +63,9 @@ export function PacksView() {
         <h2>Paket importieren</h2>
         <p className="muted small">Ein Paket ist eine ZIP-Datei mit Vokabeln, Texten und Audio, die deine Lehrkraft erstellt hat.</p>
         <div className="row">
-          <input ref={fileRef} type="file" accept=".zip,application/zip" style={{ display: 'none' }} onChange={(e) => void onFile(e.target.files?.[0])} />
-          <button className="btn primary" disabled={busy} onClick={() => fileRef.current?.click()}>ZIP-Datei auswählen</button>
+          <input ref={fileRef} type="file" multiple accept=".zip,application/zip" style={{ display: 'none' }} onChange={(e) => void onFiles(e.target.files)} />
+          <button className="btn primary" disabled={busy} onClick={() => fileRef.current?.click()}>ZIP-Datei(en) auswählen</button>
+          <span className="muted small">Mehrere Dateien auf einmal möglich, z. B. alle Bände.</span>
         </div>
         <div className="row" style={{ marginTop: 10 }}>
           <input placeholder="https://… /paket.zip" value={url} onChange={(e) => setUrl(e.target.value)} style={{ flex: 1, minWidth: 200, padding: 8, borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)' }} />

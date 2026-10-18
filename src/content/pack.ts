@@ -10,7 +10,7 @@
  */
 import JSZip from 'jszip';
 import { PACK_FORMAT_VERSION, newId, type AudioAsset, type Pack } from '../types/content';
-import { getAudio, listAudioForPack, putAudio, savePack } from '../storage/db';
+import { absorbPacks, getAudio, listAudioForPack, putAudio, savePack } from '../storage/db';
 
 const MIME_EXT: Record<string, string> = {
   'audio/mpeg': 'mp3',
@@ -59,6 +59,8 @@ export function validatePack(raw: unknown): { ok: true; pack: Pack } | { ok: fal
     level: p.level,
     author: p.author,
     rightsNote: p.rightsNote,
+    sortKey: typeof p.sortKey === 'string' ? p.sortKey : undefined,
+    replaces: Array.isArray(p.replaces) ? p.replaces.filter((x): x is string => typeof x === 'string') : undefined,
     formatVersion: PACK_FORMAT_VERSION,
     createdAt: p.createdAt ?? now,
     updatedAt: p.updatedAt ?? now,
@@ -115,6 +117,10 @@ export async function importPackZip(file: Blob, opts: { newId?: boolean } = {}):
   }
   for (const missing of referenced) warnings.push(`Audio „${missing}“ wird referenziert, fehlt aber im Paket.`);
   await savePack(pack);
+  if (pack.replaces?.length) {
+    const n = await absorbPacks(pack.replaces, pack.id);
+    if (n) warnings.push(`${n} frühere Einzelpakete ersetzt, Lernstand übernommen`);
+  }
   return { pack, audioCount, warnings };
 }
 
