@@ -12,7 +12,7 @@ on:
         description: sample oder full
         default: sample
       voice:
-        description: Nur bei full – Stimmen-ID aus der Matrix (z. B. piper-siwis-medium)
+        description: Nur bei full – Stimmen-ID(s) aus der Matrix, durch Komma getrennt (z. B. piper-siwis-medium,kokoro-ff-siwis)
         default: piper-siwis-medium
 
 permissions:
@@ -36,7 +36,8 @@ jobs:
       - name: Stimme überspringen (full nur für die gewählte)
         id: gate
         run: |
-          if [ "${{ inputs.mode }}" = "full" ] && [ "${{ inputs.voice }}" != "${{ matrix.id }}" ]; then echo "skip=1" >> "$GITHUB_OUTPUT"; fi
+          # voice darf eine Komma-Liste sein, z. B. "piper-siwis-medium,kokoro-ff-siwis"
+          if [ "${{ inputs.mode }}" = "full" ] && [[ ",${{ inputs.voice }}," != *",${{ matrix.id }},"* ]]; then echo "skip=1" >> "$GITHUB_OUTPUT"; fi
       - uses: actions/checkout@v4
         if: ${{ !steps.gate.outputs.skip }}
       - uses: actions/setup-node@v4

@@ -100,9 +100,9 @@ export const PHENOMENA: Phenomenon[] = [
     pairs: [
       { a: 'il chante', b: 'ils chantent', ipaA: 'il ʃɑ̃t', ipaB: 'il ʃɑ̃t', deA: 'er singt', deB: 'sie singen' },
       { a: 'elle parle', b: 'elles parlent', ipaA: 'ɛl paʁl', ipaB: 'ɛl paʁl', deA: 'sie spricht', deB: 'sie sprechen' },
-      { a: 'ils parlent', b: 'parler', ipaA: 'il paʁl', ipaB: 'paʁle', deA: 'sie sprechen', deB: 'sprechen' },
-      { a: 'ils trouvent', b: 'souvent', ipaA: 'il tʁuv', ipaB: 'suvɑ̃', deA: 'sie finden', deB: 'oft' },
-      { a: 'ils chantent', b: 'chanter', ipaA: 'il ʃɑ̃t', ipaB: 'ʃɑ̃te', deA: 'sie singen', deB: 'singen' },
+      { a: 'parlent', b: 'parler', ipaA: 'paʁl', ipaB: 'paʁle', deA: '(sie) sprechen', deB: 'sprechen' },
+      { a: 'trouvent', b: 'souvent', ipaA: 'tʁuv', ipaB: 'suvɑ̃', deA: '(sie) finden', deB: 'oft' },
+      { a: 'chantent', b: 'chanter', ipaA: 'ʃɑ̃t', ipaB: 'ʃɑ̃te', deA: '(sie) singen', deB: 'singen' },
     ],
     year: 1,
   },
@@ -302,8 +302,8 @@ export const PHENOMENA: Phenomenon[] = [
     pitfall: '„vous parlez“ als [paʁlɛts] mit gesprochenem z, „nous parlons“ als [paʁlɔns]. Vor Vokal wird das z gebunden: „vous‿avez“ [vuzave].',
     examples: [{ fr: 'vous parlez', ipa: 'vu paʁle' }, { fr: 'parler', ipa: 'paʁle' }, { fr: 'nous parlons', ipa: 'nu paʁlɔ̃' }, { fr: 'vous avez', ipa: 'vuz‿ave' }],
     pairs: [
-      { a: 'vous parlez', b: 'parler', ipaA: 'vu paʁle', ipaB: 'paʁle', deA: 'ihr sprecht', deB: 'sprechen' },
-      { a: 'vous chantez', b: 'chanté', ipaA: 'vu ʃɑ̃te', ipaB: 'ʃɑ̃te', deA: 'ihr singt', deB: 'gesungen' },
+      { a: 'parlez', b: 'parler', ipaA: 'paʁle', ipaB: 'paʁle', deA: '(ihr) sprecht', deB: 'sprechen' },
+      { a: 'chantez', b: 'chanté', ipaA: 'ʃɑ̃te', ipaB: 'ʃɑ̃te', deA: '(ihr) singt', deB: 'gesungen' },
       { a: 'nous parlons', b: 'ils parlent', ipaA: 'nu paʁlɔ̃', ipaB: 'il paʁl', deA: 'wir sprechen', deB: 'sie sprechen' },
       { a: 'nous chantons', b: 'ils chantent', ipaA: 'nu ʃɑ̃tɔ̃', ipaB: 'il ʃɑ̃t', deA: 'wir singen', deB: 'sie singen' },
       { a: 'vous êtes', b: 'vous faites', ipaA: 'vuz‿ɛt', ipaB: 'vu fɛt', deA: 'ihr seid', deB: 'ihr macht' },
