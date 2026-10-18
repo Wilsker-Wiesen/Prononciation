@@ -168,10 +168,16 @@ export function useTrainer(item: TrainItem, settings: Settings) {
     setPhase('analyzing');
     try {
       const r = await rec.stop();
+      console.info('[Aufnahme]', r.info.via, `${Math.round(r.durationMs)} ms`, `Graph ${Math.round(r.info.graphMs)} ms`, `Kontext ${r.info.ctxState}`);
       const pcm16 = resampleTo(r.pcm, r.sampleRate, 16000);
       const trimmed = trimSilence(pcm16, 16000).pcm;
       if (trimmed.length < 1600) {
-        setError('Die Aufnahme war zu leise oder zu kurz. Bitte noch einmal.');
+        const i = r.info;
+        setError(
+          i.elapsedMs > 600 && r.durationMs < 200
+            ? `Vom Mikrofon kam kein Ton an (${Math.round(i.elapsedMs / 100) / 10} s aufgenommen, ${Math.round(i.graphMs)} ms Daten, Audio: ${i.ctxState}). Bitte noch einmal; falls es bleibt, die App neu öffnen.`
+            : 'Die Aufnahme war zu kurz. Tippe auf das Mikrofon, sprich und tippe dann erneut.',
+        );
         setPhase('idle');
         return;
       }

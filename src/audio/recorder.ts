@@ -13,9 +13,12 @@
  *   auf 16 kHz übernimmt später resampleTo() aus ./resample.
  * - Erfassung per AudioWorklet (Code inline als Blob-URL), Rückfall auf
  *   ScriptProcessorNode, wenn kein AudioWorklet vorhanden ist.
+ * - Parallel läuft ein MediaRecorder auf demselben Mikrofon-Stream. Liefert der
+ *   Audio-Graph keine Daten (iOS: Kontext „interrupted“/„suspended“ nach dem
+ *   Umschalten der Audio-Sitzung), wird die MediaRecorder-Aufnahme dekodiert.
  */
-import { setAudioSession } from './audioSession';
 import { getAudioContextCtor } from './audioContext';
+import { decodeAudioFile } from './resample';
 
 export interface RecorderOptions {
   /** Automatischer Stopp nach so vielen Sekunden (Standard 20). */
@@ -30,6 +33,8 @@ export interface Recording {
   pcm: Float32Array;
   sampleRate: number;
   durationMs: number;
+  /** Diagnose: Herkunft der Daten und Zustand des Audio-Kontexts */
+  info: { via: 'graph' | 'media-recorder'; graphMs: number; elapsedMs: number; ctxState: string };
 }
 
 export type RecorderErrorCode = 'permission-denied' | 'not-found' | 'unsupported' | 'not-recording';
@@ -106,6 +111,8 @@ export class Recorder {
   private maxTimer: ReturnType<typeof setTimeout> | null = null;
   private stopPromise: Promise<Recording> | null = null;
   private flushResolve: (() => void) | null = null;
+  private mediaRecorder: MediaRecorder | null = null;
+  private mediaChunks: Blob[] = [];
 
   static isSupported(): boolean {
     return (
@@ -148,8 +155,6 @@ export class Recorder {
     this.totalSamples = 0;
     this.resetLevel();
 
-    // iOS: Aufnahme-Sitzung vor dem Kontext anfordern
-    setAudioSession('play-and-record');
     // Kontext synchron innerhalb der Geste erzeugen und entsperren
     let ctx = new Ctor();
     this.ctx = ctx;
@@ -184,6 +189,11 @@ export class Recorder {
       }
     }
     if (ctx.state !== 'running') void ctx.resume().catch(() => undefined);
+    // iOS unterbricht den Kontext, wenn die Audio-Sitzung umschaltet: sofort wieder anwerfen
+    ctx.onstatechange = () => {
+      if (this.ctx === ctx && this.state === 'recording' && ctx.state !== 'running' && ctx.state !== 'closed') void ctx.resume().catch(() => undefined);
+    };
+    this.startMediaRecorder(stream);
 
     this.maxSamples = Math.max(1, Math.round(this.maxSeconds * ctx.sampleRate));
     this.source = ctx.createMediaStreamSource(stream);
@@ -302,11 +312,39 @@ export class Recorder {
     this.levelCount = 0;
   }
 
+  private startMediaRecorder(stream: MediaStream): void {
+    this.mediaChunks = [];
+    if (typeof MediaRecorder === 'undefined') return;
+    try {
+      const mr = new MediaRecorder(stream);
+      mr.ondataavailable = (e) => { if (e.data.size > 0) this.mediaChunks.push(e.data); };
+      mr.start();
+      this.mediaRecorder = mr;
+    } catch {
+      this.mediaRecorder = null;
+    }
+  }
+
+  private stopMediaRecorder(): Promise<Blob | null> {
+    const mr = this.mediaRecorder;
+    this.mediaRecorder = null;
+    if (!mr || mr.state === 'inactive') return Promise.resolve(this.mediaChunks.length ? new Blob(this.mediaChunks) : null);
+    return new Promise((resolve) => {
+      const done = () => resolve(this.mediaChunks.length ? new Blob(this.mediaChunks, { type: mr.mimeType || this.mediaChunks[0]?.type }) : null);
+      const timer = setTimeout(done, 1500);
+      mr.onstop = () => { clearTimeout(timer); done(); };
+      try { mr.stop(); } catch { clearTimeout(timer); done(); }
+    });
+  }
+
   private async finish(): Promise<Recording> {
     this.state = 'stopping';
     this.clearTimers();
     const sampleRate = this.ctx?.sampleRate ?? 48000;
+    const ctxState = this.ctx?.state ?? 'none';
+    const elapsedMs = now() - this.startedAt;
 
+    const mediaBlob = await this.stopMediaRecorder();
     if (this.stream) stopTracks(this.stream);
     try {
       this.source?.disconnect();
@@ -319,7 +357,19 @@ export class Recorder {
 
     const pcm = this.collect();
     this.release();
-    return { pcm, sampleRate, durationMs: (pcm.length / sampleRate) * 1000 };
+    const graphMs = (pcm.length / sampleRate) * 1000;
+    // Audio-Graph hat weniger als die Hälfte geliefert: MediaRecorder-Aufnahme verwenden
+    if (graphMs < elapsedMs * 0.5 && mediaBlob && mediaBlob.size > 0) {
+      try {
+        const dec = await decodeAudioFile(mediaBlob);
+        if (dec.pcm.length > pcm.length) {
+          return { pcm: dec.pcm, sampleRate: dec.sampleRate, durationMs: dec.durationMs, info: { via: 'media-recorder', graphMs, elapsedMs, ctxState } };
+        }
+      } catch {
+        /* dann bleibt es bei den Graph-Daten */
+      }
+    }
+    return { pcm, sampleRate, durationMs: graphMs, info: { via: 'graph', graphMs, elapsedMs, ctxState } };
   }
 
   private flushWorklet(node: AudioWorkletNode): Promise<void> {
@@ -387,6 +437,10 @@ export class Recorder {
     }
     if (this.scriptNode) this.scriptNode.onaudioprocess = null;
     if (this.workletNode) this.workletNode.port.onmessage = null;
+    if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
+      try { this.mediaRecorder.stop(); } catch { /* ignorieren */ }
+    }
+    this.mediaRecorder = null;
     const ctx = this.ctx;
     this.ctx = null;
     this.stream = this.source = this.workletNode = this.scriptNode = this.sink = null;
@@ -397,8 +451,6 @@ export class Recorder {
 
 function stopTracks(stream: MediaStream): void {
   for (const track of stream.getTracks()) track.stop();
-  // iOS: zurück auf Wiedergabe (Lautsprecher statt Hörmuschel, unabhängig vom Stummschalter)
-  setAudioSession('playback');
 }
 
 function now(): number {

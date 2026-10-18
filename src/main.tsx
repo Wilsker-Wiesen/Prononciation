@@ -3,7 +3,6 @@ import { createRoot } from 'react-dom/client';
 import { Capacitor } from '@capacitor/core';
 import { registerSW } from 'virtual:pwa-register';
 import App from './App';
-import { setAudioSession } from './audio/audioSession';
 import { installAudioUnlock } from './audio/player';
 import './ui/styles.css';
 
@@ -15,7 +14,6 @@ if (!Capacitor.isNativePlatform()) {
 } else {
   document.documentElement.classList.add('native');
 }
-setAudioSession('playback');
 installAudioUnlock();
 
 createRoot(document.getElementById('root')!).render(
