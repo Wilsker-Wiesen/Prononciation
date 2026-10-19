@@ -6,7 +6,7 @@ const config: CapacitorConfig = {
   appId: 'de.wilskerwiesen.prononciation',
   appName: 'Prononciation',
   webDir: 'dist',
-  backgroundColor: '#f7f5f0',
+  backgroundColor: '#eaf4fc',
   ios: {
     contentInset: 'never',
     // Wiedergabe ohne Vollbild-Player, Mikrofon im WebView

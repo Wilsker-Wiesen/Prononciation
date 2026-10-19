@@ -73,7 +73,7 @@ p { margin: 0 0 0.75em; }
   padding-top: calc(10px + env(safe-area-inset-top));
 }
 .topbar .brand { font-weight: 700; letter-spacing: 0.2px; font-size: 1.1rem; display: flex; align-items: center; gap: 8px; }
-.topbar .brand svg { width: 26px; height: 26px; }
+.topbar .brand img { width: 30px; height: 30px; border-radius: 7px; box-shadow: 0 0 0 1px var(--border); background: #cfe6f8; }
 .topbar nav { margin-left: auto; display: flex; gap: 4px; flex-wrap: wrap; }
 .topbar nav button {
   background: transparent; border: 1px solid transparent; color: inherit; padding: 6px 10px; border-radius: 8px; cursor: pointer;
