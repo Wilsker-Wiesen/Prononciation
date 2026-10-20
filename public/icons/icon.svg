@@ -4,7 +4,7 @@
     <path d="M-15 -6 q5 -6 10 0 M6 -6 q5 -6 10 0" stroke="#ffffff" stroke-width="4" fill="none" stroke-linecap="round"/>
     <path d="M-7 4 L9 4 L1 15 Z" fill="#f2b84b"/>
     <path d="M-1 14 c-6 8 2 13 5 5 Z" fill="#e63946"/>
-  </g><g>
+  </g><g transform="translate(103.5 90.75) scale(0.85) translate(-101.5 -71.75)">
     <rect x="96" y="56" width="11" height="18" rx="5.5" fill="#13293d"/>
     <path d="M92.5 67 a9 9 0 0 0 18 0" stroke="#13293d" stroke-width="3" fill="none" stroke-linecap="round"/>
     <path d="M101.5 76 v8 M96 86 h11" stroke="#13293d" stroke-width="3" stroke-linecap="round"/>
