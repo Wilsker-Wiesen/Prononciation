@@ -8,6 +8,7 @@ import type { Attempt, Pack } from '../types/content';
 import { Badge, Icon } from './components';
 import { PHENOMENA, detectPhenomena } from '../phon/phenomena';
 import { KIND_LABEL, lessonKind } from '../content/lessonKind';
+import { puzzleEligible } from '../game/puzzle';
 
 export function LessonView({ pack, lessonId, tab }: { pack: Pack; lessonId: string; tab?: string }) {
   const { settings } = useApp();
@@ -32,6 +33,7 @@ export function LessonView({ pack, lessonId, tab }: { pack: Pack; lessonId: stri
   // Leere Rubriken ausblenden; Reiter nur, wenn es beides gibt
   const active = (tab === 'text' && lesson.texts.length) || !lesson.vocab.length ? 'text' : 'vocab';
   const showTabs = lesson.vocab.length > 0 && lesson.texts.length > 0;
+  const puzzleCount = lesson.vocab.filter(puzzleEligible).length;
 
   const playItem = async (text: string, audioId?: string, start?: number, end?: number) => {
     await playModelText(text, { audioId, start, end, ttsFallback: settings.ttsFallback, voiceName: settings.ttsVoice || undefined }).catch(() => undefined);
@@ -49,23 +51,31 @@ export function LessonView({ pack, lessonId, tab }: { pack: Pack; lessonId: stri
       )}
       {active === 'vocab' && (
         <div className="card">
-          <div className="row between" style={{ marginBottom: 8 }}>
-            <h2 style={{ margin: 0 }}>{label}</h2>
-            <div className="row">
-              <select value={focus} onChange={(e) => setFocus(e.target.value)} aria-label="Fokus" style={{ padding: 8, borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)' }}>
-                <option value="">{kind === 'sentences' ? 'Alle Sätze' : 'Alle Wörter'}</option>
+          <h2 style={{ margin: 0 }}>{label} <span className="muted small">({lesson.vocab.length})</span></h2>
+          <div className="exercise-grid">
+            <button className="exercise" disabled={!lesson.vocab.length} onClick={() => navigate({ name: 'train', packId: pack.id, lessonId, kind: 'vocab', focus: focus || undefined })}>
+              <span className="ex-emoji" aria-hidden="true">🎤</span><b>Sprechen</b><span className="small muted">Nachsprechen mit Rückmeldung</span>
+            </button>
+            <button className="exercise" disabled={lesson.vocab.length < 3} onClick={() => navigate({ name: 'listen', packId: pack.id, lessonId })}>
+              <span className="ex-emoji" aria-hidden="true">👂</span><b>Hörverstehen</b><span className="small muted">Hören und das Richtige wählen</span>
+            </button>
+            {puzzleCount >= 3 && (
+              <button className="exercise" onClick={() => navigate({ name: 'puzzle', packId: pack.id, lessonId })}>
+                <span className="ex-emoji" aria-hidden="true">🧩</span><b>Satzpuzzle</b><span className="small muted">Hören, Satz bauen, sprechen</span>
+              </button>
+            )}
+          </div>
+          {focusCounts.size > 0 && (
+            <label className="row small muted" style={{ gap: 8, marginBottom: 8 }}>
+              Sprechen mit Fokus:
+              <select value={focus} onChange={(e) => setFocus(e.target.value)} style={{ padding: 6, borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)' }}>
+                <option value="">{kind === 'sentences' ? 'alle Sätze' : 'alle Wörter'}</option>
                 {PHENOMENA.filter((p) => (focusCounts.get(p.id) ?? 0) > 0).map((p) => (
                   <option key={p.id} value={p.id}>{p.emoji} {p.short} ({focusCounts.get(p.id)})</option>
                 ))}
               </select>
-              <button className="btn" disabled={lesson.vocab.length < 3} onClick={() => navigate({ name: 'listen', packId: pack.id, lessonId })}>
-                <Icon.ear /> Hörverstehen
-              </button>
-              <button className="btn primary" disabled={!lesson.vocab.length} onClick={() => navigate({ name: 'train', packId: pack.id, lessonId, kind: 'vocab', focus: focus || undefined })}>
-                <Icon.mic /> Training starten
-              </button>
-            </div>
-          </div>
+            </label>
+          )}
           {lesson.sections?.length ? (
             lesson.sections.map((sec) => (
               <div key={sec.id}>

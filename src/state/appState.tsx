@@ -130,6 +130,7 @@ export type Route =
   | { name: 'home' }
   | { name: 'lesson'; packId: string; lessonId: string; tab?: string }
   | { name: 'listen'; packId: string; lessonId: string }
+  | { name: 'puzzle'; packId: string; lessonId: string }
   | { name: 'train'; packId: string; lessonId: string; kind: 'vocab' | 'text'; itemId?: string; index?: number; focus?: string }
   | { name: 'progress' }
   | { name: 'settings' }
@@ -145,7 +146,8 @@ export function parseRoute(hash: string): Route {
     case 'lesson':
       return parts[1] && parts[2] ? { name: 'lesson', packId: parts[1], lessonId: parts[2], tab: parts[3] } : { name: 'home' };
     case 'listen':
-      return parts[1] && parts[2] ? { name: 'listen', packId: parts[1], lessonId: parts[2] } : { name: 'home' };
+    case 'puzzle':
+      return parts[1] && parts[2] ? { name: parts[0], packId: parts[1], lessonId: parts[2] } : { name: 'home' };
     case 'train':
       return parts[1] && parts[2] && (parts[3] === 'vocab' || parts[3] === 'text')
         ? { name: 'train', packId: parts[1], lessonId: parts[2], kind: parts[3], itemId: parts[4] === '-' ? undefined : parts[4], index: parts[5] && parts[5] !== '-' ? Number(parts[5]) : undefined, focus: parts[6] }
@@ -166,7 +168,8 @@ export function routeToHash(r: Route): string {
   switch (r.name) {
     case 'home': return '#/';
     case 'lesson': return `#/lesson/${e(r.packId)}/${e(r.lessonId)}${r.tab ? `/${e(r.tab)}` : ''}`;
-    case 'listen': return `#/listen/${e(r.packId)}/${e(r.lessonId)}`;
+    case 'listen':
+    case 'puzzle': return `#/${r.name}/${e(r.packId)}/${e(r.lessonId)}`;
     case 'train': return `#/train/${e(r.packId)}/${e(r.lessonId)}/${r.kind}${r.focus ? `/${r.itemId ? e(r.itemId) : '-'}/${r.index ?? '-'}/${e(r.focus)}` : `${r.itemId ? `/${e(r.itemId)}` : ''}${r.index !== undefined ? `/${r.index}` : ''}`}`;
     case 'teacher': return `#/teacher${r.packId ? `/${e(r.packId)}` : ''}${r.lessonId ? `/${e(r.lessonId)}` : ''}`;
     case 'mission': return `#/mission${r.phenomenonId ? `/${e(r.phenomenonId)}` : ''}`;

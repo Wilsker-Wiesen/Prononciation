@@ -70,7 +70,8 @@ export function TrainerView({ pack, lessonId, kind, itemId, index, focus }: { pa
   );
 }
 
-export function TrainerCard({ item, onResult }: { item: TrainItem; onResult?: (overall: number) => void }) {
+/** compact: nur Gesamtpunktzahl und wichtigster Hinweis (für Spiele), sonst volle Auswertung. */
+export function TrainerCard({ item, onResult, compact = false }: { item: TrainItem; onResult?: (overall: number) => void; compact?: boolean }) {
   const { settings } = useApp();
   const model = useModelStatus();
   const { state, playModel, playOwn, startRecording, stopRecording, reset } = useTrainer(item, settings);
@@ -164,7 +165,7 @@ export function TrainerCard({ item, onResult }: { item: TrainItem; onResult?: (o
         </div>
       )}
 
-      {result && <ResultPanel result={result} />}
+      {result && (compact ? <CompactResult result={result} /> : <ResultPanel result={result} />)}
       {shownReward && result && (
         <div className="stack" style={{ marginTop: 12 }}>
           {(() => {
@@ -181,6 +182,17 @@ export function TrainerCard({ item, onResult }: { item: TrainItem; onResult?: (o
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function CompactResult({ result }: { result: NonNullable<ReturnType<typeof useTrainer>['state']['result']> }) {
+  const tip = result.assessment?.findings[0];
+  if (result.overall < 0) return null;
+  return (
+    <div className="row" style={{ marginTop: 14, gap: 14, alignItems: 'center' }}>
+      <ScoreRing score={result.overall} label="gesamt" />
+      {tip ? <div style={{ flex: 1, minWidth: 180 }}><FindingsList findings={[tip]} /></div> : <div className="muted">{result.overall >= 85 ? 'Très bien !' : 'Hör nochmal genau hin und versuch es erneut.'}</div>}
     </div>
   );
 }

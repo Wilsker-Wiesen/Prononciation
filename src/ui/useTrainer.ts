@@ -34,6 +34,11 @@ export interface TrainItem {
   lessonId: string;
 }
 
+/** Aufnahmegrenze nach Textlänge: Wörter 8 s, lange Lehrbuchsätze bis 30 s (Lernende sprechen langsam). */
+export function recordingLimit(text: string): number {
+  return Math.min(30, Math.max(8, Math.ceil(text.length / 7) + 3));
+}
+
 export interface TrainResult {
   overall: number;
   assessment: Assessment | null;
@@ -137,7 +142,7 @@ export function useTrainer(item: TrainItem, settings: Settings) {
     setError(null);
     player.stop();
     const rec = new Recorder({
-      maxSeconds: item.kind === 'vocab' ? 8 : 20,
+      maxSeconds: recordingLimit(item.text),
       onLevel: (r) => setLevel(Math.min(1, r * 4)),
       onTick: (s) => setSeconds(s),
     });
@@ -159,7 +164,7 @@ export function useTrainer(item: TrainItem, settings: Settings) {
               : `Aufnahme nicht möglich: ${e instanceof Error ? e.message : String(e)}`,
       );
     }
-  }, [phase, item.kind]);
+  }, [phase, item.text]);
 
   const stopRecording = useCallback(async () => {
     const rec = recorderRef.current;

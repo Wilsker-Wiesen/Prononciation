@@ -299,3 +299,17 @@ table.tbl input { width: 100%; background: var(--surface); border: 1px solid var
 .unit-row:first-child { border-top: 0; }
 .unit-name { font-weight: 700; }
 @media (max-width: 520px) { .unit-row { grid-template-columns: 1fr; gap: 4px; } }
+
+/* Übungsauswahl in der Lektion */
+.exercise-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; margin: 12px 0; }
+.exercise { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 14px 10px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--surface-2); color: var(--text); cursor: pointer; font: inherit; text-align: center; }
+.exercise:hover:not(:disabled) { border-color: var(--primary); }
+.exercise:disabled { opacity: 0.5; cursor: default; }
+.exercise .ex-emoji { font-size: 1.8rem; line-height: 1.2; }
+
+/* Satzpuzzle */
+.puzzle-line { min-height: 64px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px; border-bottom: 2px solid var(--border); margin-bottom: 14px; }
+.puzzle-bank { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.tile { font: inherit; font-size: 1.1rem; padding: 10px 14px; min-height: 48px; border-radius: 10px; border: 1px solid var(--border); border-bottom-width: 3px; background: var(--surface); color: var(--text); cursor: pointer; }
+.tile.ok { border-color: var(--good); color: var(--good); }
+.tile.bad { border-color: var(--bad); color: var(--bad); }
