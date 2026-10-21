@@ -9,7 +9,8 @@ Standard: ein Paket je Band (z. B. „Découvertes 1“) mit Lektionen wie „Un
 Mit --per-unit: ein Paket je Einheit (früheres Verhalten).
 
 Wortliste (*.tsv/*.csv/*.txt im Importordner), Tab-getrennt, Kopfzeile:
-  französisch ⇥ deutsch ⇥ Lektion ⇥ Audiodateiname ⇥ IPA
+  französisch ⇥ deutsch ⇥ Lektion ⇥ Audiodateiname ⇥ IPA [⇥ Abschnitt]
+„Abschnitt“ ist optional (z. B. „Atelier A“, „Volet 2“) und erscheint in der App als Zwischenüberschrift.
 „Lektion“ hat die Form „D1 Unité 3 – Vokabeln“: vor dem Gedankenstrich die Einheit (= ein Paket),
 dahinter der Lektionstitel im Paket. Die Reihenfolge der Zeilen bleibt erhalten (Buchreihenfolge).
 
@@ -54,15 +55,15 @@ def read_rows(folder: str) -> list[dict]:
             lines = [l.rstrip('\r\n') for l in fh if l.strip()]
         for n, line in enumerate(lines):
             cols = [c.strip() for c in line.split('\t')]
-            cols += [''] * (5 - len(cols))
-            fr, de, lesson, audio, ipa = cols[:5]
+            cols += [''] * (6 - len(cols))
+            fr, de, lesson, audio, ipa, section = cols[:6]
             if n == 0 and fr.lower().startswith(('franz', 'fr')) and de.lower().startswith(('deutsch', 'de')):
                 continue  # Kopfzeile
             if not fr:
                 continue
             ipa = re.sub(r'^[\[/]|[\]/]$', '', ipa).strip()
             rows.append({'fr': unicodedata.normalize('NFC', fr), 'de': unicodedata.normalize('NFC', de), 'lesson': lesson or 'Import',
-                         'audio': audio, 'ipa': unicodedata.normalize('NFC', ipa)})
+                         'audio': audio, 'ipa': unicodedata.normalize('NFC', ipa), 'section': unicodedata.normalize('NFC', section)})
     return rows
 
 
@@ -106,12 +107,19 @@ def build(folder: str, out: str, per_unit: bool = False) -> None:
             rest = unit[len(band):].strip() if not per_unit else ''
             for part, entries in parts.items():
                 vocab = []
+                # Abschnitte in Buchreihenfolge (erstes Auftreten)
+                sections = []
+                for r in entries:
+                    if r['section'] and r['section'] not in sections:
+                        sections.append(r['section'])
                 for r in entries:
                     # IDs wie bei den früheren Einheiten-Paketen: Lernstand bleibt gültig
                     base = os.path.splitext(r['audio'])[0] if r['audio'] else slug(r['fr'])[:40]
                     entry = {'id': f'v_{slug(unit)}_{slug(base)}', 'fr': r['fr'], 'de': r['de']}
                     if r['ipa']:
                         entry['ipaRef'] = r['ipa']
+                    if r['section']:
+                        entry['sectionId'] = f'sec_{sections.index(r["section"]) + 1}'
                     src = files.get(unicodedata.normalize('NFC', r['audio'])) if r['audio'] else None
                     if src:
                         ext = os.path.splitext(src)[1].lower()
@@ -120,7 +128,7 @@ def build(folder: str, out: str, per_unit: bool = False) -> None:
                         audio_files.append((os.path.join(folder, src), f'audio/{asset_id}{ext if ext in AUDIO_EXT else ".mp3"}'))
                     vocab.append(entry)
                 title = f'{rest} – {part}' if rest else part
-                lessons.append({'id': f'les_{slug(unit)}_{slug(part)}', 'title': title, 'sections': [], 'vocab': vocab, 'texts': []})
+                lessons.append({'id': f'les_{slug(unit)}_{slug(part)}', 'title': title, 'sections': [{'id': f'sec_{i + 1}', 'title': t} for i, t in enumerate(sections)], 'vocab': vocab, 'texts': []})
         title = key if per_unit else (f'Découvertes {m.group(1)}' if m else key)
         pack = {
             'id': f'pack_{slug(key)}', 'title': title, 'level': f'Lernjahr {m.group(1)}' if m else None,

@@ -65,6 +65,7 @@ deshalb nur ein schlanker Kern:
 | Lernpfad | vier Etappen mit 16 Missionen, „Weiter hier!“ | nichts gesperrt, nur Empfehlung |
 | Feiern | Konfetti, Fanfare (Web Audio), Vibration | abschaltbar; „Bewegung reduzieren“ wird respektiert |
 | Ohren-Blitz | 60-Sekunden-Hörquiz mit Minimalpaaren, persönlicher Rekord | kein Vergleich mit anderen |
+| Hörverstehen | je Lektion 10 Aufnahmen: Bedeutung wählen (Einträge mit Übersetzung) oder fehlendes Wort im Satz wählen; Fehlerrunde | +2 XP je richtige Antwort |
 
 Bewusst **nicht** umgesetzt: Währung, Shop und Outfits (erwartete Belohnungen können die intrinsische Motivation von
 Kindern untergraben; Deci, Koestner & Ryan 1999), Tagesquests und Kombos (mehr Drumherum als Nutzen), Ranglisten und

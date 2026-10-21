@@ -20,6 +20,8 @@ export interface ParsedRow {
   audio?: string;
   /** Lautschrift aus der Quelle, ohne [ ] bzw. / / */
   ipa?: string;
+  /** Abschnitt im Buch (6. Spalte), z. B. „Atelier A“ oder „Volet 2“; wird zur Zwischenüberschrift */
+  section?: string;
 }
 
 const AUDIO_RE = /\.(mp3|m4a|aac|wav|ogg|oga|opus|webm|flac)$/i;
@@ -32,10 +34,10 @@ export function parseWordList(text: string): ParsedRow[] {
     if (line.startsWith('#')) continue;
     const parts = line.includes('\t') ? line.split('\t') : line.includes(';') ? line.split(';') : line.split(/\s[–-]\s/);
     const cols = parts.map((c) => c.trim().replace(/^"|"$/g, ''));
-    const [fr = '', de = '', lesson, audio, ipa] = cols;
+    const [fr = '', de = '', lesson, audio, ipa, section] = cols;
     if (!fr) continue;
     const ipaClean = ipa?.replace(/^[[/]|[\]/]$/g, '').trim();
-    rows.push({ fr, de, lesson: lesson || undefined, audio: audio || undefined, ipa: ipaClean || undefined });
+    rows.push({ fr, de, lesson: lesson || undefined, audio: audio || undefined, ipa: ipaClean || undefined, section: section || undefined });
   }
   // Kopfzeile erkennen
   const first = rows[0];
@@ -153,13 +155,18 @@ export function materialize(plan: BulkPlan, packId: string, opts: { includeUnmat
     }
     return id;
   };
-  const lessons: Lesson[] = plan.lessons.map((l) => ({
-    id: newId('les'),
-    title: l.title,
-    sections: [],
-    vocab: l.entries.map(({ row, file }): VocabEntry => ({ id: newId('v'), fr: row.fr, de: row.de, ipaRef: row.ipa, audioId: file ? ensureAsset(file) : undefined })),
-    texts: [],
-  }));
+  const lessons: Lesson[] = plan.lessons.map((l) => {
+    // Abschnitte in Buchreihenfolge (erstes Auftreten)
+    const sections = [...new Set(l.entries.map((e) => e.row.section).filter((t): t is string => !!t))].map((title, i) => ({ id: `sec_${i + 1}`, title }));
+    const sectionId = (t?: string) => sections.find((x) => x.title === t)?.id;
+    return {
+      id: newId('les'),
+      title: l.title,
+      sections,
+      vocab: l.entries.map(({ row, file }): VocabEntry => ({ id: newId('v'), fr: row.fr, de: row.de, ipaRef: row.ipa, audioId: file ? ensureAsset(file) : undefined, sectionId: sectionId(row.section) })),
+      texts: [],
+    };
+  });
   if (opts.includeUnmatchedAudio && plan.unmatchedAudio.length) {
     const extra: Lesson = {
       id: newId('les'),

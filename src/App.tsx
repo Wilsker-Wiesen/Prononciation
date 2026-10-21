@@ -5,6 +5,7 @@ import { AppProvider, navigate, useApp, useRoute } from './state/appState';
 import { HomeView } from './ui/HomeView';
 import { InfoView } from './ui/InfoView';
 import { LessonView } from './ui/LessonView';
+import { ListeningView } from './ui/ListeningView';
 import { MissionsView } from './ui/MissionsView';
 import { BlitzView } from './ui/BlitzView';
 import { PacksView } from './ui/PacksView';
@@ -21,7 +22,7 @@ function Shell() {
   useEffect(() => { void loadGame(); }, []);
 
   const nav = (name: 'home' | 'mission' | 'progress' | 'packs' | 'settings' | 'teacher' | 'info', label: string, icon: string, secondary = false, short = label) => {
-    const active = route.name === name || (name === 'home' && (route.name === 'lesson' || route.name === 'train' || route.name === 'blitz'));
+    const active = route.name === name || (name === 'home' && (route.name === 'lesson' || route.name === 'train' || route.name === 'listen' || route.name === 'blitz'));
     return (
       <button className={`${active ? 'active' : ''}${secondary ? ' secondary' : ''}`} aria-current={active ? 'page' : undefined} onClick={() => navigate({ name })}>
         <span className="tab-icon" aria-hidden="true">{icon}</span>
@@ -33,10 +34,11 @@ function Shell() {
 
   let view: React.ReactNode;
   if (!ready) view = <div className="card muted">Wird geladen …</div>;
-  else if (route.name === 'lesson' || route.name === 'train') {
+  else if (route.name === 'lesson' || route.name === 'train' || route.name === 'listen') {
     const pack = packs.find((p) => p.id === route.packId);
     if (!pack) view = <div className="card">Paket nicht gefunden. <button className="btn" onClick={() => navigate({ name: 'home' })}>Zur Startseite</button></div>;
     else if (route.name === 'lesson') view = <LessonView pack={pack} lessonId={route.lessonId} tab={route.tab} />;
+    else if (route.name === 'listen') view = <ListeningView key={location.hash} pack={pack} lessonId={route.lessonId} />;
     else view = <TrainerView key={location.hash} pack={pack} lessonId={route.lessonId} kind={route.kind} itemId={route.itemId} index={route.index} focus={route.focus} />;
   } else if (route.name === 'mission') view = <MissionsView key={route.phenomenonId ?? 'list'} phenomenonId={route.phenomenonId} />;
   else if (route.name === 'blitz') view = <BlitzView />;

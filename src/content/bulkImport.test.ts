@@ -43,6 +43,14 @@ describe('planBulkImport', () => {
     expect(v.ipa).toBeUndefined();
     expect(lessons[1]!.vocab[0]!.de).toBe('');
   });
+
+  it('macht aus der optionalen 6. Spalte Abschnitte in Buchreihenfolge', async () => {
+    const list = new File(['französisch\tdeutsch\tLektion\tAudiodateiname\tIPA\tAbschnitt\nIls arrivent.\t\tU1 – Texte\t\t\tAtelier B\nIl pleut.\t\tU1 – Texte\t\t\tAtelier A\nOn y va.\t\tU1 – Texte\t\t\tAtelier B\nSalut !\t\tU1 – Texte\t\t\t\n'], 'wortliste.tsv');
+    const { lessons } = materialize(await planBulkImport([list]), 'p1');
+    const l = lessons[0]!;
+    expect(l.sections).toEqual([{ id: 'sec_1', title: 'Atelier B' }, { id: 'sec_2', title: 'Atelier A' }]);
+    expect(l.vocab.map((v) => v.sectionId)).toEqual(['sec_1', 'sec_2', 'sec_1', undefined]);
+  });
 });
 
 describe('groupPlanByUnit', () => {

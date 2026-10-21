@@ -279,6 +279,16 @@ table.tbl input { width: 100%; background: var(--surface); border: 1px solid var
 .path-node .stars { color: #e8b84a; font-size: 0.9rem; letter-spacing: 1px; }
 .blitz-timer { font-size: 2rem; font-weight: 800; font-variant-numeric: tabular-nums; }
 .blitz-timer.low { color: var(--bad); }
+/* Hörverstehen */
+.listen-gap { font-size: 1.3rem; text-align: center; line-height: 1.7; margin: 8px 0 16px; }
+.listen-gap .gap { display: inline-block; min-width: 4em; padding: 0 6px; border-bottom: 3px solid var(--primary); font-weight: 700; text-align: center; }
+.listen-gap .gap.ok { color: var(--good); border-color: var(--good); }
+.listen-ask { text-align: center; font-size: 1.15rem; margin: 8px 0 16px; }
+.listen-options { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+.listen-options .btn { white-space: normal; justify-content: center; }
+.btn.wrong { border-color: var(--bad); color: var(--bad); }
+.listen-ok { color: var(--good); font-weight: 600; }
+.listen-bad { color: var(--bad); font-weight: 600; }
 @media (prefers-reduced-motion: reduce) {
   .path-node.next button, .reward-pop, .btn.record.on { animation: none; }
 }

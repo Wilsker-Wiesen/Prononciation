@@ -58,6 +58,9 @@ export function LessonView({ pack, lessonId, tab }: { pack: Pack; lessonId: stri
                   <option key={p.id} value={p.id}>{p.emoji} {p.short} ({focusCounts.get(p.id)})</option>
                 ))}
               </select>
+              <button className="btn" disabled={lesson.vocab.length < 3} onClick={() => navigate({ name: 'listen', packId: pack.id, lessonId })}>
+                <Icon.ear /> Hörverstehen
+              </button>
               <button className="btn primary" disabled={!lesson.vocab.length} onClick={() => navigate({ name: 'train', packId: pack.id, lessonId, kind: 'vocab', focus: focus || undefined })}>
                 <Icon.mic /> Training starten
               </button>
@@ -117,7 +120,7 @@ function VocabList({ pack, lessonId, entries, best, play, showIpa }: { pack: Pac
           <button className="btn ghost" aria-label="Anhören" onClick={() => void play(v.fr, v.audioId, v.start, v.end)}><Icon.play /></button>
           <div>
             <div className="fr">{v.fr}</div>
-            <div className="de small">{v.de}{showIpa && <span className="ipa muted"> · [{v.ipaRef ?? v.ipa ?? ipaString(transcribe(v.fr))}]</span>}</div>
+            <div className="de small">{v.de}{showIpa && <span className="ipa muted">{v.de ? ' · ' : ''}[{v.ipaRef ?? v.ipa ?? ipaString(transcribe(v.fr))}]</span>}</div>
           </div>
           <span className="spacer" />
           {best.has(v.id) && <Badge score={best.get(v.id)} />}

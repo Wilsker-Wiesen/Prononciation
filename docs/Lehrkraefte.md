@@ -69,8 +69,9 @@ Für große Bestände gibt es zwei Wege:
   „Unité 3 – Vokabeln“). Auf der Startseite stehen die Unités dann zeilenweise mit ihren Teilen.
 - **Ordner importieren** (im geöffneten Paket): alle Lektionen in dieses eine Paket.
 
-Wortliste (CSV/TSV/TXT, Kopfzeile wird erkannt): `französisch ⇥ deutsch ⇥ Lektion ⇥ Dateiname ⇥ Lautschrift`.
-„deutsch“ darf leer sein (z. B. Sätze aus Lektionstexten). Die Lautschrift aus dem Lehrwerk wird nur angezeigt; bewertet
+Wortliste (CSV/TSV/TXT, Kopfzeile wird erkannt): `französisch ⇥ deutsch ⇥ Lektion ⇥ Dateiname ⇥ Lautschrift ⇥ Abschnitt`.
+„deutsch“ darf leer sein (z. B. Sätze aus Lektionstexten). „Abschnitt“ ist optional (z. B. „Atelier A“, „Volet 2“) und
+erscheint in der Lektion als Zwischenüberschrift. Die Lautschrift aus dem Lehrwerk wird nur angezeigt; bewertet
 wird mit der App-eigenen Transkription, weil nur sie Wortgrenzen, stumme Endungen und Liaison kennt. Zuordnung der
 Audiodateien über die Spalte *Dateiname*, sonst über den Dateinamen („le_college.mp3“ ↔ „le collège“).
 

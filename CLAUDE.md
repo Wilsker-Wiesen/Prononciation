@@ -51,7 +51,7 @@ Auftraggeber und Nutzer: Jan Wilsker-Wiesen, Lehrer für Französisch und Sport 
 └── Prononciation/                               (dieses Repository)
 ```
 
-- `wortliste.tsv`: `französisch ⇥ deutsch ⇥ Lektion ⇥ Audiodateiname ⇥ IPA`; „deutsch“ darf leer sein (Lektionstexte,
+- `wortliste.tsv`: `französisch ⇥ deutsch ⇥ Lektion ⇥ Audiodateiname ⇥ IPA [⇥ Abschnitt]` (Abschnitt optional, z. B. „Atelier A“ → Zwischenüberschrift); „deutsch“ darf leer sein (Lektionstexte,
   Eigennamen); Lektion wie `D1 Unité 3 – Vokabeln`. Zahlen: D1 1.103, D2 1.096, D3 895, D4 844 Einträge.
 - Pakete bauen (auf dem Mac, nur Python-Standardbibliothek), ein Paket je Band:
   `python3 Prononciation/tools/build-packs.py "Aussprache-App - Audiomaterial Découvertes/Import/Découvertes 1" "Pakete/Bände"`
