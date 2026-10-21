@@ -7,7 +7,7 @@ import { listAttemptsForPack } from '../storage/db';
 import type { Attempt, Pack } from '../types/content';
 import { Badge, Icon } from './components';
 import { PHENOMENA, detectPhenomena } from '../phon/phenomena';
-import { KIND_LABEL, lessonKind } from '../content/lessonKind';
+import { KIND_LABEL, groupBySection, lessonKind } from '../content/lessonKind';
 import { puzzleEligible } from '../game/puzzle';
 
 export function LessonView({ pack, lessonId, tab }: { pack: Pack; lessonId: string; tab?: string }) {
@@ -76,15 +76,12 @@ export function LessonView({ pack, lessonId, tab }: { pack: Pack; lessonId: stri
               </select>
             </label>
           )}
-          {lesson.sections?.length ? (
-            lesson.sections.map((sec) => (
-              <div key={sec.id}>
-                <h3 className="muted" style={{ marginTop: 12 }}>{sec.title}</h3>
-                <VocabList pack={pack} lessonId={lessonId} entries={lesson.vocab.filter((v) => v.sectionId === sec.id)} best={best} play={playItem} showIpa={settings.showIpa} />
-              </div>
-            ))
-          ) : null}
-          <VocabList pack={pack} lessonId={lessonId} entries={lesson.vocab.filter((v) => !v.sectionId || !lesson.sections?.some((s) => s.id === v.sectionId))} best={best} play={playItem} showIpa={settings.showIpa} />
+          {groupBySection(lesson.vocab, lesson.sections).map((g, i) => (
+            <div key={i}>
+              {g.title && <h3 className="muted" style={{ marginTop: 12 }}>{g.title}</h3>}
+              <VocabList pack={pack} lessonId={lessonId} entries={g.entries} best={best} play={playItem} showIpa={settings.showIpa} />
+            </div>
+          ))}
         </div>
       )}
       {active === 'text' && (

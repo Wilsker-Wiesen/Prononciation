@@ -75,10 +75,16 @@ npm run models      # Erkennungsmodell aus dem Release nach public/models laden
   `native.yml` (iOS-Simulator-Build, Android-APK).
 - Doku: `docs/Konzept.md`, `Lehrkraefte.md`, `Entwicklung.md`, `Datenschutz.md`, `App.md`, `Aussprachefehler.md`, `Gamification.md`.
 
-## Offene Punkte (Stand 19.10.2026)
+## Übungen je Lektion
+
+Sprechen (Training), Hörverstehen (`src/game/listening.ts`, `ListeningView`), Satzpuzzle (`src/game/puzzle.ts`,
+`PuzzleView`, nur Sätze mit 3–10 Wörtern). Lektionsart „Vokabeln“/„Einzelsätze“ aus Titel oder Inhalt (`lessonKind.ts`);
+Abschnitte in Buchreihenfolge (`groupBySection`). Abschnittsnamen nur so, wie das Buch sie setzt (Material-Sitzung, 21.10.2026).
+
+## Offene Punkte (Stand 21.10.2026)
 
 - iPad-Test durch Jan: 10 Aufnahmen hintereinander (nach Umbau auf gemeinsamen AudioContext); Meldungstext bei Fehlern erfragen.
-- Klett-Band-Pakete neu bauen und importieren (ersetzen die früheren 29 Einzelpakete).
+- Band-Pakete mit Spalte „Abschnitt“ neu bauen und importieren.
 - Lizenzfrage Klett (Schulleitung oder Verlag) vor jeder Weitergabe an Lernende.
 - Lernstand-Steuerung: Inhalte nur bis zum aktuellen Stand im Buch anbieten (Buchreihenfolge ist in den Paketen erhalten).
 - Bewertung mit echten Schüleraufnahmen nachkalibrieren (bisher Lingua Libre und synthetische Proben).
