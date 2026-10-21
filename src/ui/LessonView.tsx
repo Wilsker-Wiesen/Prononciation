@@ -1,4 +1,4 @@
-/** Lektionsansicht: Vokabeln und Texte mit Vorhören und Einstieg ins Training. */
+/** Lektionsansicht: Vokabeln oder Einzelsätze und Texte mit Vorhören und Einstieg ins Training. */
 import { useEffect, useMemo, useState } from 'react';
 import { playText as playModelText } from '../audio/modelVoice';
 import { ipaString, transcribe } from '../phon/g2p';
@@ -7,13 +7,13 @@ import { listAttemptsForPack } from '../storage/db';
 import type { Attempt, Pack } from '../types/content';
 import { Badge, Icon } from './components';
 import { PHENOMENA, detectPhenomena } from '../phon/phenomena';
+import { KIND_LABEL, lessonKind } from '../content/lessonKind';
 
 export function LessonView({ pack, lessonId, tab }: { pack: Pack; lessonId: string; tab?: string }) {
   const { settings } = useApp();
   const lesson = pack.lessons.find((l) => l.id === lessonId);
   const [best, setBest] = useState<Map<string, number>>(new Map());
   const [focus, setFocus] = useState('');
-  const active = tab === 'text' ? 'text' : 'vocab';
   const focusCounts = useMemo(() => {
     const counts = new Map<string, number>();
     for (const v of lesson?.vocab ?? []) for (const ph of detectPhenomena(transcribe(v.fr))) counts.set(ph, (counts.get(ph) ?? 0) + 1);
@@ -27,6 +27,11 @@ export function LessonView({ pack, lessonId, tab }: { pack: Pack; lessonId: stri
     });
   }, [pack.id, lessonId]);
   if (!lesson) return <div className="card">Lektion nicht gefunden.</div>;
+  const kind = lessonKind(lesson);
+  const label = KIND_LABEL[kind];
+  // Leere Rubriken ausblenden; Reiter nur, wenn es beides gibt
+  const active = (tab === 'text' && lesson.texts.length) || !lesson.vocab.length ? 'text' : 'vocab';
+  const showTabs = lesson.vocab.length > 0 && lesson.texts.length > 0;
 
   const playItem = async (text: string, audioId?: string, start?: number, end?: number) => {
     await playModelText(text, { audioId, start, end, ttsFallback: settings.ttsFallback, voiceName: settings.ttsVoice || undefined }).catch(() => undefined);
@@ -36,17 +41,19 @@ export function LessonView({ pack, lessonId, tab }: { pack: Pack; lessonId: stri
     <div>
       <button className="btn ghost" onClick={() => navigate({ name: 'home' })}><Icon.prev /> {pack.title}</button>
       <h1 style={{ marginTop: 8 }}>{lesson.title}</h1>
-      <div className="tabs">
-        <button className={active === 'vocab' ? 'active' : ''} onClick={() => navigate({ name: 'lesson', packId: pack.id, lessonId, tab: 'vocab' })}>Vokabeln ({lesson.vocab.length})</button>
-        <button className={active === 'text' ? 'active' : ''} onClick={() => navigate({ name: 'lesson', packId: pack.id, lessonId, tab: 'text' })}>Texte ({lesson.texts.length})</button>
-      </div>
+      {showTabs && (
+        <div className="tabs">
+          <button className={active === 'vocab' ? 'active' : ''} onClick={() => navigate({ name: 'lesson', packId: pack.id, lessonId, tab: 'vocab' })}>{label} ({lesson.vocab.length})</button>
+          <button className={active === 'text' ? 'active' : ''} onClick={() => navigate({ name: 'lesson', packId: pack.id, lessonId, tab: 'text' })}>Texte ({lesson.texts.length})</button>
+        </div>
+      )}
       {active === 'vocab' && (
         <div className="card">
           <div className="row between" style={{ marginBottom: 8 }}>
-            <h2 style={{ margin: 0 }}>Vokabeln</h2>
+            <h2 style={{ margin: 0 }}>{label}</h2>
             <div className="row">
               <select value={focus} onChange={(e) => setFocus(e.target.value)} aria-label="Fokus" style={{ padding: 8, borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)' }}>
-                <option value="">Alle Wörter</option>
+                <option value="">{kind === 'sentences' ? 'Alle Sätze' : 'Alle Wörter'}</option>
                 {PHENOMENA.filter((p) => (focusCounts.get(p.id) ?? 0) > 0).map((p) => (
                   <option key={p.id} value={p.id}>{p.emoji} {p.short} ({focusCounts.get(p.id)})</option>
                 ))}
@@ -69,7 +76,7 @@ export function LessonView({ pack, lessonId, tab }: { pack: Pack; lessonId: stri
       )}
       {active === 'text' && (
         <div className="stack">
-          {lesson.texts.length === 0 && <div className="card muted">Keine Texte in dieser Lektion.</div>}
+          {lesson.texts.length === 0 && <div className="card muted">Diese Lektion ist leer.</div>}
           {lesson.texts.map((t) => (
             <div className="card" key={t.id}>
               <div className="row between">

@@ -1,5 +1,6 @@
 /** Startseite: Pakete und Lektionen. */
 import { splitLessonTitle } from '../content/bulkImport';
+import { KIND_LABEL, lessonKind } from '../content/lessonKind';
 import { navigate, useApp } from '../state/appState';
 import type { Lesson, Pack } from '../types/content';
 import { Icon } from './components';
@@ -57,7 +58,7 @@ function PackLessons({ pack }: { pack: Pack }) {
           <li key={l.id}>
             <div>
               <div className="fr">{l.title}</div>
-              <div className="de small">{l.vocab.length} Vokabeln · {l.texts.length} Texte</div>
+              <div className="de small">{[l.vocab.length ? `${l.vocab.length} ${KIND_LABEL[lessonKind(l)]}` : '', l.texts.length ? `${l.texts.length} Texte` : ''].filter(Boolean).join(' · ') || 'leer'}</div>
             </div>
             <span className="spacer" />
             <button className="btn" onClick={() => navigate({ name: 'lesson', packId: pack.id, lessonId: l.id })}>Öffnen <Icon.next /></button>
