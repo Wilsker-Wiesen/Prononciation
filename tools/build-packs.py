@@ -143,7 +143,9 @@ def build(folder: str, out: str, per_unit: bool = False) -> None:
         write_pack(pack, audio_files, target, title)
         total_audio += len(audio_files)
         size = os.path.getsize(target) / 1_048_576
-        print(f'{title:28s} {sum(len(l["vocab"]) for l in lessons):5d} Einträge  {len(lessons):3d} Lektionen  {len(audio_files):5d} Audio  {size:6.1f} MB  → {target}')
+        with_section = sum(1 for l in lessons for v in l['vocab'] if 'sectionId' in v)
+        print(f'{title:28s} {sum(len(l["vocab"]) for l in lessons):5d} Einträge  {len(lessons):3d} Lektionen  {len(audio_files):5d} Audio  '
+              f'{with_section:5d} mit Abschnitt  {size:6.1f} MB  → {target}')
     print(f'\n{len(packs)} Paket(e), {len(rows)} Einträge, {total_audio} Audiodateien.')
 
 
